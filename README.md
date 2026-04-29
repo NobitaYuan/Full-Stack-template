@@ -11,11 +11,11 @@
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
 </p>
 
-> 集成 Vue3 + Hono 的**主流技术栈和工具链** ⚡
+> 集成 Vue3 + Hono 的**主流全栈开发工具链** ⚡
 >
 > 完整的**前后端类型安全协作链路** 🔗
 >
-> 内置 **Claude Code AI 辅助开发**，开箱即用 🤖
+> 内置 **Claude Code AI Prompts**，以Claude Code开发,开箱即用 🤖
 
 # ✨ 核心特性
 
