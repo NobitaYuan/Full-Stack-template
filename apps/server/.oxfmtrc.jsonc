@@ -5,4 +5,5 @@
   "semi": false,
   "singleQuote": true,
   "ignorePatterns": ["node_modules", "dist", "coverage"],
+  "endOfLine": "lf",
 }

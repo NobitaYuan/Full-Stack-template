@@ -36,6 +36,8 @@ auto-imports.d.ts
 components.d.ts
 .eslintrc-auto-import.json
 tsconfig.tsbuildinfo
+openapi.json
+apps/client/src/api/generated/api.d.ts
 
 # Bundle analysis
 stats.html

@@ -77,17 +77,13 @@ export * from './schema.js'
 
 ## 第 5 步：导出 spec + 生成类型
 
-```bash
-pnpm --filter @repo/server export-spec && pnpm --filter @repo/client generate:api
-```
-
-或从根目录一键执行（默认用这个）：
+根目录一键执行：
 
 ```bash
 pnpm generate:api
 ```
 
-后者通过 turbo 依赖链自动先运行 `export-spec`（导出 `openapi.json`），再运行 `generate:api`（生成前端 `api.d.ts`）。
+生成前端 `api.d.ts`
 
 ## 第 6 步：写测试
 

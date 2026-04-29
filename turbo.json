@@ -14,13 +14,8 @@
     "test": {
       "dependsOn": ["build"]
     },
-    "export-spec": {
-      "outputs": ["openapi.json"]
-    },
     "generate:api": {
-      "dependsOn": ["@repo/server#export-spec"],
-      "inputs": ["$TURBO_DEFAULT$", "../server/openapi.json"],
-      "outputs": ["src/api/generated/**"]
+      "outputs": ["../client/src/api/generated/**"]
     }
   }
 }

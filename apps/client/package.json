@@ -13,8 +13,7 @@
     "cz": "cz",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "oxfmt",
-    "generate:api": "openapi-typescript ../server/openapi.json -o src/api/generated/api.d.ts"
+    "format": "oxfmt"
   },
   "dependencies": {
     "@vueuse/core": "^10.11.1",
@@ -39,7 +38,6 @@
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "autoprefixer": "^10.4.21",
     "cz-git": "^1.11.1",
-    "openapi-typescript": "^7.13.0",
     "postcss": "^8.5.5",
     "rollup-plugin-visualizer": "^7",
     "tailwindcss": "^3.4.17",

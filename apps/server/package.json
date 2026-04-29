@@ -14,8 +14,7 @@
     "db:studio": "drizzle-kit studio",
     "format": "oxfmt",
     "kill": "npx kill-port 3000",
-    "export-spec": "tsx src/scripts/export-openapi.ts",
-    "generate:types": "openapi-typescript openapi.json -o api-types.d.ts"
+    "generate:api": "tsx src/scripts/export-openapi.ts && openapi-typescript openapi.json -o ../client/src/api/generated/api.d.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.0.0",

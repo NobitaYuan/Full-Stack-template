@@ -9,7 +9,6 @@
     "lint": "turbo run lint",
     "format": "turbo run format",
     "test": "turbo run test",
-    "export-spec": "turbo run export-spec",
     "generate:api": "turbo run generate:api"
   },
   "devDependencies": {

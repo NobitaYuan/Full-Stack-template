@@ -10,4 +10,5 @@
   "singleQuote": true,
   // 对应 .prettierignore
   "ignorePatterns": ["node_modules", "build", "coverage", "dist"],
+  "endOfLine": "lf",
 }
