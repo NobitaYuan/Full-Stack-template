@@ -1,30 +1,38 @@
-# Full-Stack-Template
+<h1 align="center">
+  <a href="https://github.com/NobitaYuan/Full-Stack-template" target="_blank">Full-Stack-Template - 前后端一体化 monorepo 开发模板</a>
+</h1>
 
-前后端一体化 monorepo 开发模板，基于 pnpm workspace + Turborepo。
+> 集成 Vue3 + Hono 的**主流技术栈和工具链** ⚡
+>
+> 完整的**前后端类型安全协作链路** 🔗
+>
+> 内置 **Claude Code AI 辅助开发**，开箱即用 🤖
 
-## 架构概览
+# ✨ 核心特性
+
+- [x] 🚀 Vue 3.5 + TypeScript + Vite 8 前端构建
+- [x] 🎀 TDesign + Tailwind CSS + Pinia 现代化 UI 与状态管理
+- [x] ⚡ Hono + Drizzle ORM + better-sqlite3 高性能后端
+- [x] 🔐 JWT 认证 + @hono/zod-openapi 类型安全路由
+- [x] 📝 Oxlint + Oxfmt + Husky + lint-staged，代码规范与提交自动格式化
+- [x] 🔗 OpenAPI Spec → openapi-typescript → 前端类型全自动同步
+- [x] 🤖 Claude Code 内置开发规范与 Skill，AI 辅助一键建模块、智能提交
+- [x] 📦 pnpm workspace + Turborepo 高效 monorepo 管理
+
+# 📦 架构概览
 
 ```
 full-stack-template/
 ├── apps/
-│   ├── client/          # 前端 — Vue 3 + Vite + TDesign
-│   └── server/          # 后端 — Hono + Drizzle ORM + SQLite
+│   ├── client/          # @repo/client — Vue 3 + Vite + TDesign
+│   └── server/          # @repo/server — Hono + Drizzle ORM + SQLite
 ├── packages/            # 共享包（预留）
 ├── turbo.json           # Turborepo 任务编排
 ├── pnpm-workspace.yaml  # pnpm workspace 配置
 └── package.json         # 根 monorepo 配置
 ```
 
-**技术栈**：
-
-| 层 | 技术 |
-|---|---|
-| 前端 | Vue 3.5 + TypeScript + Vite 8 + TDesign + Pinia + Tailwind CSS |
-| 后端 | Hono + TypeScript + Drizzle ORM + better-sqlite3 + @hono/zod-openapi + JWT |
-| 工程化 | pnpm workspace + Turborepo + Oxlint + Oxfmt + Husky |
-| 类型安全 | OpenAPI spec → openapi-typescript → 前端自动生成类型 |
-
-**前后端协作链路**：
+**前后端类型安全协作链路：**
 
 | 步骤 | 技术 | 功能 | 效果 |
 |------|------|------|------|
@@ -42,65 +50,60 @@ flowchart TD
   D -->|"openapi-fetch"| E["类型安全请求"]
 ```
 
-## 快速开始
+# 🚀 快速开始
 
-### 环境要求
+```shell
+# 克隆仓库
+git clone https://github.com/NobitaYuan/Full-Stack-template.git
 
-- Node.js >= 18
-- pnpm（必须）
+# 安装依赖
+pnpm i
 
-### 安装依赖
+# 生成前端类型（首次启动前必须执行，以后后端改接口后再执行）
+pnpm generate:api
 
-```bash
-pnpm install
+# 启动开发服务器（前后端同时启动）
+pnpm dev
 ```
 
-### 环境变量
+> 环境要求：Node.js >= 18、pnpm
 
-服务端默认配置开箱即用，无需额外配置。如需自定义（如修改 JWT 密钥），复制 `apps/server/.env.example` 为 `.env` 并编辑：
+**单独启动：**
 
-```bash
-cp apps/server/.env.example apps/server/.env
-```
-
-### 开发
-
-```bash
-pnpm dev          # 同时启动前后端开发服务器
-```
-
-也可以单独启动：
-
-```bash
+```shell
 pnpm --filter @repo/client dev    # 仅前端
 pnpm --filter @repo/server dev    # 仅后端
 ```
 
-### 构建
+**构建：**
 
-```bash
+```shell
 pnpm build        # 并行构建前后端
 ```
 
-### 其他命令
+**其他命令：**
 
-```bash
+```shell
 pnpm lint         # Oxlint 代码检查
 pnpm format       # Oxfmt 格式化
 pnpm test         # 运行测试（Vitest）
 ```
 
-### API 类型同步
+**API 类型同步：**
 
 后端修改 API 后，一键同步前端类型：
 
-```bash
+```shell
 pnpm generate:api
 ```
 
-该命令会自动先导出后端 OpenAPI spec，再生成前端 TypeScript 类型。
+如需自定义服务端环境变量（如 JWT 密钥），复制：
 
-## AI 辅助开发
+```shell
+cp apps/server/.env.example apps/server/.env
+```
+
+# 🤖 AI 辅助开发
 
 本项目内置 [Claude Code](https://claude.ai/code) 开发配置，包含完整的 CLAUDE.md 规范文档和实用 Skill，AI 开箱即用：
 
@@ -112,7 +115,13 @@ pnpm generate:api
 
 配合 Claude Code，新增一个完整的增删改查模块只需执行一个 Skill，全程类型安全。
 
-## 项目详情
+# 📂 项目详情
 
 - **[apps/client/CLAUDE.md](apps/client/CLAUDE.md)** — 前端技术栈、目录结构、开发规范
 - **[apps/server/CLAUDE.md](apps/server/CLAUDE.md)** — 后端技术栈、目录结构、API 路由、开发规范
+
+# 📄 License
+
+<a href="https://opensource.org/license/mit/" target="_blank">MIT license.</a>
+
+> Copyright (c) 2026 NobitaYuan
