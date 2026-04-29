@@ -73,14 +73,13 @@ pnpm generate:api
 pnpm dev
 ```
 
-> 环境要求：Node.js >= 18、pnpm
-
-**单独启动：**
-
 ```shell
+# 若需要单独启动：
 pnpm --filter @repo/client dev    # 仅前端
 pnpm --filter @repo/server dev    # 仅后端
 ```
+> 环境要求：Node.js >= 18、pnpm
+
 
 **构建：**
 
