@@ -97,7 +97,7 @@ service.interceptors.response.use(
         content: msg,
         closeBtn: true,
       })
-      useUserStore().logout(true)
+      useUserStore().logout()
       return Promise.reject(res)
     }
     logInDev(res)

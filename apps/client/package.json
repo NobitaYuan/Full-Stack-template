@@ -21,6 +21,7 @@
     "animate.css": "^4.1.1",
     "axios": "^1.9.0",
     "commitizen": "^4.3.1",
+    "dayjs": "^1.11.20",
     "nprogress": "^0.2.0",
     "openapi-fetch": "^0.17.0",
     "pinia": "^2.3.1",

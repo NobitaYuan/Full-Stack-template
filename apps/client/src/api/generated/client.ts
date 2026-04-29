@@ -26,7 +26,7 @@ client.use({
     // 401：身份失效，跳转登录
     if (body.code === 401) {
       MessagePlugin.warning({ content: '身份验证失效，请重新登录', closeBtn: true })
-      useUserStore().logout(true)
+      useUserStore().logout()
       return response
     }
 

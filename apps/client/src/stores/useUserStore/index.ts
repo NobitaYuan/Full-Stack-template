@@ -40,7 +40,9 @@ export const useUserStore = defineStore('userStore', {
       this.info = data.data.user
       this.hasUserInfo = true
     },
-    async getUserInfo(userId: string) {
+    async getUserInfo() {
+      const userId = this.info.id
+      if (!userId) return
       const { data, error } = await serverUserApi.getUser(userId)
       if (error || !data) throw error
       this.info = data.data

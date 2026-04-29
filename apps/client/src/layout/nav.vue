@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 const navList = [
   { name: '示例页面', path: '/index', icon: 'app' },
-  { name: '数据管理', path: '/data', icon: 'server' },
-  { name: '系统设置', path: '/settings', icon: 'setting' },
+  { name: '用户管理', path: '/user-manage', icon: 'usergroup' },
 ]
 
 const route = useRoute()
