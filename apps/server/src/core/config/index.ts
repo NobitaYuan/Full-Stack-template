@@ -5,7 +5,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   DATABASE_URL: z.string().default('./data.db'),
-  JWT_SECRET: z.string().min(1),
+  JWT_SECRET: z.string().min(1).default('dev-secret-change-in-production'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 })

@@ -44,6 +44,14 @@ full-stack-template/
 pnpm install
 ```
 
+### 环境变量
+
+服务端默认配置开箱即用，无需额外配置。如需自定义（如修改 JWT 密钥），复制 `apps/server/.env.example` 为 `.env` 并编辑：
+
+```bash
+cp apps/server/.env.example apps/server/.env
+```
+
 ### 开发
 
 ```bash
