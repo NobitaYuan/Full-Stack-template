@@ -39,3 +39,6 @@ tsconfig.tsbuildinfo
 
 # Bundle analysis
 stats.html
+
+# Turborepo
+.turbo/

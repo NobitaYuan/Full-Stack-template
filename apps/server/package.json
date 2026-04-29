@@ -1,5 +1,5 @@
 {
-  "name": "server-template",
+  "name": "@repo/server",
   "version": "1.0.0",
   "description": "A Hono-based backend template project",
   "type": "module",
@@ -13,7 +13,6 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "format": "oxfmt",
-    "prepare": "husky",
     "kill": "npx kill-port 3000",
     "export-spec": "tsx src/scripts/export-openapi.ts",
     "generate:types": "openapi-typescript openapi.json -o api-types.d.ts"
@@ -38,24 +37,12 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.6.0",
     "drizzle-kit": "^0.31.10",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
     "openapi-typescript": "^7.13.0",
-    "oxfmt": "^0.47.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.5"
   },
-  "lint-staged": {
-    "**/*": "oxfmt"
-  },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "esbuild"
-    ]
   }
 }

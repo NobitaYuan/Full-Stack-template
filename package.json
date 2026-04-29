@@ -1,0 +1,27 @@
+{
+  "name": "full-stack-template",
+  "private": true,
+  "packageManager": "pnpm@10.29.2",
+  "scripts": {
+    "prepare": "husky",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "test": "turbo run test",
+    "export-spec": "turbo run export-spec",
+    "generate:api": "turbo run generate:api"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0",
+    "turbo": "^2"
+  },
+  "lint-staged": {
+    "apps/client/**/*": "oxfmt",
+    "apps/client/*.{js,ts,vue,jsx,tsx}": "oxlint --fix",
+    "apps/server/**/*": "oxfmt"
+  }
+}
