@@ -2,6 +2,15 @@
   <a href="https://github.com/NobitaYuan/Full-Stack-template" target="_blank">Full-Stack-Template - 前后端一体化 monorepo 开发模板</a>
 </h1>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white" alt="Vue 3.5" />
+  <img src="https://img.shields.io/badge/Hono-4.x-E36002?logo=hono&logoColor=white" alt="Hono" />
+  <img src="https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/pnpm-10.x-F69220?logo=pnpm&logoColor=white" alt="pnpm" />
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
+</p>
+
 > 集成 Vue3 + Hono 的**主流技术栈和工具链** ⚡
 >
 > 完整的**前后端类型安全协作链路** 🔗
@@ -10,14 +19,12 @@
 
 # ✨ 核心特性
 
-- [x] 🚀 Vue 3.5 + TypeScript + Vite 8 前端构建
-- [x] 🎀 TDesign + Tailwind CSS + Pinia 现代化 UI 与状态管理
-- [x] ⚡ Hono + Drizzle ORM + better-sqlite3 高性能后端
-- [x] 🔐 JWT 认证 + @hono/zod-openapi 类型安全路由
-- [x] 📝 Oxlint + Oxfmt + Husky + lint-staged，代码规范与提交自动格式化
-- [x] 🔗 OpenAPI Spec → openapi-typescript → 前端类型全自动同步
-- [x] 🤖 Claude Code 内置开发规范与 Skill，AI 辅助一键建模块、智能提交
-- [x] 📦 pnpm workspace + Turborepo 高效 monorepo 管理
+- [x] 🚀 前后端类型全链路安全 — Drizzle → Zod → OpenAPI → 前端类型，一处修改全局感知
+- [x] ⚡ 高性能全栈运行时 — Vue 3.5 + Vite 8 + Hono，开发体验与运行性能兼顾
+- [x] 🔐 内置认证与权限体系 — JWT + 路由守卫，开箱即用
+- [x] 🤖 Claude Code AI 辅助开发 — 一键建模块、智能提交、代码审查
+- [x] 📝 工程化规范自动化 — Oxlint + Oxfmt + Husky，提交即格式化
+- [x] 📦 现代化 Monorepo 工作流 — pnpm workspace + Turborepo，一键启动全栈
 
 # 📦 架构概览
 
