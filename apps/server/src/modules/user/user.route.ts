@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi'
-import { z } from 'zod'
+import { z } from '@hono/zod-openapi'
 import { UserSchema, UpdateUserSchema, UserListQuerySchema, UserListResponseSchema } from './user.schema.js'
 import { apiSchema, success, createRouteApp } from '../../lib/response.js'
 import * as userService from './user.service.js'

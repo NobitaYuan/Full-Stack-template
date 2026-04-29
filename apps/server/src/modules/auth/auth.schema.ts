@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { AuthUserSchema } from '../../core/db/schema/types.js'
+import { z } from '@hono/zod-openapi'
+import { AuthUserSchema } from '../../core/db/user/index.js'
 
 export const RegisterSchema = z
   .object({
@@ -11,11 +11,14 @@ export const RegisterSchema = z
     message: '两次密码不一致',
     path: ['confirmPassword'],
   })
+  .openapi('RegisterInput')
 
-export const LoginSchema = z.object({
-  username: z.string().describe('用户名'),
-  password: z.string().describe('密码'),
-})
+export const LoginSchema = z
+  .object({
+    username: z.string().describe('用户名'),
+    password: z.string().describe('密码'),
+  })
+  .openapi('LoginInput')
 
 export const AuthResponseSchema = z
   .object({
@@ -23,6 +26,7 @@ export const AuthResponseSchema = z
     accessToken: z.string().describe('JWT 访问令牌'),
   })
   .describe('认证响应')
+  .openapi('AuthResponse')
 
 export type RegisterInput = z.infer<typeof RegisterSchema>
 export type LoginInput = z.infer<typeof LoginSchema>

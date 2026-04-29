@@ -22,14 +22,7 @@ export interface paths {
       }
       requestBody?: {
         content: {
-          'application/json': {
-            /** @description 用户名（2-50 字符） */
-            username: string
-            /** @description 密码（6-100 字符） */
-            password: string
-            /** @description 确认密码 */
-            confirmPassword: string
-          }
+          'application/json': components['schemas']['RegisterInput']
         }
       }
       responses: {
@@ -42,16 +35,7 @@ export interface paths {
             'application/json': {
               code: number
               message: string
-              /** @description 认证响应 */
-              data: {
-                /** @description 用户信息 */
-                user: {
-                  id: string
-                  username: string
-                }
-                /** @description JWT 访问令牌 */
-                accessToken: string
-              }
+              data: components['schemas']['AuthResponse']
             }
           }
         }
@@ -81,12 +65,7 @@ export interface paths {
       }
       requestBody?: {
         content: {
-          'application/json': {
-            /** @description 用户名 */
-            username: string
-            /** @description 密码 */
-            password: string
-          }
+          'application/json': components['schemas']['LoginInput']
         }
       }
       responses: {
@@ -99,16 +78,7 @@ export interface paths {
             'application/json': {
               code: number
               message: string
-              /** @description 认证响应 */
-              data: {
-                /** @description 用户信息 */
-                user: {
-                  id: string
-                  username: string
-                }
-                /** @description JWT 访问令牌 */
-                accessToken: string
-              }
+              data: components['schemas']['AuthResponse']
             }
           }
         }
@@ -150,22 +120,7 @@ export interface paths {
             'application/json': {
               code: number
               message: string
-              /** @description 用户列表响应 */
-              data: {
-                /** @description 用户列表 */
-                items: {
-                  id: string
-                  username: string
-                  /** @description 注册时间（ISO 8601） */
-                  createdAt: string
-                }[]
-                /** @description 总数 */
-                total: number
-                /** @description 当前页码 */
-                page: number
-                /** @description 每页数量 */
-                size: number
-              }
+              data: components['schemas']['UserListResponse']
             }
           }
         }
@@ -206,13 +161,7 @@ export interface paths {
             'application/json': {
               code: number
               message: string
-              /** @description 用户信息 */
-              data: {
-                id: string
-                username: string
-                /** @description 注册时间（ISO 8601） */
-                createdAt: string
-              }
+              data: components['schemas']['User']
             }
           }
         }
@@ -260,10 +209,7 @@ export interface paths {
       }
       requestBody?: {
         content: {
-          'application/json': {
-            /** @description 新用户名 */
-            username?: string
-          }
+          'application/json': components['schemas']['UpdateUserInput']
         }
       }
       responses: {
@@ -276,13 +222,7 @@ export interface paths {
             'application/json': {
               code: number
               message: string
-              /** @description 用户信息 */
-              data: {
-                id: string
-                username: string
-                /** @description 注册时间（ISO 8601） */
-                createdAt: string
-              }
+              data: components['schemas']['User']
             }
           }
         }
@@ -294,38 +234,48 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    /** @description 用户信息 */
-    User: {
-      id: string
-      username: string
-      /** @description 注册时间（ISO 8601） */
-      createdAt: string
-    }
     /** @description 认证响应 */
     AuthResponse: {
-      /** @description 用户信息 */
-      user: {
-        id: string
-        username: string
-      }
+      user: components['schemas']['AuthUser']
       /** @description JWT 访问令牌 */
       accessToken: string
+    }
+    /** @description 用户信息 */
+    AuthUser: {
+      id: string
+      username: string
+    }
+    RegisterInput: {
+      /** @description 用户名（2-50 字符） */
+      username: string
+      /** @description 密码（6-100 字符） */
+      password: string
+      /** @description 确认密码 */
+      confirmPassword: string
+    }
+    LoginInput: {
+      /** @description 用户名 */
+      username: string
+      /** @description 密码 */
+      password: string
     }
     /** @description 用户列表响应 */
     UserListResponse: {
       /** @description 用户列表 */
-      items: {
-        id: string
-        username: string
-        /** @description 注册时间（ISO 8601） */
-        createdAt: string
-      }[]
+      items: components['schemas']['User'][]
       /** @description 总数 */
       total: number
       /** @description 当前页码 */
       page: number
       /** @description 每页数量 */
       size: number
+    }
+    /** @description 用户信息 */
+    User: {
+      id: string
+      username: string
+      /** @description 注册时间（ISO 8601） */
+      createdAt: string
     }
     /** @description 更新用户输入 */
     UpdateUserInput: {

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from '@hono/zod-openapi'
 import 'dotenv/config'
 
 const envSchema = z.object({
@@ -18,7 +18,7 @@ export function getConfig(): Config {
   if (_config) return _config
   const result = envSchema.safeParse(process.env)
   if (!result.success) {
-    console.error('Invalid environment variables:', result.error.flatten().fieldErrors)
+    console.error('Invalid environment variables:', z.treeifyError(result.error))
     process.exit(1)
   }
   _config = result.data

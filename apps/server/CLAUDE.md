@@ -6,7 +6,7 @@
 - **TypeScript** — strict 模式
 - **Drizzle ORM** + **better-sqlite3** — 数据库（SQLite，可扩展 PostgreSQL）
 - **drizzle-zod** — 从 Drizzle 表自动生成 Zod schema（单一数据源）
-- **Zod** — 参数校验 + Schema 定义 + 类型推导
+- **Zod**（通过 `@hono/zod-openapi` 导入 `z`）— 参数校验 + Schema 定义 + 类型推导 + OpenAPI 命名注册
 - **JWT (jose)** — 单 Token 认证（HS256，默认 7 天过期）
 - **Pino** — 日志
 - **Vitest** — 测试
@@ -22,8 +22,7 @@ src/
 ├── core/                   # 核心基础设施（不依赖业务模块）
 │   ├── config/index.ts     # Zod 校验环境变量，单例
 │   ├── db/index.ts         # 数据库连接（better-sqlite3 + Drizzle）
-│   ├── db/schema/          # Drizzle 表定义 + 自动生成的响应 schema（types.ts）
-│   ├── db/schema/types.ts  # 从 Drizzle 表自动推导的 Zod 响应 schema
+│   ├── db/{domain}/        # 按领域组织：db.ts（表定义）+ schema.ts（Zod 派生）+ index.ts
 │   ├── errors/index.ts     # 自定义错误类（AppError 体系）
 │   └── middleware/          # 全局中间件（auth、error-handler、request-logger）
 ├── lib/                    # 通用工具
@@ -92,7 +91,9 @@ tests/
 - **密码** — 使用 bcryptjs（`hashPassword` / `verifyPassword`）
 - **Token** — 单 JWT Token，`signToken` / `verifyToken` 在 `auth.service.ts` 中
 - **认证中间件** — `src/core/middleware/auth.ts`，在 `app.ts` 中用 `app.use('/api/v1/xxx/*', authMiddleware)` 统一管理，新增需要认证的模块在 `app.ts` 加一行即可
-- **响应 Schema** — 使用 `drizzle-zod` 的 `createSelectSchema()` 从 Drizzle 表自动生成，在 `src/core/db/schema/types.ts` 中统一管理，模块 schema 文件从 types.ts 导入
+- **响应 Schema** — 使用 `drizzle-zod` 的 `createSelectSchema()` 从 Drizzle 表自动生成，定义在各域目录的 `schema.ts` 中（如 `user/schema.ts`），模块 schema 文件从域目录的 `index.js` 导入
+- **`z` 导入源** — 所有 schema 文件中的 `z` 必须从 `'@hono/zod-openapi'` 导入（不直接用 `'zod'`），这样可以使用 `.openapi('Name')` 注册命名 schema 到 OpenAPI `components.schemas`。只有 `core/config/index.ts`（环境变量校验）例外，直接用 `'zod'`
+- **`.openapi('Name')`** — 每个导出的 schema 都应链式调用 `.openapi('SchemaName')` 注册为命名组件，避免 OpenAPI spec 中 schema 重复内联
 - **`.describe()` 注释** — 所有 schema 和关键字段都应加 `.describe('中文描述')`，注释会传递到 OpenAPI spec 和前端类型文件。链路：`Zod .describe()` → OpenAPI `description` → `api-types.d.ts` 的 `/** @description */` 注释
 - **前端类型** — 运行 `pnpm export-spec && pnpm generate:types` 生成 `api-types.d.ts`，前端通过 `components['schemas']` 使用
 - **日志** — 使用 `getLogger()`（Pino），不要用 `console.log`

@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import { OpenAPIHono } from '@hono/zod-openapi'
-import { z } from 'zod'
+import { z } from '@hono/zod-openapi'
 
 export interface ApiResponse<T> {
   code: number

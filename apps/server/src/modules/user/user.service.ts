@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { getDb } from '../../core/db/index.js'
-import { users } from '../../core/db/schema/user.js'
+import { users } from '../../core/db/user/db.js'
 import { NotFoundError, ConflictError } from '../../core/errors/index.js'
 import { getLogger } from '../../lib/logger.js'
 import type { UpdateUserInput } from './user.schema.js'

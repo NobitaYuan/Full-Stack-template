@@ -143,13 +143,13 @@ onMounted(() => fetchData())
     <t-dialog v-model:visible="addDialogVisible" header="新增用户" :confirm-btn="{ loading: addLoading }" @confirm="handleAddSubmit">
       <t-form label-width="80px">
         <t-form-item label="用户名">
-          <t-input v-model="addForm.username" />
+          <t-input v-model="addForm.username" autocomplete="username" />
         </t-form-item>
         <t-form-item label="密码">
-          <t-input v-model="addForm.password" type="password" />
+          <t-input v-model="addForm.password" type="password" autocomplete="new-password" />
         </t-form-item>
         <t-form-item label="确认密码">
-          <t-input v-model="addForm.confirmPassword" type="password" />
+          <t-input v-model="addForm.confirmPassword" type="password" autocomplete="new-password" />
         </t-form-item>
       </t-form>
     </t-dialog>

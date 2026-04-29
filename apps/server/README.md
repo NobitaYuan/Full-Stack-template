@@ -85,7 +85,7 @@ src/
    - `post.service.ts` — 业务逻辑
    - `post.route.ts` — OpenAPI 路由
    - `index.ts` — 导出路由
-3. 在 `src/core/db/schema/` 中添加 Drizzle 表定义
+3. 在 `src/core/db/{domain}/db.ts` 中添加 Drizzle 表定义
 4. 在 `src/app.ts` 中挂载新路由：
    ```ts
    import { postApp } from './modules/post/index.js'

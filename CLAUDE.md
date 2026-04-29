@@ -63,10 +63,13 @@ pnpm --filter @repo/server <command>
 
 本项目通过 OpenAPI spec 实现前后端类型同步：
 
-```
-后端 Drizzle 表 → Zod schema → OpenAPI spec (openapi.json)
-  → 前端 TypeScript 类型 (src/api/generated/api.d.ts) → openapi-fetch 类型安全请求
-```
+| 步骤 | 技术 | 功能 | 效果 |
+|------|------|------|------|
+| 1. 定义数据库表 | Drizzle ORM | 用 TypeScript 声明表结构 | 表结构即代码，类型安全 |
+| 2. 生成校验 Schema | drizzle-zod | 从 Drizzle 表自动生成 Zod schema | 单一数据源，表变 schema 自动跟着变 |
+| 3. 生成 OpenAPI 规范 | @hono/zod-openapi | 从 Zod schema 自动生成 OpenAPI spec | 路由校验 + API 文档一体化 |
+| 4. 同步前端类型 | openapi-typescript | 从 OpenAPI spec 生成前端 `.d.ts` 类型 | 后端改了，前端编译就能发现 |
+| 5. 类型安全请求 | openapi-fetch | 带类型的 HTTP 客户端 | 路径、参数、响应全部有类型提示 |
 
 ### 后端修改 API 后
 

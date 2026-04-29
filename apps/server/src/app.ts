@@ -6,9 +6,6 @@ import { requestLogger } from './core/middleware/request-logger.js'
 import { authMiddleware } from './core/middleware/auth.js'
 import { authApp } from './modules/auth/index.js'
 import { userApp } from './modules/user/index.js'
-import { UserResponseSchema } from './core/db/schema/types.js'
-import { AuthResponseSchema } from './modules/auth/auth.schema.js'
-import { UserListResponseSchema, UpdateUserSchema } from './modules/user/user.schema.js'
 
 const API_PREFIX = '/api/v1'
 
@@ -38,12 +35,6 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'BearerAuth', {
   scheme: 'bearer',
   bearerFormat: 'JWT',
 })
-
-// 注册命名 schema 组件（前端 openapi-typescript 生成类型用）
-app.openAPIRegistry.register('User', UserResponseSchema)
-app.openAPIRegistry.register('AuthResponse', AuthResponseSchema)
-app.openAPIRegistry.register('UserListResponse', UserListResponseSchema)
-app.openAPIRegistry.register('UpdateUserInput', UpdateUserSchema)
 
 // OpenAPI 规范
 app.doc(`${API_PREFIX}/openapi.json`, {

@@ -20,15 +20,26 @@ full-stack-template/
 | 层 | 技术 |
 |---|---|
 | 前端 | Vue 3.5 + TypeScript + Vite 8 + TDesign + Pinia + Tailwind CSS |
-| 后端 | Hono + TypeScript + Drizzle ORM + better-sqlite3 + Zod + JWT |
+| 后端 | Hono + TypeScript + Drizzle ORM + better-sqlite3 + @hono/zod-openapi + JWT |
 | 工程化 | pnpm workspace + Turborepo + Oxlint + Oxfmt + Husky |
 | 类型安全 | OpenAPI spec → openapi-typescript → 前端自动生成类型 |
 
 **前后端协作链路**：
 
-```
-后端 Drizzle 表 → drizzle-zod 自动生成 Zod schema → @hono/zod-openapi 生成 OpenAPI spec
-→ pnpm generate:api → 前端自动生成 TypeScript 类型 → openapi-fetch 类型安全请求
+| 步骤 | 技术 | 功能 | 效果 |
+|------|------|------|------|
+| 1. 定义数据库表 | Drizzle ORM | 用 TypeScript 声明表结构 | 表结构即代码，类型安全 |
+| 2. 生成校验 Schema | drizzle-zod | 从 Drizzle 表自动生成 Zod schema | 单一数据源，表变 schema 自动跟着变 |
+| 3. 生成 OpenAPI 规范 | @hono/zod-openapi | 从 Zod schema 自动生成 OpenAPI spec | 路由校验 + API 文档一体化 |
+| 4. 同步前端类型 | openapi-typescript | 从 OpenAPI spec 生成前端 `.d.ts` 类型 | 后端改了，前端编译就能发现 |
+| 5. 类型安全请求 | openapi-fetch | 带类型的 HTTP 客户端 | 路径、参数、响应全部有类型提示 |
+
+```mermaid
+flowchart TD
+  A["Drizzle 表定义"] -->|"drizzle-zod"| B["Zod Schema"]
+  B -->|"@hono/zod-openapi"| C["OpenAPI Spec"]
+  C -->|"openapi-typescript"| D["前端 .d.ts 类型"]
+  D -->|"openapi-fetch"| E["类型安全请求"]
 ```
 
 ## 快速开始
@@ -88,6 +99,18 @@ pnpm generate:api
 ```
 
 该命令会自动先导出后端 OpenAPI spec，再生成前端 TypeScript 类型。
+
+## AI 辅助开发
+
+本项目内置 [Claude Code](https://claude.ai/code) 开发配置，包含完整的 CLAUDE.md 规范文档和实用 Skill，AI 开箱即用：
+
+- **CLAUDE.md 三层规范** — 根目录 + 前端 + 后端，涵盖技术栈约定、目录结构、编码规范，AI 读取后自动遵循
+- **Skill 技能集** — 封装常用开发流程为一条命令：
+  - `/add-module <模块名>` — 一键创建后端模块（建表 → Schema → 路由 → Service → 前端类型生成）
+  - `/git-commit` — 智能提交：分析变更、生成结构化 commit message
+  - `/simplify` — 代码审查：检查复用性、质量和效率
+
+配合 Claude Code，新增一个完整的增删改查模块只需执行一个 Skill，全程类型安全。
 
 ## 项目详情
 
