@@ -1,0 +1,599 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Server Template API",
+    "version": "1.0.0"
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "注册时间（ISO 8601）"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "createdAt"
+        ],
+        "description": "用户信息"
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "username"
+            ],
+            "description": "用户信息"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "JWT 访问令牌"
+          }
+        },
+        "required": [
+          "user",
+          "accessToken"
+        ],
+        "description": "认证响应"
+      },
+      "UserListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "注册时间（ISO 8601）"
+                }
+              },
+              "required": [
+                "id",
+                "username",
+                "createdAt"
+              ],
+              "description": "用户信息"
+            },
+            "description": "用户列表"
+          },
+          "total": {
+            "type": "number",
+            "description": "总数"
+          },
+          "page": {
+            "type": "number",
+            "description": "当前页码"
+          },
+          "size": {
+            "type": "number",
+            "description": "每页数量"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "size"
+        ],
+        "description": "用户列表响应"
+      },
+      "UpdateUserInput": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "新用户名"
+          }
+        },
+        "description": "更新用户输入"
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
+                    "description": "用户名（2-50 字符）"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 100,
+                    "description": "密码（6-100 字符）"
+                  },
+                  "confirmPassword": {
+                    "type": "string",
+                    "description": "确认密码"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password",
+                  "confirmPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户注册成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "username"
+                          ],
+                          "description": "用户信息"
+                        },
+                        "accessToken": {
+                          "type": "string",
+                          "description": "JWT 访问令牌"
+                        }
+                      },
+                      "required": [
+                        "user",
+                        "accessToken"
+                      ],
+                      "description": "认证响应"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "username"
+                          ],
+                          "description": "用户信息"
+                        },
+                        "accessToken": {
+                          "type": "string",
+                          "description": "JWT 访问令牌"
+                        }
+                      },
+                      "required": [
+                        "user",
+                        "accessToken"
+                      ],
+                      "description": "认证响应"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "页码"
+            },
+            "required": false,
+            "description": "页码",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "每页数量"
+            },
+            "required": false,
+            "description": "每页数量",
+            "name": "size",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "description": "注册时间（ISO 8601）"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "username",
+                              "createdAt"
+                            ],
+                            "description": "用户信息"
+                          },
+                          "description": "用户列表"
+                        },
+                        "total": {
+                          "type": "number",
+                          "description": "总数"
+                        },
+                        "page": {
+                          "type": "number",
+                          "description": "当前页码"
+                        },
+                        "size": {
+                          "type": "number",
+                          "description": "每页数量"
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "total",
+                        "page",
+                        "size"
+                      ],
+                      "description": "用户列表响应"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "注册时间（ISO 8601）"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "createdAt"
+                      ],
+                      "description": "用户信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
+                    "description": "新用户名"
+                  }
+                },
+                "description": "更新用户输入"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户已更新",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "注册时间（ISO 8601）"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "createdAt"
+                      ],
+                      "description": "用户信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户已删除",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "enum": [
+                        null
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
