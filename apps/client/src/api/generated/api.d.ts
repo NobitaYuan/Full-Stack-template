@@ -23,8 +23,11 @@ export interface paths {
       requestBody?: {
         content: {
           'application/json': {
+            /** @description 用户名（2-50 字符） */
             username: string
+            /** @description 密码（6-100 字符） */
             password: string
+            /** @description 确认密码 */
             confirmPassword: string
           }
         }
@@ -39,11 +42,14 @@ export interface paths {
             'application/json': {
               code: number
               message: string
+              /** @description 认证响应 */
               data: {
+                /** @description 用户信息 */
                 user: {
                   id: string
                   username: string
                 }
+                /** @description JWT 访问令牌 */
                 accessToken: string
               }
             }
@@ -76,7 +82,9 @@ export interface paths {
       requestBody?: {
         content: {
           'application/json': {
+            /** @description 用户名 */
             username: string
+            /** @description 密码 */
             password: string
           }
         }
@@ -91,11 +99,14 @@ export interface paths {
             'application/json': {
               code: number
               message: string
+              /** @description 认证响应 */
               data: {
+                /** @description 用户信息 */
                 user: {
                   id: string
                   username: string
                 }
+                /** @description JWT 访问令牌 */
                 accessToken: string
               }
             }
@@ -119,7 +130,9 @@ export interface paths {
     get: {
       parameters: {
         query?: {
+          /** @description 页码 */
           page?: number
+          /** @description 每页数量 */
           size?: number
         }
         header?: never
@@ -137,14 +150,20 @@ export interface paths {
             'application/json': {
               code: number
               message: string
+              /** @description 用户列表响应 */
               data: {
+                /** @description 用户列表 */
                 items: {
                   id: string
                   username: string
+                  /** @description 注册时间（ISO 8601） */
                   createdAt: string
                 }[]
+                /** @description 总数 */
                 total: number
+                /** @description 当前页码 */
                 page: number
+                /** @description 每页数量 */
                 size: number
               }
             }
@@ -187,9 +206,11 @@ export interface paths {
             'application/json': {
               code: number
               message: string
+              /** @description 用户信息 */
               data: {
                 id: string
                 username: string
+                /** @description 注册时间（ISO 8601） */
                 createdAt: string
               }
             }
@@ -240,6 +261,7 @@ export interface paths {
       requestBody?: {
         content: {
           'application/json': {
+            /** @description 新用户名 */
             username?: string
           }
         }
@@ -254,9 +276,11 @@ export interface paths {
             'application/json': {
               code: number
               message: string
+              /** @description 用户信息 */
               data: {
                 id: string
                 username: string
+                /** @description 注册时间（ISO 8601） */
                 createdAt: string
               }
             }
@@ -269,7 +293,46 @@ export interface paths {
 }
 export type webhooks = Record<string, never>
 export interface components {
-  schemas: never
+  schemas: {
+    /** @description 用户信息 */
+    User: {
+      id: string
+      username: string
+      /** @description 注册时间（ISO 8601） */
+      createdAt: string
+    }
+    /** @description 认证响应 */
+    AuthResponse: {
+      /** @description 用户信息 */
+      user: {
+        id: string
+        username: string
+      }
+      /** @description JWT 访问令牌 */
+      accessToken: string
+    }
+    /** @description 用户列表响应 */
+    UserListResponse: {
+      /** @description 用户列表 */
+      items: {
+        id: string
+        username: string
+        /** @description 注册时间（ISO 8601） */
+        createdAt: string
+      }[]
+      /** @description 总数 */
+      total: number
+      /** @description 当前页码 */
+      page: number
+      /** @description 每页数量 */
+      size: number
+    }
+    /** @description 更新用户输入 */
+    UpdateUserInput: {
+      /** @description 新用户名 */
+      username?: string
+    }
+  }
   responses: never
   parameters: never
   requestBodies: never

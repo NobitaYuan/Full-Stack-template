@@ -1,11 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-> 运用第一性原理思考，拒绝经验主义和路径盲从，不要假设我完全清楚目标，保持审慎，从原始需求和问题出发
-> 若目标模糊请停下和我讨论，若目标清晰但路径非最优，请直接建议更短、更低成本的办法。
-
----
+# @repo/server — 后端开发规范
 
 ## 技术栈
 
@@ -17,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **JWT (jose)** — 单 Token 认证（HS256，默认 7 天过期）
 - **Pino** — 日志
 - **Vitest** — 测试
-- **oxfmt** — 代码格式化（Husky + lint-staged 提交时自动格式化）
+- **oxfmt** — 代码格式化
 - **Scalar** — API 文档 UI（访问 `/api/v1/doc`）
 
 ## 项目结构
@@ -89,9 +82,7 @@ tests/
 
 ## 如何添加新模块
 
-使用 `/add-module <模块名>` 获取完整 6 步指南和代码模板。
-
-流程概要：Drizzle 建表 → `types.ts` 用 `createSelectSchema()` 生成响应 schema → 模块四文件（schema / service / route / index）→ `app.ts` 注册命名 schema + 挂路由 → `pnpm export-spec && pnpm generate:types` 导出类型 → 写测试
+使用 `/add-module <模块名>` 获取完整指南和代码模板。
 
 ## 关键约定
 
@@ -106,67 +97,6 @@ tests/
 - **前端类型** — 运行 `pnpm export-spec && pnpm generate:types` 生成 `api-types.d.ts`，前端通过 `components['schemas']` 使用
 - **日志** — 使用 `getLogger()`（Pino），不要用 `console.log`
 - **测试** — Vitest，每个测试文件独立数据库，`afterEach` 清空数据
-
-## 前后端协作（openapi-typescript + openapi-fetch）
-
-前端通过 OpenAPI spec 自动生成 TypeScript 类型，实现 API 类型安全。
-
-### 类型共享流程
-
-```
-Drizzle 表定义
-    ↓ drizzle-zod (createSelectSchema)
-Zod schema（.describe() 加注释）
-    ↓ @hono/zod-openapi
-OpenAPI spec（命名组件 + description）
-    ↓ pnpm export-spec
-openapi.json
-    ↓ pnpm generate:types (openapi-typescript)
-api-types.d.ts（带 /** @description */ 注释的类型）
-```
-
-### 后端操作
-
-1. 修改/新增 Drizzle 表后，在 `src/core/db/schema/types.ts` 中更新响应 schema
-2. 新增模块时在 `src/app.ts` 中用 `app.openAPIRegistry.register('TypeName', Schema)` 注册命名组件
-3. 运行 `pnpm export-spec` 导出 OpenAPI spec
-4. 运行 `pnpm generate:types` 生成前端类型文件
-
-### 前端使用
-
-**简单类型引用** — 直接导入 `api-types.d.ts`：
-
-```typescript
-import type { components } from '../server-template/api-types'
-
-type User = components['schemas']['User']
-type UserListResponse = components['schemas']['UserListResponse']
-type AuthResponse = components['schemas']['AuthResponse']
-
-function UserCard({ user }: { user: User }) { ... }
-```
-
-**类型安全请求**（可选） — 安装 `openapi-fetch`：
-
-- 不要设 `baseUrl`：OpenAPI spec 中的路径已包含 `/api/v1` 前缀
-- 路径写错会报红：`client.GET('/api/v1/users/{id}')` 中的路径必须与 spec 完全一致
-- 响应格式统一：后端返回 `{ code, message, data }`，前端中间件统一处理业务错误
-
-## 可用脚本
-
-| 命令               | 说明                              |
-| ------------------ | --------------------------------- |
-| `pnpm dev`         | 启动开发服务器（热重载）          |
-| `pnpm build`       | TypeScript 编译                   |
-| `pnpm start`       | 运行编译后的代码                  |
-| `pnpm test`        | 运行测试                          |
-| `pnpm test:watch`  | 监听模式测试                      |
-| `pnpm db:generate` | 生成数据库迁移文件                |
-| `pnpm db:migrate`  | 执行迁移                          |
-| `pnpm db:studio`   | 打开 Drizzle Studio               |
-| `pnpm format`      | 全局格式化（oxfmt）               |
-| `pnpm export-spec` | 导出 OpenAPI spec 到 openapi.json |
-| `pnpm generate:types` | 从 OpenAPI spec 生成前端 TypeScript 类型（api-types.d.ts） |
 
 ## API 路由
 
