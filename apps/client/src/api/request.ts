@@ -1,12 +1,12 @@
 import createClient from 'openapi-fetch'
-import type { paths } from './api'
+import type { paths } from './api-types'
 import { getToken } from '@/utils/localStorage/token'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { useUserStore } from '@/stores/useUserStore'
 
-const client = createClient<paths>()
+const request = createClient<paths>()
 
-client.use({
+request.use({
   async onRequest({ request }) {
     const token = getToken()
     if (token) {
@@ -44,4 +44,4 @@ client.use({
   },
 })
 
-export { client }
+export { request }

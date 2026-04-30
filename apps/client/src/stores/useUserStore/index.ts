@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { getToken, setToken, userInfoKey, userTokenKey } from '@/utils/localStorage/token'
 import { clearLocal, getFromLocal } from '@/utils'
-import * as serverUserApi from '@/api/user/user'
+import * as serverAuthApi from '@/api/auth'
+import * as serverUserApi from '@/api/users'
 
 interface UserInfo {
   id: string
@@ -33,7 +34,7 @@ export const useUserStore = defineStore('userStore', {
   },
   actions: {
     async login(username: string, password: string) {
-      const { data, error } = await serverUserApi.login(username, password)
+      const { data, error } = await serverAuthApi.login(username, password)
       if (error || !data) throw error
       this.token = data.data.accessToken
       setToken(data.data.accessToken)

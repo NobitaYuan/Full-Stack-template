@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next'
-import type { components } from '@/api/generated/api'
-import { getUserList, updateUser, deleteUser, register } from '@/api/user/user'
+import type { components } from '@/api/users/users'
+import { getUserList, updateUser, deleteUser } from '@/api/users'
+import { register } from '@/api/auth'
 import dayjs from 'dayjs'
 
 type User = components['schemas']['User']

@@ -29,12 +29,14 @@
 ```
 src/
 ├── api/
-│   ├── generated/              # 自动生成（勿手动编辑）
-│   │   ├── api.d.ts            # openapi-typescript 生成的类型
-│   │   └── client.ts           # openapi-fetch 客户端（含 auth 中间件）
-│   ├── user/                 # 类型安全的 API 函数（openapi-fetch，新模块用这个）
-│   │   └── user.ts
-│   └── user/                   # 旧 axios API（遗留代码，不新增）
+│   ├── request.ts              # openapi-fetch 客户端（含 auth 中间件）
+│   ├── api-types.d.ts          # 合并所有模块的类型（自动生成，勿手动编辑）
+│   ├── auth/                   # 认证模块
+│   │   ├── index.ts            # 请求函数（register, login）
+│   │   └── auth.d.ts           # 生成的类型（自动生成，勿手动编辑）
+│   └── users/                  # 用户模块
+│       ├── index.ts            # 请求函数（getUserList, getUser, updateUser, deleteUser）
+│       └── users.d.ts          # 生成的类型（自动生成，勿手动编辑）
 ├── assets/
 │   ├── images/
 │   └── style/                 # main.css, tailwind.css, var.css, reset.css
@@ -150,7 +152,7 @@ import { getToken, setToken, clearUserToken, clearAllLocalStorage } from '@/util
 
 ### 5. API 请求与封装
 
-使用 openapi-fetch（类型安全，新模块必须用），client 自动处理 Bearer token、401 登出、业务错误 MessagePlugin 提示。
+使用 openapi-fetch（类型安全，新模块必须用），request 自动处理 Bearer token、401 登出、业务错误 MessagePlugin 提示。
 
 **不要设 baseUrl**：OpenAPI spec 中的路径已包含 `/api/v1` 前缀。
 
@@ -169,39 +171,39 @@ import { getToken, setToken, clearUserToken, clearAllLocalStorage } from '@/util
 
 #### 封装规范
 
-新模块必须在 `src/api/server/` 下创建封装文件，类型由 OpenAPI spec 自动生成，不需要手写 `type.ts`。
+新模块必须在 `src/api/{moduleName}/` 下创建 `index.ts` 封装文件，类型由 OpenAPI spec 自动生成，不需要手写 `type.ts`。
 
 ```typescript
-// src/api/server/post.ts
-import { client } from '../generated/client'
+// src/api/posts/index.ts
+import { request } from '../request'
 
 /** 创建帖子 */
 export function createPost(data: { title: string; content: string }) {
-  return client.POST('/api/v1/posts', { body: data })
+  return request.POST('/api/v1/posts', { body: data })
 }
 
 /** 帖子列表（分页） */
 export function getPostList(params?: { page?: number; size?: number }) {
-  return client.GET('/api/v1/posts', { params: { query: params } })
+  return request.GET('/api/v1/posts', { params: { query: params } })
 }
 
 /** 帖子详情 */
 export function getPost(id: string) {
-  return client.GET('/api/v1/posts/{id}', { params: { path: { id } } })
+  return request.GET('/api/v1/posts/{id}', { params: { path: { id } } })
 }
 
 /** 更新帖子 */
 export function updatePost(id: string, data: { title?: string; content?: string }) {
-  return client.PATCH('/api/v1/posts/{id}', { params: { path: { id } }, body: data })
+  return request.PATCH('/api/v1/posts/{id}', { params: { path: { id } }, body: data })
 }
 
 /** 删除帖子 */
 export function deletePost(id: string) {
-  return client.DELETE('/api/v1/posts/{id}', { params: { path: { id } } })
+  return request.DELETE('/api/v1/posts/{id}', { params: { path: { id } } })
 }
 ```
 
-参考：`src/api/server/user.ts`
+参考：`src/api/users/index.ts`
 
 ### 6. UI 组件选择
 

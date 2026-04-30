@@ -15,7 +15,7 @@
       "dependsOn": ["build"]
     },
     "generate:api": {
-      "outputs": ["../client/src/api/generated/**"]
+      "outputs": ["../client/src/api/**"]
     }
   }
 }

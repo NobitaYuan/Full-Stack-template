@@ -83,7 +83,9 @@ export * from './schema.js'
 pnpm generate:api
 ```
 
-生成前端 `api.d.ts`
+这会按模块生成前端类型：
+- `apps/client/src/api/{module}/{module}.d.ts` — 每个模块独立的类型文件
+- `apps/client/src/api/api-types.d.ts` — 合并所有模块的 paths + components 类型
 
 ## 第 6 步：写测试
 

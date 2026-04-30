@@ -94,8 +94,8 @@ tests/
 - **响应 Schema** — 使用 `drizzle-zod` 的 `createSelectSchema()` 从 Drizzle 表自动生成，定义在各域目录的 `schema.ts` 中（如 `user/schema.ts`），模块 schema 文件从域目录的 `index.js` 导入
 - **`z` 导入源** — 所有 schema 文件中的 `z` 必须从 `'@hono/zod-openapi'` 导入（不直接用 `'zod'`），这样可以使用 `.openapi('Name')` 注册命名 schema 到 OpenAPI `components.schemas`。只有 `core/config/index.ts`（环境变量校验）例外，直接用 `'zod'`
 - **`.openapi('Name')`** — 每个导出的 schema 都应链式调用 `.openapi('SchemaName')` 注册为命名组件，避免 OpenAPI spec 中 schema 重复内联
-- **`.describe()` 注释** — 所有 schema 和关键字段都应加 `.describe('中文描述')`，注释会传递到 OpenAPI spec 和前端类型文件。链路：`Zod .describe()` → OpenAPI `description` → 前端 `apps/client/src/api/generated/api.d.ts` 的 `/** @description */` 注释
-- **前端类型** — 运行 `pnpm generate:api` 生成 `api-types.d.ts`，前端通过 `components['schemas']` 使用
+- **`.describe()` 注释** — 所有 schema 和关键字段都应加 `.describe('中文描述')`，注释会传递到 OpenAPI spec 和前端类型文件。链路：`Zod .describe()` → OpenAPI `description` → 前端 `apps/client/src/api/{module}/{module}.d.ts` 的 `/** @description */` 注释
+- **前端类型** — 运行 `pnpm generate:api` 按模块生成类型到 `apps/client/src/api/{module}/{module}.d.ts`，合并导出到 `apps/client/src/api/api-types.d.ts`，前端通过 `components['schemas']` 使用
 - **日志** — 使用 `getLogger()`（Pino），不要用 `console.log`
 - **测试** — Vitest，每个测试文件独立数据库，`afterEach` 清空数据
 
