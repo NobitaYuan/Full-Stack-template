@@ -6,7 +6,7 @@
 import type { UIMessage } from 'ai'
 
 export interface MessageQueue {
-  readonly messages: Ref<readonly UIMessage[]>
+  readonly messages: Readonly<Ref<UIMessage[]>>
   addUser(text: string): void
   addAssistant(): string
   addSystemError(text: string): void
@@ -77,7 +77,7 @@ export function useMessageQueue(): MessageQueue {
   }
 
   return {
-    messages: readonly(messages),
+    messages: shallowReadonly(messages),
     addUser,
     addAssistant,
     addSystemError,
