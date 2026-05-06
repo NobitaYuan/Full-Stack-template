@@ -29,12 +29,9 @@
 
 > 开发者手动完成，AI 助手无法自动执行。
 
-- [ ] 配置 `apps/server/.env`：加 `ANTHROPIC_API_KEY=sk-ant-xxx`、`ANTHROPIC_BASE_URL=`（可选，默认 Anthropic 官方，填其他厂商 URL 即可切换）
-- [ ] 安装后端依赖：`cd apps/server && pnpm add @anthropic-ai/claude-agent-sdk`
-- [ ] 安装前端依赖：`cd apps/client && pnpm add ai lucide-vue-next vue-stream-markdown`
-- [ ] 初始化 shadcn-vue：`cd apps/client && npx shadcn-vue@latest init`
-- [ ] 安装 ai-elements-vue 组件：`npx ai-elements-vue@latest add conversation message prompt-input tool reasoning code-block`
-
+- [x] 配置 `apps/server/.env`：加 `ANTHROPIC_API_KEY=sk-ant-xxx`、`ANTHROPIC_BASE_URL=`（可选，默认 Anthropic 官方，填其他厂商 URL 即可切换）
+- [x] 安装后端依赖：`cd apps/server && pnpm add @anthropic-ai/claude-agent-sdk`
+- [x] 安装前端依赖：`cd apps/client && npx shadcn-vue@latest add https://registry.ai-elements-vue.com/all.json`
 ---
 
 ## 后端 Phase 1：最小可用版本
