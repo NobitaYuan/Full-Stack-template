@@ -1,5 +1,6 @@
 import { eq, desc, asc } from 'drizzle-orm'
 import { query } from '@anthropic-ai/claude-agent-sdk'
+import type { CanUseTool, PermissionResult } from '@anthropic-ai/claude-agent-sdk'
 import { getConfig } from '../../core/config/index.js'
 import { getDb } from '../../core/db/index.js'
 import { aiSessions, aiMessages } from '../../core/db/agent/db.js'
@@ -21,10 +22,46 @@ const SYSTEM_PROMPT = `你是一个管理后台的 AI 助手。你可以通过�
 
 规则：
 - 使用中文回复
-- 删除操作前需要确认
+- 当你需要用户提供信息、做选择、或确认操作时，使用 AskUserQuestion 工具询问用户
+- 危险操作（如删除）执行前必须用 AskUserQuestion 确认
 - 操作完成后给出简洁的结果摘要
 - 不要编造数据，只展示工具返回的真实数据
 - 用户信息中不包含密码等敏感字段`
+
+// =================== 异步队列 ===================
+
+function createAsyncQueue<T>() {
+  const items: T[] = []
+  let closed = false
+  const resolvers: Array<(value: T | null) => void> = []
+
+  return {
+    push(item: T) {
+      if (closed) return
+      if (resolvers.length > 0) {
+        resolvers.shift()!(item)
+      } else {
+        items.push(item)
+      }
+    },
+    async next(): Promise<T | null> {
+      if (items.length > 0) return items.shift()!
+      if (closed) return null
+      return new Promise<T | null>((resolve) => resolvers.push(resolve))
+    },
+    close() {
+      closed = true
+      while (resolvers.length > 0) resolvers.shift()!(null)
+    },
+  }
+}
+
+interface PendingPermission {
+  originalInput: Record<string, unknown>
+  resolve: (result: PermissionResult) => void
+}
+
+export const pendingPermissions = new Map<string, PendingPermission>()
 
 // =================== Session 管理 ===================
 
@@ -102,9 +139,13 @@ export function getSessionMessages(sessionId: string) {
 
 // =================== Agent Chat ===================
 
+/** MCP 工具名称列表，这些工具自动放行不询问用户 */
+const MCP_TOOL_NAMES = ['query_users', 'create_user', 'update_user', 'delete_user']
+
 export async function* streamAgentChat(prompt: string, sessionId?: string, userId?: string): AsyncGenerator<AgentSSEEvent> {
   const config = getConfig()
   const logger = getLogger()
+  const queue = createAsyncQueue<AgentSSEEvent>()
 
   let dbSessionId = sessionId
 
@@ -112,7 +153,7 @@ export async function* streamAgentChat(prompt: string, sessionId?: string, userI
   if (!dbSessionId && userId) {
     const session = createSession(userId, prompt.slice(0, 50))
     dbSessionId = session.id
-    yield { type: 'sdk_message', raw: { type: 'session_created', sessionId: dbSessionId } } as AgentSSEEvent
+    queue.push({ type: 'sdk_message', raw: { type: 'session_created', sessionId: dbSessionId } })
   }
 
   // 恢复已有会话
@@ -133,51 +174,89 @@ export async function* streamAgentChat(prompt: string, sessionId?: string, userI
     env.ANTHROPIC_BASE_URL = config.ANTHROPIC_BASE_URL
   }
 
-  try {
-    const messageStream = query({
-      prompt,
-      options: {
-        model: 'claude-sonnet-4-6',
-        mcpServers: { business: mcpServer },
-        tools: [],
-        systemPrompt: SYSTEM_PROMPT,
-        maxTurns: 20,
-        permissionMode: 'bypassPermissions',
-        allowDangerouslySkipPermissions: true,
-        env,
-        cwd: process.cwd(),
-        resume: resumeSessionId,
-        includePartialMessages: true,
-      },
-    })
-
-    // 持久化用户消息
-    if (dbSessionId) {
-      saveMessage(dbSessionId, { type: 'user', content: prompt })
+  const canUseTool: CanUseTool = async (toolName, input) => {
+    // MCP 工具自动放行
+    if (MCP_TOOL_NAMES.includes(toolName)) {
+      return { behavior: 'allow', updatedInput: input }
     }
 
-    for await (const msg of messageStream) {
-      const msgType = (msg as Record<string, unknown>).type as string
-      logger.debug({ msgType }, 'SDK message')
-      yield { type: 'sdk_message', raw: msg }
+    // AskUserQuestion 和其他内置工具 → 推给前端让用户处理
+    const requestId = generateId()
+    queue.push({
+      type: 'tool_permission_request',
+      requestId,
+      toolName,
+      input,
+    })
 
-      // 持久化关键消息
-      if (dbSessionId && (msgType === 'assistant' || msgType === 'result')) {
-        saveMessage(dbSessionId, msg as Record<string, unknown>)
+    // 等待前端回传用户决策
+    return new Promise<PermissionResult>((resolve) => {
+      pendingPermissions.set(requestId, { originalInput: input, resolve })
+    })
+  }
 
-        // 从 result 消息中提取 SDK session_id 用于 resume
-        if (msgType === 'result') {
-          const sdkSessionId = (msg as Record<string, unknown>).session_id as string | undefined
-          if (sdkSessionId) {
-            updateSessionAgentId(dbSessionId, sdkSessionId)
+  // 后台执行 query
+  ;(async () => {
+    try {
+      const messageStream = query({
+        prompt,
+        options: {
+          model: 'claude-sonnet-4-6',
+          mcpServers: { business: mcpServer },
+          tools: ['AskUserQuestion'],
+          systemPrompt: SYSTEM_PROMPT,
+          maxTurns: 20,
+          permissionMode: 'bypassPermissions',
+          allowDangerouslySkipPermissions: true,
+          canUseTool,
+          env,
+          cwd: process.cwd(),
+          resume: resumeSessionId,
+          includePartialMessages: true,
+        },
+      })
+
+      // 持久化用户消息
+      if (dbSessionId) {
+        saveMessage(dbSessionId, { type: 'user', content: prompt })
+      }
+
+      for await (const msg of messageStream) {
+        const msgType = (msg as Record<string, unknown>).type as string
+        logger.debug({ msgType }, 'SDK message')
+        queue.push({ type: 'sdk_message', raw: msg })
+
+        // 持久化所有 SDK 消息（stream_event 增量文本除外，已包含在 assistant 中）
+        if (dbSessionId && msgType !== 'stream_event') {
+          saveMessage(dbSessionId, msg as Record<string, unknown>)
+
+          // 从 result 消息中提取 SDK session_id 用于 resume
+          if (msgType === 'result') {
+            const sdkSessionId = (msg as Record<string, unknown>).session_id as string | undefined
+            if (sdkSessionId) {
+              updateSessionAgentId(dbSessionId, sdkSessionId)
+            }
           }
         }
       }
-    }
 
-    yield { type: 'done' }
-  } catch (err) {
-    logger.error({ err }, 'Agent chat error')
-    yield { type: 'error', message: err instanceof Error ? err.message : String(err) }
+      queue.push({ type: 'done' })
+    } catch (err) {
+      logger.error({ err }, 'Agent chat error')
+      queue.push({ type: 'error', message: err instanceof Error ? err.message : String(err) })
+    } finally {
+      queue.close()
+      for (const [, pending] of pendingPermissions) {
+        pending.resolve({ behavior: 'deny', message: '会话已关闭' })
+      }
+      pendingPermissions.clear()
+    }
+  })()
+
+  while (true) {
+    const event = await queue.next()
+    if (event === null) break
+    yield event
+    if (event.type === 'done' || event.type === 'error') break
   }
 }

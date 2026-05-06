@@ -137,6 +137,24 @@ export interface components {
       /** @description 新用户名 */
       username?: string
     }
+    /** @description 权限响应 */
+    PermissionResponse: {
+      /** @description 操作成功 */
+      ok: boolean
+    }
+    /** @description 权限决策请求 */
+    PermissionRequest: {
+      /** @description 权限请求 ID */
+      requestId: string
+      /** @description 是否允许工具执行 */
+      allow: boolean
+      /** @description 修改后的工具输入（AskUserQuestion 时传回 { questions, answers }） */
+      updatedInput?: {
+        [key: string]: unknown
+      }
+      /** @description 拒绝原因（allow=false 时） */
+      message?: string
+    }
     /** @description 会话列表响应 */
     AgentSessionListResponse: {
       /** @description 会话列表 */

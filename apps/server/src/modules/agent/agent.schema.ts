@@ -87,3 +87,29 @@ export const deleteRoute = createRoute({
     200: { content: { 'application/json': { schema: apiSchema(z.literal(null)) } }, description: '已删除' },
   },
 })
+
+// =================== Permission Schema ===================
+
+export const PermissionRequestSchema = z
+  .object({
+    requestId: z.string().describe('权限请求 ID'),
+    allow: z.boolean().describe('是否允许工具执行'),
+    updatedInput: z.object({}).passthrough().optional().describe('修改后的工具输入（AskUserQuestion 时传回 { questions, answers }）'),
+    message: z.string().optional().describe('拒绝原因（allow=false 时）'),
+  })
+  .describe('权限决策请求')
+  .openapi('PermissionRequest')
+
+export const PermissionResponseSchema = z
+  .object({ ok: z.boolean().describe('操作成功') })
+  .describe('权限响应')
+  .openapi('PermissionResponse')
+
+export const permissionRoute = createRoute({
+  method: 'post',
+  path: '/permission',
+  request: { body: { content: { 'application/json': { schema: PermissionRequestSchema } } } },
+  responses: {
+    200: { content: { 'application/json': { schema: apiSchema(PermissionResponseSchema) } }, description: '权限决策已处理' },
+  },
+})

@@ -42,7 +42,7 @@ export default defineConfig((env: ConfigEnv) => {
         dts: 'src/types/components.d.ts',
       }),
       visualizer({
-        open: true, //如果存在本地服务端口，将在打包后自动展示
+        open: false, //如果存在本地服务端口，将在打包后自动展示
       }),
     ],
     resolve: {

@@ -24,3 +24,8 @@ export function deleteSession(id: string) {
 export function updateSessionTitle(id: string, body: { title: string }) {
   return request.PATCH('/api/v1/agent/sessions/{id}', { params: { path: { id } }, body })
 }
+
+/** 响应工具权限请求（包括 AskUserQuestion） */
+export function respondPermission(body: { requestId: string; allow: boolean; updatedInput?: Record<string, unknown>; message?: string }) {
+  return request.POST('/api/v1/agent/permission', { body })
+}

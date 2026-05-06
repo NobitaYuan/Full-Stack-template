@@ -6,11 +6,18 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getToken } from '@/utils/localStorage/token'
 import { useAgentStore } from '@/stores/useAgentStore'
-import { getSession } from '@/api/agent'
+import { getSession, respondPermission } from '@/api/agent'
 import type { UIMessage } from 'ai'
 import { extractTextDelta, extractOrderedContent } from './sse-parser'
 import type { OrderedContentBlock } from './sse-parser'
-import { convertDbMessagesToUIMessages } from './message-converter'
+import { convertDbMessagesToUIMessages, buildSystemErrorText } from './message-converter'
+
+/** SSE 推送的权限/问答请求（手动类型，SSE 不走 OpenAPI） */
+export interface ToolPermissionRequest {
+  requestId: string
+  toolName: string
+  input: Record<string, unknown>
+}
 
 type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
 
@@ -27,6 +34,7 @@ export function useAgentChat() {
   const messages = ref<UIMessage[]>([])
   const status = ref<ChatStatus>('ready')
   const error = ref<string | null>(null)
+  const pendingRequests = ref<ToolPermissionRequest[]>([])
 
   let abortCtrl: AbortController | null = null
 
@@ -83,6 +91,12 @@ export function useAgentChat() {
 
           if (type === 'sdk_message') {
             handleSDKMessage(parsed, ctx)
+          } else if (type === 'tool_permission_request') {
+            pendingRequests.value.push({
+              requestId: parsed.requestId as string,
+              toolName: parsed.toolName as string,
+              input: (parsed.input as Record<string, unknown>) ?? {},
+            })
           } else if (type === 'done') {
             status.value = 'ready'
             setPartsState(ctx.assistantId, 'done')
@@ -148,6 +162,8 @@ export function useAgentChat() {
     } else if (msgType === 'session_created') {
       const newSessionId = raw.sessionId as string
       if (newSessionId) agentStore.selectSession(newSessionId)
+    } else if (msgType === 'system') {
+      pushSystemMessage(raw)
     }
   }
 
@@ -175,6 +191,21 @@ export function useAgentChat() {
       },
     ]
     return id
+  }
+
+  function pushSystemMessage(raw: Record<string, unknown>) {
+    const text = buildSystemErrorText(raw)
+    if (!text) return
+    status.value = 'error'
+    error.value = text
+    messages.value = [
+      ...messages.value,
+      {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        parts: [{ type: 'text' as const, text, state: 'done' as const }],
+      },
+    ]
   }
 
   /** 将有序内容块转为 UIMessage parts */
@@ -221,6 +252,20 @@ export function useAgentChat() {
     messages.value = convertDbMessagesToUIMessages(detail.messages)
   }
 
+  // =================== 权限处理 ===================
+
+  /** 允许工具调用 */
+  async function approvePermission(requestId: string, updatedInput?: Record<string, unknown>) {
+    const { error } = await respondPermission({ requestId, allow: true, updatedInput })
+    if (!error) pendingRequests.value = pendingRequests.value.filter((r) => r.requestId !== requestId)
+  }
+
+  /** 拒绝工具调用 */
+  async function denyPermission(requestId: string, message?: string) {
+    const { error } = await respondPermission({ requestId, allow: false, message })
+    if (!error) pendingRequests.value = pendingRequests.value.filter((r) => r.requestId !== requestId)
+  }
+
   // =================== 停止 ===================
 
   function stop() {
@@ -233,9 +278,12 @@ export function useAgentChat() {
     messages: readonly(messages),
     status: readonly(status),
     error: readonly(error),
+    pendingRequests: readonly(pendingRequests),
     sendMessage,
     stop,
     loadSession,
     clearMessages,
+    approvePermission,
+    denyPermission,
   }
 }

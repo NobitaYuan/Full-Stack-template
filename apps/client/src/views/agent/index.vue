@@ -9,9 +9,10 @@ import { Tool, ToolContent, ToolHeader } from '@/components/ai-elements/tool'
 import { useAgentChat } from './composables/useAgentChat'
 import { useAgentStore } from '@/stores/useAgentStore'
 import SessionList from './components/SessionList.vue'
+import PermissionCard from './components/PermissionCard.vue'
 
 const agentStore = useAgentStore()
-const { messages, status, sendMessage, stop, loadSession, clearMessages } = useAgentChat()
+const { messages, status, pendingRequests, sendMessage, stop, loadSession, clearMessages, approvePermission, denyPermission } = useAgentChat()
 
 const suggestions = ['帮我查询所有用户', '创建一个新用户，用户名 zhangsan，密码 abc123', '查询用户列表，分析一下数据概况']
 
@@ -96,6 +97,8 @@ function handleSuggestionClick(prompt: string) {
                   </Tool>
                 </template>
               </div>
+
+              <PermissionCard v-for="req in pendingRequests" :key="req.requestId" :request="req" @approve="approvePermission" @deny="denyPermission" />
 
               <Loader v-if="status === 'submitted'" class="mx-auto" />
             </ConversationContent>

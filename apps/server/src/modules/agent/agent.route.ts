@@ -1,8 +1,18 @@
 import type { Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
 import { createRouteApp, success } from '../../lib/response.js'
-import { ChatRequestSchema, listRoute, getRoute, createRoute_, updateRoute, deleteRoute } from './agent.schema.js'
-import { streamAgentChat, listSessions, getSession, createSession, deleteSession, updateSessionTitle, getSessionMessages } from './agent.service.js'
+import { ChatRequestSchema, listRoute, getRoute, createRoute_, updateRoute, deleteRoute, permissionRoute } from './agent.schema.js'
+import {
+  streamAgentChat,
+  pendingPermissions,
+  listSessions,
+  getSession,
+  createSession,
+  deleteSession,
+  updateSessionTitle,
+  getSessionMessages,
+} from './agent.service.js'
+import { NotFoundError } from '../../core/errors/index.js'
 
 type AuthedContext = Context<{ Variables: { userId: string } }>
 function getUserId(c: AuthedContext): string {
@@ -22,6 +32,29 @@ agentApp.post('/chat', async (c) => {
       await stream.writeSSE({ data: JSON.stringify(event) })
     }
   })
+})
+
+// =================== Permission Endpoint ===================
+
+agentApp.openapi(permissionRoute, async (c) => {
+  const body = c.req.valid('json')
+  const pending = pendingPermissions.get(body.requestId)
+  if (!pending) throw new NotFoundError('权限请求已过期')
+
+  pendingPermissions.delete(body.requestId)
+
+  if (body.allow) {
+    pending.resolve({
+      behavior: 'allow',
+      updatedInput: body.updatedInput ?? pending.originalInput,
+    })
+  } else {
+    pending.resolve({
+      behavior: 'deny',
+      message: body.message ?? '用户拒绝',
+    })
+  }
+  return success(c, { ok: true })
 })
 
 // =================== Session CRUD ===================

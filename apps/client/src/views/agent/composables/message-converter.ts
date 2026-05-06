@@ -41,6 +41,9 @@ export function convertDbMessagesToUIMessages(dbMessages: AgentMessage[]): UIMes
     } else if (dbMsg.type === 'assistant') {
       const converted = convertAssistantMessage(dbMsg)
       if (converted) result.push(converted)
+    } else if (dbMsg.type === 'system') {
+      const converted = convertSystemMessage(dbMsg)
+      if (converted) result.push(converted)
     }
   }
 
@@ -85,4 +88,29 @@ function convertAssistantMessage(dbMsg: AgentMessage): UIMessage | null {
   })
 
   return { id: dbMsg.id, role: 'assistant', parts }
+}
+
+/** 从 SDK system 消息中提取错误文本（实时流和历史加载共用） */
+export function buildSystemErrorText(raw: Record<string, unknown>): string | null {
+  const errStatus = raw.error_status as number | undefined
+  const errMsg = raw.error as string | undefined
+  if ((errStatus && errStatus >= 400) || errMsg) {
+    return `\`API 错误 (${errStatus ?? 'unknown'}): ${errMsg ?? '未知错误'}（重试 ${raw.attempt ?? '-'}/${raw.max_retries ?? '-'}）\``
+  }
+  return null
+}
+
+function convertSystemMessage(dbMsg: AgentMessage): UIMessage | null {
+  let raw: Record<string, unknown>
+  try {
+    raw = JSON.parse(dbMsg.raw)
+  } catch {
+    return null
+  }
+
+  const text = buildSystemErrorText(raw)
+  if (text) {
+    return { id: dbMsg.id, role: 'assistant', parts: [{ type: 'text', text, state: 'done' }] }
+  }
+  return null
 }

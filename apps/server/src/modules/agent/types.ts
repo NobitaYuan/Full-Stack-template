@@ -4,6 +4,14 @@ export type SDKSSEEvent = {
   raw: unknown
 }
 
+/** SSE 事件类型：工具权限请求（需用户决策） */
+export type ToolPermissionRequestSSEEvent = {
+  type: 'tool_permission_request'
+  requestId: string
+  toolName: string
+  input: Record<string, unknown>
+}
+
 /** SSE 事件类型：流结束 */
 export type DoneSSEEvent = {
   type: 'done'
@@ -15,4 +23,4 @@ export type ErrorSSEEvent = {
   message: string
 }
 
-export type AgentSSEEvent = SDKSSEEvent | DoneSSEEvent | ErrorSSEEvent
+export type AgentSSEEvent = SDKSSEEvent | ToolPermissionRequestSSEEvent | DoneSSEEvent | ErrorSSEEvent
