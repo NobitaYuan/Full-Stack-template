@@ -52,6 +52,7 @@ export function isSDKMessage(val: unknown): val is SDKMessage {
   switch (type) {
     case 'stream_event':
     case 'assistant':
+      return true
     case 'session_created':
       return typeof val.sessionId === 'string'
     case 'system':
