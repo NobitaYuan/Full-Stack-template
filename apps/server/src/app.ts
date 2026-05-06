@@ -6,6 +6,7 @@ import { requestLogger } from './core/middleware/request-logger.js'
 import { authMiddleware } from './core/middleware/auth.js'
 import { authApp } from './modules/auth/index.js'
 import { userApp } from './modules/user/index.js'
+import { agentApp } from './modules/agent/index.js'
 
 const API_PREFIX = '/api/v1'
 
@@ -22,9 +23,11 @@ app.get('/health', (c) => c.json({ status: 'ok' }))
 const api = new OpenAPIHono()
 api.route('/auth', authApp)
 api.route('/users', userApp)
+api.route('/agent', agentApp)
 
 // 认证中间件（NOTE: 需要认证的模块在此声明）
 app.use(`${API_PREFIX}/users/*`, authMiddleware)
+app.use(`${API_PREFIX}/agent/*`, authMiddleware)
 
 app.route(API_PREFIX, api)
 

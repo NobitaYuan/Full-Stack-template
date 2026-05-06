@@ -1,5 +1,4 @@
 import { eq } from 'drizzle-orm'
-import bcrypt from 'bcryptjs'
 import * as jose from 'jose'
 import { getDb } from '../../core/db/index.js'
 import { users } from '../../core/db/user/db.js'
@@ -7,15 +6,8 @@ import { getConfig } from '../../core/config/index.js'
 import { ConflictError, UnauthorizedError } from '../../core/errors/index.js'
 import { getLogger } from '../../lib/logger.js'
 import { generateId } from '../../lib/utils.js'
+import { hashPassword, verifyPassword } from '../../lib/password.js'
 import type { RegisterInput, LoginInput } from './auth.schema.js'
-
-async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10)
-}
-
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash)
-}
 
 async function signToken(payload: { userId: string }, expiresIn: string): Promise<string> {
   const config = getConfig()

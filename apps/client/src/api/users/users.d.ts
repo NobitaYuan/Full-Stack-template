@@ -191,6 +191,50 @@ export interface components {
       /** @description 新用户名 */
       username?: string
     }
+    /** @description 会话列表响应 */
+    AgentSessionListResponse: {
+      /** @description 会话列表 */
+      items: components['schemas']['AgentSession'][]
+    }
+    /** @description AI 会话 */
+    AgentSession: {
+      id: string
+      userId: string
+      title: string
+      agentSessionId: string | null
+      /** @description 创建时间（ISO 8601） */
+      createdAt: string
+      /** @description 更新时间（ISO 8601） */
+      updatedAt: string
+    }
+    /** @description 会话详情响应 */
+    AgentSessionDetailResponse: {
+      session: components['schemas']['AgentSession'] & unknown
+      /** @description 消息列表 */
+      messages: components['schemas']['AgentMessage'][]
+    }
+    /** @description AI 消息 */
+    AgentMessage: {
+      id: string
+      sessionId: string
+      type: string
+      subtype: string | null
+      sessionIdSdk: string | null
+      parentToolUseId: string | null
+      raw: string
+      /** @description 写入时间（ISO 8601） */
+      createdAt: string
+    }
+    /** @description 创建会话输入 */
+    CreateAgentSession: {
+      /** @description 会话标题 */
+      title?: string
+    }
+    /** @description 更新会话输入 */
+    UpdateAgentSession: {
+      /** @description 新标题 */
+      title: string
+    }
   }
   responses: never
   parameters: never

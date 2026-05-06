@@ -8,6 +8,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1).default('dev-secret-change-in-production'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  ANTHROPIC_API_KEY: z.string().min(1),
+  ANTHROPIC_BASE_URL: z.string().optional(),
 })
 
 export type Config = z.infer<typeof envSchema>

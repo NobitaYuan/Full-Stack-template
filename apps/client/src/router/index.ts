@@ -18,6 +18,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/userManage/index.vue'),
   },
   {
+    path: '/agent',
+    name: 'agent',
+    meta: { title: 'AI 助手' },
+    component: () => import('@/views/agent/index.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     meta: { title: '404' },

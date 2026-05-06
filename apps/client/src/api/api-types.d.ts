@@ -2,6 +2,7 @@
 
 import type { paths as AuthPaths, components as AuthComponents } from './auth/auth'
 import type { paths as UsersPaths, components as UsersComponents } from './users/users'
+import type { paths as AgentPaths, components as AgentComponents } from './agent/agent'
 
-export type paths = AuthPaths & UsersPaths
-export type components = AuthComponents & UsersComponents
+export type paths = AuthPaths & UsersPaths & AgentPaths
+export type components = AuthComponents & UsersComponents & AgentComponents

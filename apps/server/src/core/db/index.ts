@@ -1,7 +1,10 @@
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
-import * as schema from './user/index.js'
+import * as userSchema from './user/index.js'
+import * as agentSchema from './agent/index.js'
 import { getConfig } from '../config/index.js'
+
+const schema = { ...userSchema, ...agentSchema }
 
 let _db: ReturnType<typeof drizzle> | null = null
 let _sqlite: Database.Database | null = null
@@ -37,6 +40,28 @@ export function initDb() {
       password_hash TEXT NOT NULL,
       created_at INTEGER NOT NULL DEFAULT (unixepoch()),
       updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    )
+  `)
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS ai_sessions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '新对话',
+      agent_session_id TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    )
+  `)
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS ai_messages (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      subtype TEXT,
+      session_id_sdk TEXT,
+      parent_tool_use_id TEXT,
+      raw TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
     )
   `)
 }

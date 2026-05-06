@@ -29,12 +29,9 @@ import headerView from './header.vue'
   .bd {
     flex: 1;
     overflow: auto;
-    // padding: 12px;
-    // .bd_container {
-    //   // border: 1px solid #e4e7ed;
-    //   border-radius: 4px;
-    //   background-color: var(--td-bg-color-container);
-    // }
+    .bd_container {
+      height: 100%;
+    }
   }
 }
 // 动画速度

@@ -2,6 +2,7 @@
 const navList = [
   { name: '示例页面', path: '/index', icon: 'app' },
   { name: '用户管理', path: '/user-manage', icon: 'usergroup' },
+  { name: 'AI 助手', path: '/agent', icon: 'chat' },
 ]
 
 const route = useRoute()
