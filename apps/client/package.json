@@ -16,6 +16,7 @@
     "format": "oxfmt"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@rive-app/webgl2": "^2.37.5",
     "@vue-flow/background": "^1.3.2",
     "@vue-flow/controls": "^1.1.3",
