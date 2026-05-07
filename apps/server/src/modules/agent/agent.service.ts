@@ -68,73 +68,72 @@ export const pendingPermissions = new Map<string, PendingPermission>()
 function formatSession(session: typeof aiSessions.$inferSelect) {
   return {
     ...session,
-    createdAt: new Date(session.createdAt).toISOString(),
-    updatedAt: new Date(session.updatedAt).toISOString(),
+    createdAt: session.createdAt.toISOString(),
+    updatedAt: session.updatedAt.toISOString(),
   }
 }
 
-export function createSession(userId: string, title?: string) {
+export async function createSession(userId: string, title?: string) {
   const db = getDb()
   const id = generateId()
-  db.insert(aiSessions)
-    .values({ id, userId, title: title ?? '新对话' })
-    .run()
+  await db.insert(aiSessions).values({ id, userId, title: title ?? '新对话' })
   return getSession(id, userId)
 }
 
-export function getSession(id: string, userId: string) {
+export async function getSession(id: string, userId: string) {
   const db = getDb()
-  const session = db.select().from(aiSessions).where(eq(aiSessions.id, id)).get()
+  const result = await db.select().from(aiSessions).where(eq(aiSessions.id, id))
+  const session = result[0]
   if (!session || session.userId !== userId) throw new NotFoundError('会话不存在')
   return formatSession(session)
 }
 
-export function listSessions(userId: string) {
+export async function listSessions(userId: string) {
   const db = getDb()
-  const list = db.select().from(aiSessions).where(eq(aiSessions.userId, userId)).orderBy(desc(aiSessions.updatedAt)).all()
+  const list = await db.select().from(aiSessions).where(eq(aiSessions.userId, userId)).orderBy(desc(aiSessions.updatedAt))
   return list.map(formatSession)
 }
 
-export function deleteSession(id: string, userId: string) {
+export async function deleteSession(id: string, userId: string) {
   const db = getDb()
-  const session = db.select().from(aiSessions).where(eq(aiSessions.id, id)).get()
+  const result = await db.select().from(aiSessions).where(eq(aiSessions.id, id))
+  const session = result[0]
   if (!session || session.userId !== userId) throw new NotFoundError('会话不存在')
-  db.delete(aiMessages).where(eq(aiMessages.sessionId, id)).run()
-  db.delete(aiSessions).where(eq(aiSessions.id, id)).run()
+  await db.delete(aiMessages).where(eq(aiMessages.sessionId, id))
+  await db.delete(aiSessions).where(eq(aiSessions.id, id))
 }
 
-export function updateSessionTitle(id: string, userId: string, title: string) {
+export async function updateSessionTitle(id: string, userId: string, title: string) {
   const db = getDb()
-  const session = db.select().from(aiSessions).where(eq(aiSessions.id, id)).get()
+  const result = await db.select().from(aiSessions).where(eq(aiSessions.id, id))
+  const session = result[0]
   if (!session || session.userId !== userId) throw new NotFoundError('会话不存在')
-  db.update(aiSessions).set({ title, updatedAt: new Date() }).where(eq(aiSessions.id, id)).run()
+  await db.update(aiSessions).set({ title, updatedAt: new Date() }).where(eq(aiSessions.id, id))
   return getSession(id, userId)
 }
 
-export function saveMessage(sessionId: string, msg: Record<string, unknown>) {
+export async function saveMessage(sessionId: string, msg: Record<string, unknown>) {
   const db = getDb()
   const id = generateId()
-  db.insert(aiMessages)
-    .values({
-      id,
-      sessionId,
-      type: String(msg.type ?? ''),
-      subtype: msg.subtype ? String(msg.subtype) : null,
-      sessionIdSdk: msg.session_id ? String(msg.session_id) : null,
-      parentToolUseId: msg.parent_tool_use_id ? String(msg.parent_tool_use_id) : null,
-      raw: JSON.stringify(msg),
-    })
-    .run()
+  await db.insert(aiMessages).values({
+    id,
+    sessionId,
+    type: String(msg.type ?? ''),
+    subtype: msg.subtype ? String(msg.subtype) : null,
+    sessionIdSdk: msg.session_id ? String(msg.session_id) : null,
+    parentToolUseId: msg.parent_tool_use_id ? String(msg.parent_tool_use_id) : null,
+    raw: JSON.stringify(msg),
+  })
 }
 
-export function updateSessionAgentId(id: string, agentSessionId: string) {
+export async function updateSessionAgentId(id: string, agentSessionId: string) {
   const db = getDb()
-  db.update(aiSessions).set({ agentSessionId, updatedAt: new Date() }).where(eq(aiSessions.id, id)).run()
+  await db.update(aiSessions).set({ agentSessionId, updatedAt: new Date() }).where(eq(aiSessions.id, id))
 }
 
-export function getSessionMessages(sessionId: string) {
+export async function getSessionMessages(sessionId: string) {
   const db = getDb()
-  return db.select().from(aiMessages).where(eq(aiMessages.sessionId, sessionId)).orderBy(asc(aiMessages.createdAt)).all()
+  return db.select().from(aiMessages).where(eq(aiMessages.sessionId, sessionId)).orderBy(asc(aiMessages.createdAt))
 }
 
 // =================== Agent Chat ===================
@@ -151,7 +150,7 @@ export async function* streamAgentChat(prompt: string, sessionId?: string, userI
 
   // 如果提供了 userId 但没有 sessionId，创建新会话
   if (!dbSessionId && userId) {
-    const session = createSession(userId, prompt.slice(0, 50))
+    const session = await createSession(userId, prompt.slice(0, 50))
     dbSessionId = session.id
     queue.push({ type: 'sdk_message', raw: { type: 'session_created', sessionId: dbSessionId } })
   }
@@ -160,7 +159,8 @@ export async function* streamAgentChat(prompt: string, sessionId?: string, userI
   let resumeSessionId: string | undefined
   if (dbSessionId) {
     const db = getDb()
-    const session = db.select().from(aiSessions).where(eq(aiSessions.id, dbSessionId)).get()
+    const result = await db.select().from(aiSessions).where(eq(aiSessions.id, dbSessionId))
+    const session = result[0]
     if (session?.agentSessionId) {
       resumeSessionId = session.agentSessionId
     }
@@ -218,7 +218,7 @@ export async function* streamAgentChat(prompt: string, sessionId?: string, userI
 
       // 持久化用户消息
       if (dbSessionId) {
-        saveMessage(dbSessionId, { type: 'user', content: prompt })
+        await saveMessage(dbSessionId, { type: 'user', content: prompt })
       }
 
       for await (const msg of messageStream) {
@@ -228,13 +228,13 @@ export async function* streamAgentChat(prompt: string, sessionId?: string, userI
 
         // 持久化所有 SDK 消息（stream_event 增量文本除外，已包含在 assistant 中）
         if (dbSessionId && msgType !== 'stream_event') {
-          saveMessage(dbSessionId, msg as Record<string, unknown>)
+          await saveMessage(dbSessionId, msg as Record<string, unknown>)
 
           // 从 result 消息中提取 SDK session_id 用于 resume
           if (msgType === 'result') {
             const sdkSessionId = (msg as Record<string, unknown>).session_id as string | undefined
             if (sdkSessionId) {
-              updateSessionAgentId(dbSessionId, sdkSessionId)
+              await updateSessionAgentId(dbSessionId, sdkSessionId)
             }
           }
         }

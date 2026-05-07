@@ -1,28 +1,28 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { pgTable, varchar, text, timestamp } from 'drizzle-orm/pg-core'
 
-export const aiSessions = sqliteTable('ai_sessions', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull(),
+export const aiSessions = pgTable('ai_sessions', {
+  id: varchar('id', { length: 36 }).primaryKey(),
+  userId: varchar('user_id', { length: 36 }).notNull(),
   title: text('title').notNull().default('新对话'),
-  agentSessionId: text('agent_session_id'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  agentSessionId: varchar('agent_session_id'),
+  createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdate(() => new Date()),
 })
 
-export const aiMessages = sqliteTable('ai_messages', {
-  id: text('id').primaryKey(),
-  sessionId: text('session_id').notNull(),
+export const aiMessages = pgTable('ai_messages', {
+  id: varchar('id', { length: 36 }).primaryKey(),
+  sessionId: varchar('session_id', { length: 36 }).notNull(),
   type: text('type').notNull(),
   subtype: text('subtype'),
-  sessionIdSdk: text('session_id_sdk'),
-  parentToolUseId: text('parent_tool_use_id'),
+  sessionIdSdk: varchar('session_id_sdk'),
+  parentToolUseId: varchar('parent_tool_use_id'),
   raw: text('raw').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
 })

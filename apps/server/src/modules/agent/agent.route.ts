@@ -61,22 +61,22 @@ agentApp.openapi(permissionRoute, async (c) => {
 
 agentApp.openapi(listRoute, async (c) => {
   const userId = getUserId(c as AuthedContext)
-  const items = listSessions(userId)
+  const items = await listSessions(userId)
   return success(c, { items })
 })
 
 agentApp.openapi(getRoute, async (c) => {
   const userId = getUserId(c as AuthedContext)
   const { id } = c.req.valid('param')
-  const session = getSession(id, userId)
-  const messages = getSessionMessages(id)
+  const session = await getSession(id, userId)
+  const messages = await getSessionMessages(id)
   return success(c, { session, messages })
 })
 
 agentApp.openapi(createRoute_, async (c) => {
   const userId = getUserId(c as AuthedContext)
   const data = c.req.valid('json')
-  const session = createSession(userId, data.title)
+  const session = await createSession(userId, data.title)
   return success(c, session)
 })
 
@@ -84,14 +84,14 @@ agentApp.openapi(updateRoute, async (c) => {
   const userId = getUserId(c as AuthedContext)
   const { id } = c.req.valid('param')
   const data = c.req.valid('json')
-  const session = updateSessionTitle(id, userId, data.title)
+  const session = await updateSessionTitle(id, userId, data.title)
   return success(c, session)
 })
 
 agentApp.openapi(deleteRoute, async (c) => {
   const userId = getUserId(c as AuthedContext)
   const { id } = c.req.valid('param')
-  deleteSession(id, userId)
+  await deleteSession(id, userId)
   return success(c, null)
 })
 
