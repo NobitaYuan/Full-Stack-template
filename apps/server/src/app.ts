@@ -3,21 +3,35 @@ import { cors } from 'hono/cors'
 import { Scalar } from '@scalar/hono-api-reference'
 import { errorHandler } from './core/middleware/error-handler.js'
 import { requestLogger } from './core/middleware/request-logger.js'
+import { requestIdMiddleware } from './core/middleware/request-id.js'
+import { securityMiddleware } from './core/middleware/security.js'
+import { rateLimitMiddleware } from './core/middleware/rate-limit.js'
 import { authMiddleware } from './core/middleware/auth.js'
 import { authApp } from './modules/auth/index.js'
 import { userApp } from './modules/user/index.js'
+import { getConfig } from './core/config/index.js'
 
 const API_PREFIX = '/api/v1'
+const config = getConfig()
 
 const app = new OpenAPIHono()
 
 // ==================== 全局中间件 ====================
-app.use('*', cors())
+app.use('*', requestIdMiddleware)
+app.use('*', securityMiddleware)
+app.use(
+  '*',
+  cors({
+    origin: config.CORS_ORIGINS.split(',').map((s) => s.trim()),
+    credentials: true,
+  }),
+)
+app.use('*', rateLimitMiddleware)
 app.use('*', requestLogger)
 app.onError(errorHandler)
 
 // ==================== 路由注册 ====================
-app.get('/health', (c) => c.json({ status: 'ok' }))
+app.get('/health', (c) => c.json({ code: 200, message: '服务正常~', data: null }))
 
 const api = new OpenAPIHono()
 api.route('/auth', authApp)
@@ -29,21 +43,18 @@ app.use(`${API_PREFIX}/users/*`, authMiddleware)
 app.route(API_PREFIX, api)
 
 // ==================== OpenAPI 文档 ====================
-// 注册 BearerAuth 安全方案（用于 OpenAPI 文档）
 app.openAPIRegistry.registerComponent('securitySchemes', 'BearerAuth', {
   type: 'http',
   scheme: 'bearer',
   bearerFormat: 'JWT',
 })
 
-// OpenAPI 规范
 app.doc(`${API_PREFIX}/openapi.json`, {
   openapi: '3.1.0',
   info: { title: 'Server Template API', version: '1.0.0' },
   security: [{ BearerAuth: [] }],
 })
 
-// Scalar API 文档界面
 app.get(
   `${API_PREFIX}/doc`,
   Scalar({

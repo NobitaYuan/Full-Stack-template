@@ -38,21 +38,19 @@ export async function register(data: RegisterInput) {
   const db = getDb()
   const logger = getLogger()
 
-  const existing = db.select().from(users).where(eq(users.username, data.username)).get()
-  if (existing) {
+  const existing = await db.select().from(users).where(eq(users.username, data.username))
+  if (existing.length > 0) {
     throw new ConflictError('用户名已被占用')
   }
 
   const passwordHash = await hashPassword(data.password)
   const id = generateId()
 
-  db.insert(users)
-    .values({
-      id,
-      username: data.username,
-      passwordHash,
-    })
-    .run()
+  await db.insert(users).values({
+    id,
+    username: data.username,
+    passwordHash,
+  })
 
   logger.info({ userId: id }, '用户注册成功')
 
@@ -68,7 +66,8 @@ export async function register(data: RegisterInput) {
 export async function login(data: LoginInput) {
   const db = getDb()
 
-  const user = db.select().from(users).where(eq(users.username, data.username)).get()
+  const result = await db.select().from(users).where(eq(users.username, data.username))
+  const user = result[0]
   if (!user) {
     throw new UnauthorizedError('用户名或密码错误')
   }
