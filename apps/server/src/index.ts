@@ -1,15 +1,11 @@
 import { serve } from '@hono/node-server'
 import { getConfig } from './core/config/index.js'
-import { initDb } from './core/db/index.js'
 import { getLogger } from './lib/logger.js'
 import { getLocalIps } from './lib/utils.js'
 import { app } from './app.js'
 
 const config = getConfig()
 const logger = getLogger()
-
-initDb()
-logger.info('数据库初始化完成')
 
 const ip = getLocalIps()[0] ?? 'localhost'
 

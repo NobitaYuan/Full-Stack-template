@@ -1,13 +1,13 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { pgTable, varchar, timestamp, text } from 'drizzle-orm/pg-core'
 
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  username: text('username').notNull().unique(),
+export const users = pgTable('users', {
+  id: varchar('id', { length: 36 }).primaryKey(),
+  username: varchar('username', { length: 50 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdate(() => new Date()),

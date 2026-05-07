@@ -1,7 +1,7 @@
 import { z } from '@hono/zod-openapi'
 import { UserResponseSchema } from '../../core/db/user/index.js'
+import { PaginationQuerySchema } from '../../lib/pagination.js'
 
-// 从 Drizzle 表自动生成的用户响应 schema
 export { UserResponseSchema as UserSchema }
 export type { UserResponse as User } from '../../core/db/user/index.js'
 
@@ -12,10 +12,7 @@ export const UpdateUserSchema = z
   .describe('更新用户输入')
   .openapi('UpdateUserInput')
 
-export const UserListQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1).describe('页码'),
-  size: z.coerce.number().int().min(1).max(100).default(20).describe('每页数量'),
-})
+export const UserListQuerySchema = PaginationQuerySchema
 
 export const UserListResponseSchema = z
   .object({
@@ -23,6 +20,7 @@ export const UserListResponseSchema = z
     total: z.number().describe('总数'),
     page: z.number().describe('当前页码'),
     size: z.number().describe('每页数量'),
+    totalPages: z.number().describe('总页数'),
   })
   .describe('用户列表响应')
   .openapi('UserListResponse')

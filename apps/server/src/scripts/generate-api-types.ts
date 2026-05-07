@@ -47,6 +47,7 @@ if (moduleMap.size === 0) {
   process.exit(0)
 }
 
+// NOTE: 这里需要改为前端项目的目录
 const apiDir = resolve(__dirname, '../../../client/src/api')
 
 // ==================== 检测 components.schemas 重名 ====================

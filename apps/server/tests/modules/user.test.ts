@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest'
 import { app } from '../../src/app.js'
-import { initDb, getDb } from '../../src/core/db/index.js'
+import { getDb } from '../../src/core/db/index.js'
 import { sql } from 'drizzle-orm'
 
-beforeAll(() => {
-  initDb()
+beforeAll(async () => {
+  // PG tables should exist via migration before tests run
 })
 
-afterEach(() => {
+afterEach(async () => {
   const db = getDb()
-  db.run(sql`DELETE FROM users`)
+  await db.execute(sql`DELETE FROM users`)
 })
 
 async function registerAndGetToken() {
