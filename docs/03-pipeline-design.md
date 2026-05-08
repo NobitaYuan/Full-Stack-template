@@ -92,18 +92,7 @@ function getAgent(role: string): ReviewerAgentHandler
 
 #### 2.3.1 数据表设计
 
-```sql
-create table system_prompts (
-  id            serial primary key,
-  role          text not null unique,           -- 'dpa' | 'bca' | 'fca' | 'ora'
-  content       text not null,                  -- 完整的 system prompt markdown
-  version       integer not null default 1,     -- 版本号，每次更新递增
-  is_active     boolean not null default true,  -- 是否启用（支持灰度/回滚）
-  updated_by    text,                           -- 最后修改人
-  updated_at    timestamptz not null default now(),
-  created_at    timestamptz not null default now()
-);
-```
+表结构定义见 [05-database-and-api-design.md](05-database-and-api-design.md) §2.2 `system_prompts` 表。生效规则：role 相同取 `isActive = true` 且 `version` 最大的那条。
 
 #### 2.3.2 初始数据
 
