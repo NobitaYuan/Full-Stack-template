@@ -1,0 +1,15 @@
+[backend]
+# biddings-reviewer 后端配置
+# 所有模型配置从 .env 文件读取
+
+[reviewer]
+# 审查流水线配置（27b 适配：提升各阶段 token 上限）
+max_retry = 3
+dpa_max_tokens = 8192
+bca_max_tokens = 8192
+fca_max_tokens = 8192
+ora_max_tokens = 16384
+
+# 文档大小限制（27b 适配：提升上限以利用 262K 上下文）
+max_tender_chars = 80000
+max_bid_chars = 80000
