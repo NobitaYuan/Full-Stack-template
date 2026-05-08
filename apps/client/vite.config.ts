@@ -5,6 +5,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
+import svgLoader from 'vite-svg-loader'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 export default defineConfig((env: ConfigEnv) => {
@@ -22,6 +23,7 @@ export default defineConfig((env: ConfigEnv) => {
       vueDevTools(),
       vueJsx(),
       vue(),
+      svgLoader(),
       createHtmlPlugin({
         inject: {
           data: {

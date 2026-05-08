@@ -5,7 +5,7 @@ import { RouterLink } from 'vue-router'
 import navCom from './nav.vue'
 import userInfo from './components/userInfo.vue'
 
-const logoUrl = new URL('@/assets/images/logo.png', import.meta.url).href
+import LogoSvg from '@/assets/images/vite.svg?component'
 
 const darkModeStore = useDarkModeStore()
 
@@ -21,7 +21,7 @@ const checked = computed({
 <template>
   <div class="header">
     <RouterLink to="/" class="logo">
-      <img class="logoImg" :src="logoUrl" alt="logo" />
+      <LogoSvg class="logoImg" />
       <div class="text">
         {{ title }}
       </div>
@@ -31,8 +31,8 @@ const checked = computed({
     </div>
     <div class="setting">
       <a-switch v-model:checked="checked" size="small">
-        <template #checkedIcon><BulbFilled /></template>
-        <template #uncheckedIcon><BulbOutlined /></template>
+        <template #checkedChildren><BulbFilled /></template>
+        <template #unCheckedChildren><BulbOutlined /></template>
       </a-switch>
       <userInfo />
     </div>
@@ -62,7 +62,7 @@ const checked = computed({
       font-weight: bold;
     }
     .logoImg {
-      width: 50px;
+      font-size: 24px;
     }
   }
   .nav {

@@ -52,11 +52,11 @@ const isPathActive = (path: string) => {
     }
     &.active {
       background-color: #fff;
-      color: #1890ff;
+      color: #0052d9;
     }
     &:hover {
       background-color: #fff;
-      color: #1890ff;
+      color: #0052d9;
     }
   }
 }

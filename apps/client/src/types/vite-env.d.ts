@@ -4,6 +4,11 @@ declare module '*.vue' {
   const component: DefineComponent<object, object, unknown>
   export default component
 }
+declare module '*.svg?component' {
+  import type { DefineComponent } from 'vue'
+  const component: DefineComponent<object, object, unknown>
+  export default component
+}
 interface ImportMetaEnv {
   //  页面标题
   readonly VITE_APP_TITLE: string
