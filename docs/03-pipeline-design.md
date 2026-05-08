@@ -44,11 +44,11 @@ ORA (报告编译)
 
 **校验通过后执行：**
 
-1. 更新 `task.status = 'running'`，`phase = 'DPA_ROUND1'`
-2. 保存联系人和项目信息到 task（`contactName`, `contactEmail`, `contactPhone`, `contactCompany`, `projectShortName`, `projectDescription`）
-3. 生成 `progress_token`（用于结果页免登录访问）
-4. 异步启动流水线引擎（`engine.start(taskId)`，fire-and-forget）
-5. WebSocket 推送 `phase_changed { from: 'DOC_UPLOADING', to: 'DPA_ROUND1' }`
+1. 保存联系人和项目信息到 task（`contactName`, `contactEmail`, `contactPhone`, `contactCompany`, `projectShortName`, `projectDescription`）
+2. 生成 `progress_token`（用于结果页免登录访问）
+3. 调用 `scheduler.enqueue(taskId)`（详见 §11）：
+   - **有空闲槽位**：`status = 'running'`，异步启动 `engine.start(taskId)`
+   - **无空闲槽位**：`status = 'queued'`，`phase = 'QUEUED'`，等待出队
 
 ---
 
@@ -641,8 +641,29 @@ interface PipelineState {
 POST /tasks/:id/start
     │
     ▼
-loadDocuments(taskId)              ← DB: review_documents 表
+scheduler.enqueue(taskId)           ← TaskScheduler 判断是否有空闲槽位
+    │
+    ├─ 有空闲 → status = 'running'，立即进入 pipeline
+    │
+    └─ 无空闲 → status = 'queued', phase = 'QUEUED'
+                  广播 WS: phase_changed { to: 'QUEUED' }, queue_position { position: N }
+                  │
+                  ▼ (scheduler.onTaskFinished → dequeueNext → 当前任务出队)
+                status = 'running'
+                  │
+                  ▼
+extractTexts(taskId)                ← 并发提取所有文件文本（Promise.allSettled + pdf-parse / mammoth）
+    │ 逐文件流程：parseStatus → 'parsing' → 提取文本 → 更新 textContent/charCount
+    │   成功：parseStatus → 'completed'，广播 WS document_parsed { docId, status: 'completed', charCount }
+    │   失败：parseStatus → 'failed'，textContent = null，广播 WS document_parsed { docId, status: 'failed', error }
+    │ 单文件失败不阻塞其他文件，tender 文件提取后回填 projects.name / projects.code
+    │
+    │ ⚠ TODO: 当前仅提取文字层，不支持扫描件/图片 OCR。若文档含扫描图片（资质证书、营业执照等），
+    │ 文字内容会丢失。后续需引入 OCR（如 Tesseract.js 或外部 OCR 服务）作为兜底。
+    ▼
+loadDocuments(taskId)              ← DB: review_documents 表（此时 textContent 已填充）
     │ tenderDoc, bidDocs 写入 state
+    │ 若 tender 文件解析失败 → 流水线终止，广播 failed
     ▼
 setPhase(DPA_ROUND1)               → WS: phase_changed { from: DOC_UPLOADING, to: DPA_ROUND1 }
     │
@@ -850,6 +871,8 @@ interface LlmCallLog {
 ```typescript
 type ReviewerEvent =
   | PhaseChangedEvent
+  | QueuePositionEvent
+  | DocumentParsedEvent
   | ArtifactReadyEvent
   | AgentCallStartedEvent
   | AgentCallCompletedEvent
@@ -862,11 +885,23 @@ interface PhaseChangedEvent {
   to: string      // 新阶段
 }
 
+interface QueuePositionEvent {
+  type: 'queue_position'
+  position: number  // 当前排队位置（1-based，0 表示即将执行）
+}
+
+interface DocumentParsedEvent {
+  type: 'document_parsed'
+  docId: string           // review_documents 表的 id
+  fileName: string        // 文件名
+  status: 'completed' | 'failed'
+  charCount: number | null
+  error?: string          // 失败时的错误信息
+}
+
 interface ArtifactReadyEvent {
   type: 'artifact_ready'
   artifactType: string   // review_baseline / extracted_fields / bca_result / fca_result / review_report
-  artifactId: string     // task_artifacts 表的 id
-  version: number
 }
 
 interface AgentCallStartedEvent {
@@ -903,14 +938,18 @@ function broadcast(taskId: string, event: ReviewerEvent): void {
 
 // 触发点：
 // 1. setPhase() 内部 → phase_changed
-// 2. saveArtifact() 内部 → artifact_ready
+// 2. extractTexts() 逐文件 → document_parsed
 // 3. callLlm() 调用前 → agent_call_started
 // 4. callLlm() 返回后 → agent_call_completed
 // 5. 流水线成功结束 → completed
 // 6. 流水线异常 → failed
+// 7. scheduler 排队 → queue_position
+// 8. saveArtifact() 内部 → artifact_ready
 ```
 
 #### 前端消费示例
+
+**WS 驱动 PipelineMonitor 进度展示 + 产物内容实时刷新。不自动切换 Tab。**
 
 ```typescript
 // 前端 WebSocket 处理
@@ -919,59 +958,89 @@ ws.onmessage = (event) => {
 
   switch (data.type) {
     case 'phase_changed':
-      // 更新 PipelineMonitor 当前步骤高亮
-      updatePipelineSteps(data.to)
+      updatePipelineSteps(data.to)        // PipelineMonitor 步骤高亮
+      break
+
+    case 'queue_position':
+      updateQueuePosition(data.position)  // 排队位置更新
+      break
+
+    case 'document_parsed':
+      updateFileStatus(data.docId, data.status, data.charCount) // 文件解析状态
       break
 
     case 'artifact_ready':
-      // 激活对应产物 Tab
-      enableArtifactTab(data.artifactType)
-      // 若为最终报告，自动切换到报告 Tab
-      if (data.artifactType === 'review_report') fetchAndRenderReport(data.artifactId)
+      // 标记对应 Tab 有新内容
+      markTabHasContent(data.artifactType)
+      // 如果用户正好在查看这个 Tab，立即刷新内容
+      if (currentActiveTab === data.artifactType) {
+        fetchAndRenderArtifact(data.artifactType)
+      }
+      break
+
+    case 'agent_call_started':
+      showAgentLoading(data.agentRole, data.attempt)  // 当前 Agent 调用指示
+      break
+
+    case 'agent_call_completed':
+      hideAgentLoading(data.agentRole)
       break
 
     case 'completed':
-      // 显示完成提示
       showCompletionNotice(data.qualityScore)
       break
 
     case 'failed':
-      // 显示错误信息
       showError(data.phase, data.error)
       break
+  }
+}
+
+// WS 断线重连策略
+ws.onreconnect = async () => {
+  const task = await api.GET('/tasks/{id}', { params: { id: taskId } })
+  syncPipelineMonitor(task.status, task.phase)  // 用最新状态刷新 PipelineMonitor
+}
+```
+
+#### 产物 Tab 按需加载
+
+用户点击产物 Tab 时，前端调用 GET 接口获取内容：
+
+```typescript
+async function onTabClick(artifactType: string) {
+  const res = await api.GET('/tasks/{id}/artifacts/{type}', {
+    params: { id: taskId, type: artifactType }
+  })
+  if (res.data) {
+    renderMarkdown(res.data.content)
+  } else {
+    showEmpty('暂无数据，流水线可能尚未生成此产物')
   }
 }
 ```
 
 ### 8.6 前端数据获取
 
-#### API 调用流程
+#### 初始化流程
 
 ```
 前端打开结果页 → GET /tasks/:id (获取 task 状态 + 文档列表)
              → 建立 WebSocket 连接
-             → GET /tasks/:id/artifacts (获取已有产物列表)
-
-             → WS: artifact_ready 事件触发时
-               → GET /tasks/:id/artifacts/:type (获取最新版本产物内容)
-               → MarkdownRenderer 渲染展示
-
-             → WS: completed 事件
-               → GET /tasks/:id/artifacts/review_report (获取最终报告)
-               → ReportRenderer 渲染七章节报告
+             → PipelineMonitor 根据 task.phase 显示当前步骤
 ```
 
-#### 产物 Tab 激活规则
+#### 产物查看流程
 
-| Tab | 激活条件 | 对应 artifactType |
-|-----|---------|-------------------|
-| 审查基准 | `artifact_ready { review_baseline }` | `review_baseline` |
-| 字段护照 | `artifact_ready { extracted_fields }` | `extracted_fields` |
-| 废标红线+中标胜算 | `artifact_ready { bca_result }` | `bca_result` |
-| 隐蔽风险+文件安检 | `artifact_ready { fca_result }` | `fca_result` |
-| 审查报告 | `artifact_ready { review_report }` | `review_report` |
+```
+用户点击产物 Tab → GET /tasks/:id/artifacts/:type
+                 → 有内容 → MarkdownRenderer 渲染
+                 → 无内容 → 显示"暂无数据"
+```
 
-**PipelineMonitor 步骤映射：**
+> 产物 Tab 始终可点击（不依赖 WS 事件激活），内容由用户主动查看时按需加载。
+
+#### PipelineMonitor 步骤映射
 
 | 步骤 | 对应 phase | 激活时机 |
 |------|-----------|---------|
@@ -1000,6 +1069,10 @@ runPipeline()
 
 ### 9.2 BCA+FCA 并行容错
 
+#### 9.2.1 执行逻辑
+
+BCA 和 FCA 通过 `Promise.allSettled` 并行执行，任一失败不阻塞另一个。两个都失败则流水线整体标记 failed。
+
 ```typescript
 const [bcaResult, fcaResult] = await Promise.allSettled([
   runPhase(taskId, 'bca', bcaPrompt),
@@ -1008,15 +1081,97 @@ const [bcaResult, fcaResult] = await Promise.allSettled([
 
 const bcaText = bcaResult.status === 'fulfilled'
   ? bcaResult.value
-  : `BCA 审查异常: ${bcaResult.reason}`
+  : buildDegradedInput('bca', bcaResult.reason)
 
 const fcaText = fcaResult.status === 'fulfilled'
   ? fcaResult.value
-  : `FCA 审查异常: ${fcaResult.reason}`
+  : buildDegradedInput('fca', fcaResult.reason)
 
 // 即使部分失败也保存结果
 await saveArtifact(taskId, 'bca_result', 'BCA_FCA_RUNNING', bcaText)
 await saveArtifact(taskId, 'fca_result', 'BCA_FCA_RUNNING', fcaText)
+```
+
+#### 9.2.2 失败降级文本（buildDegradedInput）
+
+当 BCA 或 FCA 执行失败时，不能把原始错误信息直接喂给 ORA（如 `"BCA 审查异常: TimeoutError"`），ORA 无法理解这是何种失败、该如何处理。需要生成结构化的降级文本，让 ORA 按指令手册的规则生成对应章节。
+
+```typescript
+function buildDegradedInput(
+  agentRole: 'bca' | 'fca',
+  error: unknown
+): string {
+  const label = agentRole === 'bca'
+    ? '废标红线与中标胜算审查'
+    : '隐蔽风险与电子文件安检'
+
+  const sections = agentRole === 'bca'
+    ? [
+        '第二部分 废标红线审查：全部检查项标注 [Human_Required]',
+        '第三部分 中标胜算评估：全部评估项标注 [Human_Required]',
+        '否决项清单：无法判定，标注 [Human_Required]',
+      ]
+    : [
+        '第四部分 隐蔽风险探测：全部检查项标注 [Human_Required]',
+        '第五部分 电子文件安检：全部检查项标注 [Human_Required]',
+        '缺陷项汇总：无法判定，标注 [Human_Required]',
+      ]
+
+  const reason = error instanceof Error ? error.message : String(error)
+
+  return [
+    `⚠ ${label}执行异常，数据不可用。`,
+    '',
+    `失败原因：${reason}`,
+    '',
+    '以下章节全部标注 [Human_Required]，列入第七部分人工复核清单：',
+    ...sections.map(s => `- ${s}`),
+    '',
+    '请按正常流程编译报告，在对应章节中使用上述标注替代审查数据。',
+    '报告其余章节（有数据的部分）正常生成。',
+  ].join('\n')
+}
+```
+
+**降级文本示例（BCA 失败）：**
+
+```
+⚠ 废标红线与中标胜算审查执行异常，数据不可用。
+
+失败原因：LLM 调用重试耗尽（3 phase × 3 call 全部超时）
+
+以下章节全部标注 [Human_Required]，列入第七部分人工复核清单：
+- 第二部分 废标红线审查：全部检查项标注 [Human_Required]
+- 第三部分 中标胜算评估：全部评估项标注 [Human_Required]
+- 否决项清单：无法判定，标注 [Human_Required]
+
+请按正常流程编译报告，在对应章节中使用上述标注替代审查数据。
+报告其余章节（有数据的部分）正常生成。
+```
+
+#### 9.2.3 与 ORA 的配合
+
+ORA 收到降级文本后，按指令手册的规则处理：
+
+| 情况 | ORA 行为 |
+|------|---------|
+| BCA 成功 + FCA 成功 | 正常编译完整报告 |
+| BCA 失败 + FCA 成功 | 第二/三/否决项章节用 `[Human_Required]` 替代，第四/五章节正常生成 |
+| BCA 成功 + FCA 失败 | 第二/三/否决项章节正常生成，第四/五/缺陷项章节用 `[Human_Required]` 替代 |
+| BCA 失败 + FCA 失败 | 流水线整体标记 failed，不进入 ORA |
+
+产物仍会保存（含降级文本），方便调试和事后排查失败原因。metadata 中记录降级状态：
+
+```typescript
+// 失败时的 artifact metadata
+{
+  degraded: true,
+  error: 'LLM 调用重试耗尽（3 phase × 3 call 全部超时）',
+  passCount: 0,
+  failCount: 0,
+  warningCount: 0,
+  rejectionItemCount: 0
+}
 ```
 
 ---
@@ -1038,3 +1193,433 @@ await saveArtifact(taskId, 'fca_result', 'BCA_FCA_RUNNING', fcaText)
 | `docs/prompts/03-bca.md` | 系统提示词（BCA） | 从指令手册完整摘取，运行时加载 |
 | `docs/prompts/04-fca.md` | 系统提示词（FCA） | 从指令手册完整摘取，运行时加载 |
 | `config/pipeline.toml` | 环境变量 + 硬编码默认值 | 配置项合并到代码常量 |
+
+---
+
+## 11. TaskScheduler 与并发控制
+
+### 11.1 设计目标
+
+- 限制同时执行的流水线数量，防止 LLM API 限流
+- 多用户同时提交时公平排队（FIFO）
+- 服务重启后队列不丢失
+
+### 11.2 架构
+
+TaskScheduler 是进程级单例，在服务启动时初始化：
+
+```typescript
+class TaskScheduler {
+  private maxConcurrent: number            // 环境变量 MAX_CONCURRENT_TASKS，默认 2
+  private activeTaskIds: Set<string>       // 当前运行中的任务 ID 集合
+
+  // 入队（POST /start 调用）
+  async enqueue(taskId: string): Promise<EnqueueResult>
+
+  // 任务完成/失败时调用
+  async onTaskFinished(taskId: string): Promise<void>
+
+  // 服务启动时恢复队列
+  async recover(): Promise<void>
+
+  // 内部：尝试出队下一个任务
+  private async dequeueNext(): Promise<void>
+}
+```
+
+**EnqueueResult：**
+
+```typescript
+interface EnqueueResult {
+  started: boolean       // true = 直接开始执行，false = 排队等待
+  queuePosition?: number // 排队位置（仅 started=false 时返回，1-based）
+}
+```
+
+### 11.3 幂等保护（防止重复启动）
+
+`POST /tasks/:id/start` 通过数据库条件更新保证幂等：
+
+```sql
+UPDATE tasks SET status = 'queued'
+WHERE id = $1 AND status = 'created'
+```
+
+- 影响行数 = 1 → 首次启动，继续走 enqueue 流程
+- 影响行数 = 0 → 任务已启动过（queued / running / completed / failed），返回对应的提示
+
+覆盖场景：用户重复点击、前端网络重试、并发请求。
+
+### 11.4 排队流程
+
+```
+POST /tasks/:id/start → 校验通过 → 幂等检查通过 → scheduler.enqueue(taskId)
+    │
+    ├─ activeTaskIds.size < maxConcurrent
+    │     │
+    │     ├─ task.status = 'running'
+    │     ├─ activeTaskIds.add(taskId)
+    │     ├─ engine.start(taskId)（异步，不 await）
+    │     └─ 返回 { started: true }
+    │
+    └─ activeTaskIds.size >= maxConcurrent
+          │
+          ├─ task.status = 'queued', task.phase = 'QUEUED'
+          ├─ 广播 WS: phase_changed { from: 'DOC_UPLOADING', to: 'QUEUED' }
+          ├─ 计算 queuePosition（DB 查询 createdAt 排名）
+          ├─ 广播 WS: queue_position { position }
+          └─ 返回 { started: false, queuePosition }
+```
+
+### 11.5 出队流程
+
+```
+Pipeline 完成/失败
+    │
+    ▼
+scheduler.onTaskFinished(taskId)
+    │
+    ├─ activeTaskIds.delete(taskId)
+    │
+    ├─ dequeueNext()
+    │     │
+    │     ├─ 查询下一个排队任务：
+    │     │   SELECT id FROM tasks
+    │     │   WHERE status = 'queued'
+    │     │   ORDER BY createdAt ASC
+    │     │   LIMIT 1
+    │     │
+    │     ├─ 找到 → task.status = 'running'
+    │     │         activeTaskIds.add(task.id)
+    │     │         广播 WS: phase_changed { from: 'QUEUED', to: 'DPA_ROUND1' }
+    │     │         engine.start(task.id)（异步）
+    │     │
+    │     └─ 未找到 → 队列为空，无操作
+    │
+    └─ 广播 WS: queue_position 给剩余排队任务（位置前移）
+```
+
+### 11.6 排队位置推送
+
+当出队触发后，所有排队任务的位置需要更新：
+
+```typescript
+// 在 dequeueNext() 内部
+const queuedTasks = await db
+  .select({ id: tasks.id })
+  .from(tasks)
+  .where(eq(tasks.status, 'queued'))
+  .orderBy(asc(tasks.createdAt))
+
+for (let i = 0; i < queuedTasks.length; i++) {
+  broadcast(queuedTasks[i].id, {
+    type: 'queue_position',
+    position: i + 1
+  })
+}
+```
+
+### 11.7 启动恢复
+
+服务启动时，`TaskScheduler.recover()` 执行：
+
+```
+1. 查询 status = 'running' 的任务：
+   - 内存中的 PipelineState 已丢失，无法恢复运行进度
+   - 策略：标记为 failed（phase 记录崩溃前的阶段）
+   - 可选优化：检查 task_artifacts 是否有完整产物链，如有则标记 completed（见 §12 崩溃恢复）
+
+2. 查询 status = 'queued' 的任务：
+   - 按 createdAt 排序，依次尝试出队执行
+   - 恢复 activeTaskIds 计数
+
+3. 初始化完成，scheduler 进入正常工作状态
+```
+
+### 11.8 配置
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `MAX_CONCURRENT_TASKS` | 2 | 最大同时运行的任务数 |
+
+> 该值取决于 LLM API 的 RPM/TPM 限制。每个任务峰值并发 2 个 LLM 调用（BCA+FCA 阶段），因此 `MAX_CONCURRENT_TASKS = N` 意味着最坏情况下同时 `2N` 个 LLM 请求。设置时需确保 `2N ≤ API 并发上限`。
+
+### 11.9 前端交互
+
+**排队状态展示：**
+
+| 阶段 | PipelineMonitor 显示 | 说明 |
+|------|---------------------|------|
+| QUEUED | 全步骤灰色 + 顶部提示"排队等待中（前方 N 个任务）" | 阶段未开始 |
+| DPA_ROUND1 | 步骤 2 高亮，正常进度 | 排队结束，流水线启动 |
+
+**事件消费：**
+
+```typescript
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data)
+
+  switch (data.type) {
+    case 'phase_changed':
+      if (data.to === 'QUEUED') {
+        showQueueWaiting()  // 显示排队提示
+      } else {
+        updatePipelineSteps(data.to)  // 正常阶段切换
+      }
+      break
+
+    case 'queue_position':
+      updateQueuePosition(data.position)  // 更新"前方 N 个任务"
+      break
+  }
+}
+```
+
+---
+
+## 12. 状态机健壮性与崩溃恢复
+
+### 12.1 需要应对的异常场景
+
+| # | 场景 | 后果 |
+|---|------|------|
+| 1 | 服务器崩溃/进程被杀 | task 永久卡在 running |
+| 2 | 崩溃在 LLM 返回成功到 saveArtifact 完成之间 | LLM 结果丢失（token 白费） |
+| 3 | 崩溃在 saveArtifact 完成到 setPhase 完成之间 | 产物已存但 phase 没更新 |
+| 4 | WS 断连后重连 | 客户端漏掉中间事件 |
+| 5 | 任务卡死（未捕获异常/死锁） | task.status 永远是 running |
+
+### 12.2 崩溃恢复（覆盖 #1-#3）
+
+**策略：服务重启时，所有 status = 'running' 的任务直接标记为 failed。**
+
+```typescript
+async function recoverCrashedTasks(): Promise<void> {
+  const crashed = await db
+    .update(tasks)
+    .set({ status: 'failed' })
+    .where(eq(tasks.status, 'running'))
+    .returning({ id: tasks.id, phase: tasks.phase })
+
+  for (const task of crashed) {
+    broadcast(task.id, {
+      type: 'failed',
+      phase: task.phase,
+      error: '服务重启，任务异常终止'
+    })
+  }
+}
+```
+
+**为什么不从 artifact 检查点恢复？**
+
+| 考虑因素 | 结论 |
+|---------|------|
+| 恢复逻辑复杂度 | 需要实现 engine.resume(phase)，逐阶段重建 state，大幅增加引擎复杂度 |
+| 崩溃频率 | 服务崩溃是低频事件（部署/硬件故障），不值得为此引入检查点机制 |
+| 产物不丢失 | 已保存的 artifact 仍在 DB 中，用户和管理员可随时查看已生成的中间产物 |
+| Token 浪费 | #2 场景（LLM 结果未持久化）概率极低（窗口在毫秒级），接受损失 |
+
+### 12.3 WS 断连重连（覆盖 #4）
+
+**策略：前端重连后主动拉取最新状态，不依赖服务端缓存事件。**
+
+```
+WS 断连 → 自动重连 → 前端调用 GET /tasks/:id
+                      → 用返回的 status + phase 刷新 PipelineMonitor
+                      → 恢复 WS 监听
+```
+
+服务端无需特殊处理，WS 连接是幂等的。
+
+### 12.4 僵尸任务检测（覆盖 #5）
+
+**策略：后台看门狗定时扫描超时的 running 任务。**
+
+```typescript
+// 看门狗：每 60 秒执行一次
+setInterval(async () => {
+  const timeout = new Date(Date.now() - TASK_TIMEOUT_MINUTES * 60 * 1000)
+
+  const zombies = await db
+    .update(tasks)
+    .set({ status: 'failed' })
+    .where(and(
+      eq(tasks.status, 'running'),
+      lt(tasks.updatedAt, timeout)
+    ))
+    .returning({ id: tasks.id, phase: tasks.phase })
+
+  for (const task of zombies) {
+    broadcast(task.id, {
+      type: 'failed',
+      phase: task.phase,
+      error: `任务超时（超过 ${TASK_TIMEOUT_MINUTES} 分钟无进展）`
+    })
+    scheduler.onTaskFinished(task.id)  // 释放槽位，出队下一个
+  }
+}, 60_000)
+```
+
+**超时阈值：**
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `TASK_TIMEOUT_MINUTES` | 120 | 任务最大运行时长，超时视为卡死 |
+
+> 正常流水线 5-15 分钟跑完，但含大量重试或 LLM API 响应慢时可能需要 30-60 分钟。2 小时阈值覆盖极端情况，超过则说明遇到了 API 长时间不可用或服务内部死锁。
+
+### 12.5 完整的状态流转
+
+```
+created ──→ queued ──→ running ──→ completed
+  │           │          │
+  │           │          ├─→ failed（流水线异常）
+  │           │          ├─→ failed（服务崩溃，重启恢复时标记）
+  │           │          └─→ failed（看门狗超时）
+  │           │
+  │           └─（重启恢复时，queued 任务重新入队）
+  │
+  └─→ created（用户未启动就离开，不转换）
+```
+
+### 12.6 启动恢复完整流程
+
+服务启动时，按顺序执行：
+
+```
+1. recoverCrashedTasks()     ← running → failed
+2. scheduler.recover()       ← queued 任务重新入队 + 尝试出队执行
+3. startWatchdog()           ← 启动看门狗定时扫描
+```
+
+**scheduler.recover() 细节（补充 §11.6）：**
+
+```
+1. 查询 status = 'queued' 的任务，按 createdAt 排序
+2. 计算当前可用槽位：maxConcurrent - running 任务数（此时 running 已被步骤1清零）
+3. 依次出队前 N 个任务启动
+4. 剩余任务保持 queued 状态等待
+```
+
+---
+
+## 13. LLM 调用层容错
+
+### 13.1 两层重试架构
+
+```
+Phase 层重试（§6，最多 3 次）
+  └── 每次 attempt 调用 callLlm()
+      └── LLM 调用层重试（§13，最多 3 次）
+           └── 单次 HTTP 请求 → LLM API
+```
+
+- **LLM 调用层**：处理 API 本身的故障（429、5xx、超时、网络错误）
+- **Phase 层**：处理业务逻辑问题（格式不对、质量不达标），用修正 prompt 重试
+
+两层各管各的，最坏情况单个阶段 3 × 3 = 9 次 API 调用（极端场景，正常 1 次即成功）。
+
+### 13.2 错误分类
+
+| 错误类型 | 例子 | 是否重试 | 处理方式 |
+|---------|------|---------|---------|
+| 速率限制 | HTTP 429 | ✅ | 读 Retry-After，否则指数退避 |
+| 服务端错误 | HTTP 500/502/503 | ✅ | 指数退避 |
+| 调用超时 | 15 分钟内无响应 | ✅ | 指数退避 |
+| 网络错误 | ECONNRESET / DNS 失败 | ✅ | 指数退避 |
+| 认证错误 | HTTP 401/403 | ❌ | 直接抛出，不浪费 attempt |
+| 请求错误 | HTTP 400 | ❌ | 直接抛出（说明 prompt 本身有问题） |
+
+### 13.3 指数退避
+
+```
+delay = base × 2^attempt + random(0, base)
+base = 2000ms
+
+attempt 0 → ~2s
+attempt 1 → ~4s
+attempt 2 → ~8s
+```
+
+429 时优先使用 `Retry-After` header 的值，没有则走指数退避。加 jitter（随机偏移）避免多个任务同时重试造成"惊群"。
+
+### 13.4 callLlm 实现
+
+```typescript
+async function callLlm(prompt: string, options: AgentOptions): Promise<string> {
+  const maxRetries = getLLMMaxRetries()    // 默认 3
+  const timeoutMs = getLLMCallTimeoutMs()  // 默认 900000 (15 分钟)
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await withTimeout(
+        llmApiCall(prompt, options),
+        timeoutMs
+      )
+    } catch (error) {
+      // 不可重试的错误直接抛出
+      if (!isRetryable(error) || attempt === maxRetries) {
+        throw error
+      }
+
+      // 429 优先读 Retry-After，否则指数退避
+      const delay = error.status === 429
+        ? getRetryAfterMs(error) ?? backoff(attempt)
+        : backoff(attempt)
+
+      await sleep(delay)
+    }
+  }
+
+  throw new Error('unreachable')
+}
+```
+
+### 13.5 与 Phase 层的配合
+
+```typescript
+// pipeline/engine.ts 中的 runPhase 伪代码
+async function runPhase(taskId, agentRole, prompt) {
+  const maxAttempts = 3
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const result = await callLlm(prompt, options)  // ← 调用层重试在这里
+      const issues = validateReviewFormat(result, agentRole)
+
+      if (issues.length === 0) return result          // 格式正确，完成
+
+      if (attempt < maxAttempts - 1) {
+        prompt = buildFormatFixPrompt(prompt, issues)  // 追加修正 prompt
+      } else {
+        return result                                   // 最后一次，兜底保留
+      }
+    } catch (error) {
+      // callLlm 所有重试耗尽后抛出 → 当前 phase attempt 失败
+      if (attempt === maxAttempts - 1) throw error
+      // 否则继续下一次 phase attempt（同样的 prompt）
+    }
+  }
+}
+```
+
+### 13.6 调用层对前端透明
+
+LLM 调用层的重试对前端完全不可见。前端只看到：
+
+- `agent_call_started { agentRole, attempt }` — phase 层的 attempt 编号
+- `agent_call_completed { agentRole, latencyMs, tokens }` — 最终成功的那次调用
+
+调用层内部的 429/5xx 重试不触发 WS 事件，不影响 PipelineMonitor 显示。
+
+### 13.7 配置
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `LLM_CALL_TIMEOUT_MS` | 900000 | 单次 API 调用超时（毫秒），默认 15 分钟 |
+| `LLM_MAX_RETRIES` | 3 | 调用层最大重试次数 |
+| `LLM_RETRY_BASE_MS` | 2000 | 退避基数（毫秒） |
+
+> 单阶段最坏情况：3 phase attempt × (1 + 3 call retry) = 12 次 API 调用 × 15 分钟 = 理论最大 180 分钟。
+> 但实际不可能所有调用都超时，看门狗 120 分钟兜底会先触发。

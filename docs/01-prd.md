@@ -358,9 +358,17 @@ ComplianceResult
 - 投标文件（docType=bid）可上传多份
 - 启动审查前必须已上传招标文件 + 至少 1 份投标文件
 
-### 5.2 文本提取
+### 5.2 文件存储
 
-上传后后端自动提取文本（pdf-parse / mammoth），存入 `review_documents.textContent`。
+文件本体存磁盘，数据库只存元数据（文件名、大小、路径、docType）。
+
+**存储路径：** `data/uploads/{taskId}/{fileName}`
+
+**文件下载：** 提供 `GET /tasks/:id/documents/:docId/download` 接口，返回原始文件。
+
+### 5.3 文本提取
+
+文本提取在用户点击"开始审查"（`POST /tasks/:id/start`）时触发，不在上传时执行。流水线引擎启动后首先提取所有文件的文本（pdf-parse / mammoth），存入 `review_documents.textContent`。
 
 **charCount 语义：**
 
@@ -371,7 +379,7 @@ ComplianceResult
 | ≥ 5,000 | 内容完整 |
 | ≥ 500 | 内容基本完整 |
 
-### 5.3 文本截断策略
+### 5.4 文本截断策略
 
 各阶段 Prompt 构建时的截断上限：
 
@@ -539,7 +547,7 @@ RAG 是四维度知识补充引擎。在 DPA 完成解析后、BCA/FCA 执行前
 
 | 指标 | 要求 |
 |------|------|
-| 文件存储 | 服务器本地，按 taskId 隔离 |
+| 文件存储 | 磁盘 `data/uploads/{taskId}/`，数据库仅存元数据 |
 | 文件名校验 | 清理特殊字符，防路径遍历 |
 | 文件类型校验 | 仅 .pdf / .docx / .doc |
 | 输入校验 | Zod schema |

@@ -52,7 +52,7 @@ rag_knowledge_chunks  [预留，独立表]
 | id | uuid | PK | 任务唯一标识，对外暴露的 ID |
 | projectId | uuid | FK → projects.id, not null | 所属项目 |
 | phase | text | not null, default 'DOC_UPLOADING' | 当前阶段 |
-| status | text | not null, default 'created' | created / running / completed / failed |
+| status | text | not null, default 'created' | created / queued / running / completed / failed |
 | contactName | text | nullable | 联系人姓名 |
 | contactEmail | text | nullable | 联系人邮箱 |
 | contactPhone | text | nullable | 联系人手机号 |
@@ -65,13 +65,23 @@ rag_knowledge_chunks  [预留，独立表]
 | createdAt | timestamptz | default now() | 创建时间 |
 | updatedAt | timestamptz | default now() | 更新时间 |
 
+**状态枚举（status）流转：**
+
+```
+created → queued → running → completed
+                      │
+                      └──→ failed
+```
+
 **阶段枚举（phase）：**
 
 ```
-DOC_UPLOADING → DPA_ROUND1 → DPA_ROUND2 → BCA_FCA_RUNNING → REPORT_COMPILING → COMPLETED
-                                                                            |
-                                                                            └──→ FAILED（任何阶段失败）
+DOC_UPLOADING → QUEUED → (extractTexts) → DPA_ROUND1 → DPA_ROUND2 → BCA_FCA_RUNNING → REPORT_COMPILING → COMPLETED
+                                                                                                            |
+                                                                                                            └──→ FAILED（任何阶段失败）
 ```
+
+> `QUEUED` 阶段仅在并发槽位满时出现。有空闲槽位时，任务直接从 `DOC_UPLOADING` 跳到 `DPA_ROUND1`。
 
 #### `review_documents` — 上传文件及提取文本
 
@@ -85,6 +95,7 @@ DOC_UPLOADING → DPA_ROUND1 → DPA_ROUND2 → BCA_FCA_RUNNING → REPORT_COMPI
 | docType | text | not null | tender（招标文件）/ bid（投标文件） |
 | charCount | integer | nullable | 提取字符数，null 表示提取失败 |
 | textContent | text | nullable | 提取的纯文本内容 |
+| parseStatus | text | not null, default 'pending' | pending / parsing / completed / failed |
 | uploadOrder | integer | not null, default 0 | 上传顺序 |
 | createdAt | timestamptz | default now() | 上传时间 |
 
@@ -235,6 +246,7 @@ RAG 的完整数据流已在 PRD 和 Pipeline 设计中定义（四维度检索 
 | POST | `/tasks` | 创建任务（自动创建 project） | 无 |
 | GET | `/tasks/:id` | 任务详情（含文件列表、产物摘要） | progressToken / adminToken |
 | POST | `/tasks/:id/start` | 启动审查流水线 | progressToken |
+| POST | `/tasks/:id/rerun` | 重新跑流水线（completed/failed → created） | progressToken |
 | GET | `/tasks/:id/status` | 获取当前阶段和状态（短轮询备用） | progressToken / adminToken |
 
 **POST /tasks 说明：**
@@ -252,26 +264,62 @@ RAG 的完整数据流已在 PRD 和 Pipeline 设计中定义（四维度检索 
 | 联系方式 | `contactEmail` 和 `contactName` 已填写 | 400，"请填写联系方式" |
 
 **POST /tasks/:id/start 执行流程：**
-1. 更新 `status = 'running'`，`phase = 'DPA_ROUND1'`
-2. 保存联系人信息到 task 记录
-3. 生成 `progressToken`（UUID）
-4. 异步启动流水线引擎 `engine.start(taskId)`（fire-and-forget）
-5. WebSocket 广播 `phase_changed { from: 'DOC_UPLOADING', to: 'DPA_ROUND1' }`
-6. 返回 `{ progressToken }`
+1. 保存联系人信息到 task 记录
+2. 生成 `progressToken`（UUID）
+3. 调用 `scheduler.enqueue(taskId)`，进入排队逻辑：
+   - **有空闲槽位**（`activeTasks.size < MAX_CONCURRENT_TASKS`）：
+     a. 更新 `status = 'running'`
+     b. 异步启动流水线引擎 `engine.start(taskId)`（fire-and-forget，内部先执行 extractTexts 再进入 DPA_ROUND1）
+     c. 返回 `{ progressToken, started: true }`
+   - **无空闲槽位**：
+     a. 更新 `status = 'queued'`，`phase = 'QUEUED'`
+     b. WebSocket 广播 `phase_changed { from: 'DOC_UPLOADING', to: 'QUEUED' }`
+     c. 计算排队位置：`SELECT COUNT(*) FROM tasks WHERE status = 'queued' AND createdAt < ?`
+     d. 返回 `{ progressToken, started: false, queuePosition }`
 
-### 4.3 文件上传（uploads）
+**GET /tasks/:id/status 排队响应扩展：**
+
+当 `status = 'queued'` 时，响应额外包含 `queuePosition` 字段：
+
+```json
+{
+  "status": "queued",
+  "phase": "QUEUED",
+  "queuePosition": 3
+}
+```
+
+**POST /tasks/:id/rerun 执行流程：**
+
+| 校验项 | 要求 | 失败响应 |
+|--------|------|---------|
+| 任务状态 | `status === 'completed'` 或 `status === 'failed'` | 400，"仅已完成或失败的任务可重新运行" |
+
+1. 清除旧产物：`DELETE FROM task_artifacts WHERE taskId = $1`
+2. 重置状态：`UPDATE tasks SET status = 'created', phase = 'DOC_UPLOADING' WHERE id = $1`
+3. 返回 `{ taskId }`，前端引导用户点击"开始"走正常 `POST /start` 流程
+
+> 文档解析（extractTexts）在重跑时重新执行。pdf-parse / mammoth 提取纯文本很快（几秒），无需特殊跳过逻辑。
+
+### 4.3 文件上传与下载（uploads）
 
 | 方法 | 路径 | 用途 | 认证 |
 |------|------|------|------|
 | POST | `/tasks/:id/upload` | 上传文件（multipart/form-data） | 无（taskId 即凭证） |
 | DELETE | `/tasks/:id/documents/:docId` | 删除已上传文件 | 无 |
+| GET | `/tasks/:id/documents/:docId/download` | 下载原始文件 | progressToken / adminToken |
 
-**POST /upload 约束：**
+**POST /upload 行为：**
 - 仅接受 `.pdf` / `.docx` / `.doc`
 - 单文件 ≤ 100MB
 - 每个 task 限 1 份 tender（重复上传返回 409）
 - bid 文件可多份
-- 后端自动提取文本，计算 charCount， tender 文件提取后回填 projects.name / projects.code
+- 文件存入磁盘 `data/uploads/{taskId}/{fileName}`，数据库仅记录元数据（文件名、大小、docType）
+- **不执行文本提取**，文本提取在流水线启动时统一执行
+
+**GET /download 行为：**
+- 从磁盘读取文件并返回，Content-Type 根据扩展名设置
+- 使用原始文件名（`originalName`）作为 `Content-Disposition` 的文件名
 
 ### 4.4 产物查询（artifacts）
 
@@ -333,12 +381,16 @@ RAG 的完整数据流已在 PRD 和 Pipeline 设计中定义（四维度检索 
 
 | 事件 | Payload | 触发时机 |
 |------|---------|---------|
-| `phase_changed` | `{ from: string, to: string }` | 阶段切换 |
-| `artifact_ready` | `{ artifactType: string, artifactId: string, version: number }` | 产物生成完成 |
+| `phase_changed` | `{ from: string, to: string }` | 阶段切换（含进入 QUEUED） |
+| `queue_position` | `{ position: number }` | 排队位置变化（前方任务完成时推送） |
+| `document_parsed` | `{ docId: string, fileName: string, status: 'completed' \| 'failed', charCount: number \| null, error?: string }` | 单文件解析完成（成功或失败） |
+| `artifact_ready` | `{ artifactType: string }` | 产物生成完成，前端刷新对应 Tab 内容 |
 | `agent_call_started` | `{ agentRole: string, attempt: number }` | LLM 调用开始 |
 | `agent_call_completed` | `{ agentRole: string, latencyMs: number, tokens: { input: number, output: number } }` | LLM 调用完成 |
 | `completed` | `{ qualityScore: number }` | 流水线全部完成 |
 | `failed` | `{ phase: string, error: string }` | 流水线失败 |
+
+> WS 用于 PipelineMonitor 进度展示 + 产物内容实时刷新。不自动切换 Tab，仅标记有新内容并在用户当前查看时刷新。
 
 ### 4.8 RAG 预留接口（rag）
 
@@ -383,13 +435,13 @@ RAG 的完整数据流已在 PRD 和 Pipeline 设计中定义（四维度检索 
 |------|---------|---------|
 | projects | 2 | 项目列表 / 详情 |
 | tasks | 4 | 创建 / 详情 / 启动 / 状态 |
-| uploads | 2 | 上传 / 删除文件 |
+| uploads | 3 | 上传 / 删除 / 下载文件 |
 | artifacts | 2 | 产物列表 / 内容 |
 | admin | 2 | 登录 / 任务列表 |
 | system-prompts | 4 | Prompt CRUD / 回滚 |
 | ws | 1 | 实时事件推送 |
 | rag | 1 | 知识检索（预留） |
-| **合计** | **18** | |
+| **合计** | **19** | |
 
 ---
 
