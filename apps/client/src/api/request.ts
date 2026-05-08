@@ -25,7 +25,7 @@ request.use({
 
     // 401：身份失效，跳转登录
     if (body.code === 401) {
-      message.warning('身份验证失效，请重新登录')
+      message.warning(body.message || '身份验证失效，请重新登录')
       useUserStore().logout()
       return response
     }

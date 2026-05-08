@@ -39,9 +39,9 @@ const fetchData = async () => {
   }
 }
 
-const handleTableChange = (pag: { current: number; pageSize: number }) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
+const handleTableChange = (pag: { current?: number; pageSize?: number }) => {
+  pagination.current = pag.current ?? 1
+  pagination.pageSize = pag.pageSize ?? 10
   fetchData()
 }
 
@@ -118,11 +118,11 @@ onMounted(() => fetchData())
     <a-card title="用户管理">
       <template #extra>
         <a-button type="primary" @click="handleAdd">
-          <PlusOutlined />
+          <template #icon><PlusOutlined /></template>
           新增用户
         </a-button>
         <a-button @click="fetchData">
-          <ReloadOutlined />
+          <template #icon><ReloadOutlined /></template>
           刷新
         </a-button>
       </template>
@@ -133,8 +133,12 @@ onMounted(() => fetchData())
             {{ formatTime(record.createdAt) }}
           </template>
           <template v-if="column.dataIndex === 'op'">
-            <a-button type="link" @click="handleEdit(record)"> <EditOutlined />编辑 </a-button>
-            <a-button type="link" danger @click="handleDelete(record)"> <DeleteOutlined />删除 </a-button>
+            <a-button type="link" @click="handleEdit(record as User)"
+              ><template #icon><EditOutlined /></template>编辑</a-button
+            >
+            <a-button type="link" danger @click="handleDelete(record as User)"
+              ><template #icon><DeleteOutlined /></template>删除</a-button
+            >
           </template>
         </template>
       </a-table>

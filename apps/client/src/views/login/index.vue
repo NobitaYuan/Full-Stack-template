@@ -3,6 +3,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { isDev } from '@/utils/isDev'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
+import type { Rule } from 'ant-design-vue/es/form'
 
 const title = import.meta.env.VITE_APP_TITLE
 
@@ -20,7 +21,7 @@ const formData = ref<LoginForm>({
   password: '',
 })
 
-const rules = {
+const rules: Record<string, Rule[]> = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
