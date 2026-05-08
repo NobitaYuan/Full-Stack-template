@@ -1,0 +1,141 @@
+<h2>新版路由方案对比</h2>
+<p class="subtitle">先确定路由结构，再设计每个页面的具体布局</p>
+
+<div class="section">
+  <div style="background:#f6ffed;border-radius:8px;padding:12px;margin-bottom:16px;border:1px solid #b7eb8f;">
+    <b>你的偏好确认：</b>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #52c41a;">✅ Steps 流水线监控</span>
+      <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #52c41a;">✅ 文件上传交互(Dragger+FileCard)</span>
+      <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #52c41a;">✅ Tabs 产物查看</span>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>方案 A：2 个路由（极简）</h3>
+      <p>项目列表 + 任务详情（一切都在详情页里）</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>方案 B：3 个路由（推荐）</h3>
+      <p>项目列表 + 任务详情 + 报告独立页</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>方案 C：4 个路由（功能分离）</h3>
+      <p>项目列表 + 任务详情 + 流水线监控 + 报告独立页</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;">
+  <div class="split">
+    <!-- 方案 A -->
+    <div class="mockup">
+      <div class="mockup-header">方案 A：2 路由</div>
+      <div class="mockup-body">
+        <div style="display:flex;gap:12px;margin-bottom:12px;">
+          <div style="flex:1;border:2px solid #1677ff;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">/reviewer/projects</div>
+            <b style="font-size:13px;">项目列表</b>
+            <div style="font-size:11px;color:#888;margin-top:4px;">创建/查看/删除</div>
+          </div>
+          <div style="flex:1;border:2px solid #52c41a;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">/reviewer/tasks/:id</div>
+            <b style="font-size:13px;">任务详情</b>
+            <div style="font-size:11px;color:#888;margin-top:4px;">上传+监控+产物</div>
+          </div>
+        </div>
+        <div style="background:#f6ffed;border-radius:4px;padding:8px;font-size:11px;">
+          ✅ 最少路由，简单直接<br>
+          ✅ 所有操作在一个页面完成<br>
+          ⚠️ 任务详情页功能较重（上传+监控+产物+报告全在一页）
+        </div>
+      </div>
+    </div>
+
+    <!-- 方案 B -->
+    <div class="mockup">
+      <div class="mockup-header">方案 B：3 路由（推荐）</div>
+      <div class="mockup-body">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:80px;border:2px solid #1677ff;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/projects</div>
+            <b style="font-size:12px;">项目列表</b>
+          </div>
+          <div style="flex:1;min-width:80px;border:2px solid #52c41a;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/tasks/:id</div>
+            <b style="font-size:12px;">任务详情</b>
+          </div>
+          <div style="flex:1;min-width:80px;border:2px solid #722ed1;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/reports/:id</div>
+            <b style="font-size:12px;">报告查看</b>
+          </div>
+        </div>
+        <div style="background:#f6ffed;border-radius:4px;padding:8px;font-size:11px;">
+          ✅ 报告内容复杂（七章节+附录A-G），独立页有更好的阅读体验<br>
+          ✅ 任务详情页聚焦"操作"（上传/启动/监控）<br>
+          ✅ 报告页聚焦"阅读"（目录导航+Markdown渲染）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 方案 C 单独一行 -->
+  <div style="margin-top:12px;">
+    <div class="mockup">
+      <div class="mockup-header">方案 C：4 路由（功能分离）</div>
+      <div class="mockup-body">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <div style="flex:1;border:2px solid #1677ff;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/projects</div>
+            <b style="font-size:12px;">项目列表</b>
+          </div>
+          <div style="flex:1;border:2px solid #52c41a;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/tasks/:id</div>
+            <b style="font-size:12px;">任务详情</b>
+          </div>
+          <div style="flex:1;border:2px solid #faad14;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/tasks/:id/monitor</div>
+            <b style="font-size:12px;">流水线监控</b>
+          </div>
+          <div style="flex:1;border:2px solid #722ed1;border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:10px;color:#888;">/reviewer/reports/:id</div>
+            <b style="font-size:12px;">报告查看</b>
+          </div>
+        </div>
+        <div style="background:#fff7e6;border-radius:4px;padding:8px;font-size:11px;">
+          ✅ 每个页面职责单一<br>
+          ⚠️ 流水线运行中需要在任务详情和监控页之间跳转<br>
+          ⚠️ 页面多，交互容易断裂
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:16px;padding:10px;background:#f0f5ff;border-radius:8px;border:1px solid #adc6ff;">
+  <b>💡 任务详情页内部分区（不受路由数影响）：</b>
+  <div style="display:flex;gap:12px;margin-top:8px;font-size:12px;">
+    <div style="flex:1;background:#fff;border-radius:6px;padding:8px;">
+      <div style="color:#1677ff;font-weight:600;margin-bottom:4px;">上传区</div>
+      Dragger + FileCard<br>文件列表 + 启动审查按钮
+    </div>
+    <div style="flex:1;background:#fff;border-radius:6px;padding:8px;">
+      <div style="color:#52c41a;font-weight:600;margin-bottom:4px;">监控区</div>
+      Steps 纵向步骤条<br>4 智能体阶段实时状态
+    </div>
+    <div style="flex:1;background:#fff;border-radius:6px;padding:8px;">
+      <div style="color:#722ed1;font-weight:600;margin-bottom:4px;">产物区</div>
+      Tabs 切换<br>5 种产物按需查看
+    </div>
+  </div>
+</div>

@@ -1,0 +1,368 @@
+<h2>结果页 — 4 个 Tab 完整展示</h2>
+<p class="subtitle">/reviewer/results/:id?token=xxx</p>
+
+<!-- 信息条 -->
+<div style="border:1px solid #d9d9d9;border-radius:8px;padding:10px;margin-bottom:16px;display:grid;grid-template-columns:1.5fr 1fr 1.5fr 0.8fr;gap:8px;font-size:12px;background:#fafafa;">
+  <div><span style="color:#888;">项目</span><br>XX系统采购项目</div>
+  <div><span style="color:#888;">提交邮箱</span><br>user@test.com</div>
+  <div><span style="color:#888;">提交时间</span><br>2026-05-08 14:30</div>
+  <div><span style="color:#888;">状态</span><br><span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:2px;font-size:10px;">已完成</span></div>
+</div>
+
+<!-- ==================== Tab 1：流水线监控 ==================== -->
+<div class="mockup" style="margin-bottom:16px;">
+  <div class="mockup-header">Tab 1：流水线监控</div>
+  <div class="mockup-body" style="padding:16px;">
+    <div style="border:1px solid #d9d9d9;border-radius:8px;padding:16px;">
+      <div style="font-weight:600;margin-bottom:16px;font-size:15px;">四智能体审查流水线</div>
+
+      <!-- Phase 1: DPA Round 1 — 已完成 -->
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✓</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:14px;">Phase 1: DPA Round 1 — 审查基准提取</div>
+          <div style="font-size:12px;color:#888;margin-top:2px;">从招标文件提取 ★号条款 / 资格准入条件(9项) / 评分标准 / 格式与封装要求</div>
+          <div style="margin-top:6px;display:flex;gap:12px;font-size:12px;">
+            <span style="color:#52c41a;">✅ 已完成</span>
+            <span style="color:#888;">耗时 45s</span>
+            <span style="color:#888;">inputTokens: 12,340 · outputTokens: 3,821</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2: DPA Round 2 — 已完成 -->
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✓</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:14px;">Phase 2: DPA Round 2 — 字段护照提取</div>
+          <div style="font-size:12px;color:#888;margin-top:2px;">从投标文件提取 公司基本信息 / 资质证书 / 社保与纳税 / 审计报告 / 人员与授权 / 业绩合同 / 报价信息 / 项目名称一致性</div>
+          <div style="margin-top:6px;display:flex;gap:12px;font-size:12px;">
+            <span style="color:#52c41a;">✅ 已完成</span>
+            <span style="color:#888;">耗时 38s</span>
+            <span style="color:#888;">inputTokens: 18,920 · outputTokens: 4,512</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3: BCA + FCA — 已完成 -->
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✓</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:14px;">Phase 3: BCA + FCA — 并行审查</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+            <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px 8px;font-size:12px;">
+              <div style="font-weight:500;">BCA 业务审查</div>
+              <div style="color:#888;">废标红线(6项) + 中标胜算(3项)</div>
+              <div style="color:#52c41a;margin-top:2px;">✅ 已完成 · 62s</div>
+            </div>
+            <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px 8px;font-size:12px;">
+              <div style="font-weight:500;">FCA 技术取证</div>
+              <div style="color:#888;">隐蔽风险(2项) + 电子文件安检(5项)</div>
+              <div style="color:#52c41a;margin-top:2px;">✅ 已完成 · 58s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4: ORA — 已完成 -->
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✓</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:14px;">Phase 4: ORA — 报告编译</div>
+          <div style="font-size:12px;color:#888;margin-top:2px;">七章节 + 审查签署 + 附录A-G · 含质量评分(≥60通过)</div>
+          <div style="margin-top:6px;display:flex;gap:12px;font-size:12px;">
+            <span style="color:#52c41a;">✅ 已完成</span>
+            <span style="color:#888;">耗时 85s</span>
+            <span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:2px;">报告质量评分: 82/100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;font-size:12px;color:#888;">
+      <span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:2px;font-size:10px;">WebSocket 实时更新</span>
+      <span style="margin-left:8px;">总耗时约 3 分 40 秒</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== Tab 2：审查产物 ==================== -->
+<div class="mockup" style="margin-bottom:16px;">
+  <div class="mockup-header">Tab 2：审查产物（5 个子 Tab）</div>
+  <div class="mockup-body" style="padding:16px;">
+    <!-- 子 Tab 栏 -->
+    <div style="border-bottom:1px solid #f0f0f0;display:flex;margin-bottom:12px;">
+      <div style="padding:6px 14px;font-size:13px;color:#52c41a;border-bottom:2px solid #52c41a;font-weight:500;">审查基准 ✓</div>
+      <div style="padding:6px 14px;font-size:13px;color:#52c41a;">字段护照 ✓</div>
+      <div style="padding:6px 14px;font-size:13px;color:#52c41a;">BCA 结果 ✓</div>
+      <div style="padding:6px 14px;font-size:13px;color:#52c41a;">FCA 结果 ✓</div>
+      <div style="padding:6px 14px;font-size:13px;color:#52c41a;">审查报告 ✓</div>
+    </div>
+
+    <!-- 审查基准内容 -->
+    <div style="border:1px solid #e8e8e8;border-radius:6px;padding:14px;">
+      <h4 style="margin:0 0 10px;font-size:14px;">DPA Round 1 — 审查基准</h4>
+
+      <!-- 表 A -->
+      <div style="margin-bottom:14px;">
+        <div style="font-weight:500;font-size:13px;margin-bottom:6px;">表 A: ★号条款提取</div>
+        <div style="border:1px solid #f0f0f0;border-radius:4px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:0.4fr 2fr 0.8fr 0.8fr 0.8fr;gap:0;font-size:11px;background:#fafafa;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:6px 8px;font-weight:600;">编号</div>
+            <div style="padding:6px 8px;font-weight:600;">原文摘要</div>
+            <div style="padding:6px 8px;font-weight:600;">所在章节</div>
+            <div style="padding:6px 8px;font-weight:600;">接受负偏离</div>
+            <div style="padding:6px 8px;font-weight:600;">支撑材料</div>
+          </div>
+          <div style="display:grid;grid-template-columns:0.4fr 2fr 0.8fr 0.8fr 0.8fr;gap:0;font-size:11px;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:5px 8px;">★1</div>
+            <div style="padding:5px 8px;">系统整体架构需满足高可用设计，核心模块冗余部署</div>
+            <div style="padding:5px 8px;">第四章 4.1</div>
+            <div style="padding:5px 8px;"><span style="color:#ff4d4f;">否</span></div>
+            <div style="padding:5px 8px;">技术方案</div>
+          </div>
+          <div style="display:grid;grid-template-columns:0.4fr 2fr 0.8fr 0.8fr 0.8fr;gap:0;font-size:11px;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:5px 8px;">★2</div>
+            <div style="padding:5px 8px;">项目经理需具备 PMP 认证及 5 年以上同类项目管理经验</div>
+            <div style="padding:5px 8px;">第四章 4.3</div>
+            <div style="padding:5px 8px;"><span style="color:#ff4d4f;">否</span></div>
+            <div style="padding:5px 8px;">人员资质</div>
+          </div>
+          <div style="display:grid;grid-template-columns:0.4fr 2fr 0.8fr 0.8fr 0.8fr;gap:0;font-size:11px;">
+            <div style="padding:5px 8px;">★3</div>
+            <div style="padding:5px 8px;">系统安全等级保护不低于三级</div>
+            <div style="padding:5px 8px;">第五章 5.2</div>
+            <div style="padding:5px 8px;"><span style="color:#ff4d4f;">否</span></div>
+            <div style="padding:5px 8px;">等保证明</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 表 B -->
+      <div style="margin-bottom:14px;">
+        <div style="font-weight:500;font-size:13px;margin-bottom:6px;">表 B: 资格准入条件提取（9 项）</div>
+        <div style="border:1px solid #f0f0f0;border-radius:4px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2fr 1fr 0.8fr;gap:0;font-size:11px;background:#fafafa;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:6px 8px;font-weight:600;">条件摘要</div>
+            <div style="padding:6px 8px;font-weight:600;">所在章节</div>
+            <div style="padding:6px 8px;font-weight:600;">废标项</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 0.8fr;gap:0;font-size:11px;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:5px 8px;">军队采购供应商库注册</div>
+            <div style="padding:5px 8px;">第三章 3.1</div>
+            <div style="padding:5px 8px;"><span style="color:#ff4d4f;">是</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 0.8fr;gap:0;font-size:11px;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:5px 8px;">信用记录（三项查询无不良）</div>
+            <div style="padding:5px 8px;">第三章 3.1</div>
+            <div style="padding:5px 8px;"><span style="color:#ff4d4f;">是</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 0.8fr;gap:0;font-size:11px;">
+            <div style="padding:5px 8px;">保密资质（等级/有效期/单位名称一致性）</div>
+            <div style="padding:5px 8px;">第三章 3.2</div>
+            <div style="padding:5px 8px;"><span style="color:#ff4d4f;">是</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">共 9 项资格条件（仅展示前 3 项）</div>
+      </div>
+
+      <!-- 表 C D 折叠 -->
+      <div style="color:#888;font-size:12px;line-height:1.8;">
+        <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px 10px;margin-bottom:4px;">表 C: 评分标准提取 — 共 15 项评分项（商务 5 / 技术 8 / 价格 2） ▼</div>
+        <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px 10px;">表 D: 格式与封装要求提取 — 共 8 项格式要求 ▼</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== Tab 3：最终报告 ==================== -->
+<div class="mockup" style="margin-bottom:16px;">
+  <div class="mockup-header">Tab 3：最终报告</div>
+  <div class="mockup-body" style="padding:0;">
+    <div style="display:flex;min-height:400px;">
+      <!-- 左侧目录 -->
+      <div style="width:180px;border-right:1px solid #f0f0f0;padding:16px 12px;font-size:11px;flex-shrink:0;position:sticky;top:0;overflow-y:auto;">
+        <b style="font-size:13px;margin-bottom:10px;display:block;">报告目录</b>
+        <div style="color:#1677ff;font-weight:500;margin-bottom:4px;padding:4px 6px;background:#e6f4ff;border-radius:3px;">一、项目概况与审查摘要</div>
+        <div style="color:#888;margin-bottom:2px;padding-left:8px;font-size:10px;">1.1 项目基本信息</div>
+        <div style="color:#888;margin-bottom:2px;padding-left:8px;font-size:10px;">1.2 审查结论总览</div>
+        <div style="color:#888;margin-bottom:2px;padding-left:8px;font-size:10px;">1.3 评审依据</div>
+        <div style="color:#888;margin-bottom:4px;">二、废标红线审查</div>
+        <div style="color:#888;margin-bottom:4px;">三、中标胜算评估</div>
+        <div style="color:#888;margin-bottom:4px;">四、隐蔽风险探测</div>
+        <div style="color:#888;margin-bottom:4px;">五、电子文件安检</div>
+        <div style="color:#888;margin-bottom:4px;">六、审查发现与整改建议</div>
+        <div style="color:#888;margin-bottom:4px;">七、线下人工复核事项</div>
+        <div style="color:#888;margin-bottom:4px;">审查签署</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 A: 资格准入明细</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 B: 反串通扫描</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 C: 技术合规检查</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 D: 电子签章验证</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 E: 暗标还原测试</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 F: 勾稽关系核验</div>
+        <div style="color:#bbb;margin-bottom:4px;">附录 G: 证据文件索引</div>
+      </div>
+
+      <!-- 右侧内容 -->
+      <div style="flex:1;padding:20px;max-width:800px;overflow-y:auto;">
+        <h2 style="margin:0 0 16px;font-size:18px;">标书合规审查报告</h2>
+
+        <!-- 四维度总览 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div style="border:2px solid #f0f0f0;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">废标红线</div>
+            <div style="font-size:18px;font-weight:700;color:#52c41a;">合格</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">无否决项</div>
+          </div>
+          <div style="border:2px solid #f0f0f0;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">中标胜算</div>
+            <div style="font-size:18px;font-weight:700;color:#1677ff;">良</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">预估得分率 75%</div>
+          </div>
+          <div style="border:2px solid #f0f0f0;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">隐蔽风险</div>
+            <div style="font-size:18px;font-weight:700;color:#52c41a;">严谨</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">脱敏彻底</div>
+          </div>
+          <div style="border:2px solid #f0f0f0;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">电子文件安检</div>
+            <div style="font-size:18px;font-weight:700;color:#faad14;">存在风险</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">2 项不合规</div>
+          </div>
+        </div>
+
+        <!-- 投标建议 -->
+        <div style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:12px;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">💡</span>
+          <div>
+            <b style="color:#d48806;">投标建议：有条件递交</b>
+            <div style="font-size:12px;color:#888;margin-top:2px;">存在可修复的否决项或高风险项，须列出具体条件并在投标截止前完成整改</div>
+          </div>
+        </div>
+
+        <!-- 报告正文 -->
+        <div style="font-size:13px;line-height:1.8;color:#333;">
+          <h3 style="font-size:15px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">一、项目概况与审查摘要</h3>
+
+          <div style="font-weight:500;margin-bottom:8px;">1.1 项目基本信息</div>
+          <div style="border:1px solid #f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;font-size:12px;">
+              <div style="padding:6px 10px;border-bottom:1px solid #f0f0f0;border-right:1px solid #f0f0f0;background:#fafafa;"><span style="color:#888;">项目名称</span></div>
+              <div style="padding:6px 10px;border-bottom:1px solid #f0f0f0;">XX系统采购项目</div>
+              <div style="padding:6px 10px;border-bottom:1px solid #f0f0f0;border-right:1px solid #f0f0f0;background:#fafafa;"><span style="color:#888;">项目编号</span></div>
+              <div style="padding:6px 10px;border-bottom:1px solid #f0f0f0;">2026-QY53ZGGK0228</div>
+              <div style="padding:6px 10px;border-bottom:1px solid #f0f0f0;border-right:1px solid #f0f0f0;background:#fafafa;"><span style="color:#888;">投标人</span></div>
+              <div style="padding:6px 10px;border-bottom:1px solid #f0f0f0;">北京方略有数科技有限公司</div>
+              <div style="padding:6px 10px;border-right:1px solid #f0f0f0;background:#fafafa;"><span style="color:#888;">审查日期</span></div>
+              <div style="padding:6px 10px;">2026-05-08</div>
+            </div>
+          </div>
+
+          <div style="font-weight:500;margin-bottom:8px;">1.2 审查结论总览</div>
+          <div style="border:1px solid #f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 0.8fr;gap:0;font-size:12px;background:#fafafa;border-bottom:1px solid #f0f0f0;">
+              <div style="padding:6px 8px;font-weight:600;">维度</div>
+              <div style="padding:6px 8px;font-weight:600;">状态</div>
+              <div style="padding:6px 8px;font-weight:600;">核心结论</div>
+              <div style="padding:6px 8px;font-weight:600;">风险等级</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 0.8fr;gap:0;font-size:12px;border-bottom:1px solid #f0f0f0;">
+              <div style="padding:5px 8px;">废标红线</div>
+              <div style="padding:5px 8px;"><span style="color:#52c41a;">合格</span></div>
+              <div style="padding:5px 8px;">无否决项，9项资格条件全部通过</div>
+              <div style="padding:5px 8px;"><span style="background:#f6ffed;color:#52c41a;padding:1px 4px;border-radius:2px;">低</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 0.8fr;gap:0;font-size:12px;border-bottom:1px solid #f0f0f0;">
+              <div style="padding:5px 8px;">中标胜算</div>
+              <div style="padding:5px 8px;"><span style="color:#1677ff;">良</span></div>
+              <div style="padding:5px 8px;">预估得分率 75%，技术方案有提升空间</div>
+              <div style="padding:5px 8px;"><span style="background:#fff7e6;color:#faad14;padding:1px 4px;border-radius:2px;">中</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 0.8fr;gap:0;font-size:12px;border-bottom:1px solid #f0f0f0;">
+              <div style="padding:5px 8px;">隐蔽风险</div>
+              <div style="padding:5px 8px;"><span style="color:#52c41a;">严谨</span></div>
+              <div style="padding:5px 8px;">脱敏彻底，数据勾稽关系一致</div>
+              <div style="padding:5px 8px;"><span style="background:#f6ffed;color:#52c41a;padding:1px 4px;border-radius:2px;">低</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 0.8fr;gap:0;font-size:12px;">
+              <div style="padding:5px 8px;">电子文件安检</div>
+              <div style="padding:5px 8px;"><span style="color:#faad14;">存在风险</span></div>
+              <div style="padding:5px 8px;">2份扫描件分辨率不足，1份文档属性含作者信息</div>
+              <div style="padding:5px 8px;"><span style="background:#fff7e6;color:#faad14;padding:1px 4px;border-radius:2px;">中</span></div>
+            </div>
+          </div>
+
+          <div style="font-weight:500;margin-bottom:8px;">审查摘要</div>
+          <p style="color:#555;margin:0 0 8px;font-size:12px;line-height:1.8;">
+            本报告针对"XX系统采购项目"（编号：2026-QY53ZGGK0228）的投标文件进行合规性审查。投标人为北京方略有数科技有限公司，报价为人民币壹佰贰拾捌万元整（¥1,280,000.00）。经四维度审查，废标红线维度全部合格，无否决项；中标胜算评估为"良"，预估得分率75%，主要失分点集中在技术方案的创新性论述；隐蔽风险探测结果为"严谨"，暗标脱敏彻底；电子文件安检发现2项可修复问题...
+          </p>
+
+          <div style="color:#ccc;font-size:12px;margin-top:16px;">
+            — 二、废标红线审查（略） —<br>
+            — 三、中标胜算评估（略） —<br>
+            — 四、隐蔽风险探测（略） —<br>
+            — 五、电子文件安检（略） —<br>
+            — 六、审查发现与整改建议（略） —<br>
+            — 七、线下人工复核事项（略） —<br>
+            — 审查签署（略） —<br>
+            — 附录 A-G（略） —
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== Tab 4：原始文件 ==================== -->
+<div class="mockup" style="margin-bottom:16px;">
+  <div class="mockup-header">Tab 4：原始文件</div>
+  <div class="mockup-body" style="padding:16px;">
+    <div style="font-size:13px;color:#888;margin-bottom:12px;">用户上传的所有文件（共 4 份）</div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="border:1px solid #e8e8e8;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:#ff4d4f;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">PDF</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:13px;">招标文件-XX系统采购项目.pdf</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">1.2 MB · 上传于 14:30</div>
+        </div>
+        <span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500;">招标文件</span>
+        <span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:3px;font-size:11px;">82,340 字</span>
+      </div>
+
+      <div style="border:1px solid #e8e8e8;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:#ff4d4f;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">PDF</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:13px;">投标函.pdf</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">256 KB · 上传于 14:31</div>
+        </div>
+        <span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500;">投标文件</span>
+        <span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:3px;font-size:11px;">3,200 字</span>
+      </div>
+
+      <div style="border:1px solid #e8e8e8;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:#1677ff;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">DOC</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:13px;">报价表.docx</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">180 KB · 上传于 14:31</div>
+        </div>
+        <span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500;">投标文件</span>
+        <span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:3px;font-size:11px;">5,100 字</span>
+      </div>
+
+      <div style="border:1px solid #e8e8e8;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:#ff4d4f;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">PDF</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:13px;">技术方案.pdf</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">4.5 MB · 上传于 14:32</div>
+        </div>
+        <span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500;">投标文件</span>
+        <span style="background:#fffbe6;color:#faad14;padding:2px 8px;border-radius:3px;font-size:11px;">扫描件</span>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;font-size:11px;color:#888;">
+      共 1 份招标文件 + 3 份投标文件 · 文本已全部提取完成
+    </div>
+  </div>
+</div>

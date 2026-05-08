@@ -1,0 +1,321 @@
+<h2>旧版完整页面概览（含管理后台）</h2>
+<p class="subtitle">compliance_v2 共 7 个页面：前台 4 个 + 后台 3 个</p>
+
+<div class="section">
+  <h3>页面流程图</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;">
+    <div style="background:#e6f4ff;border:2px solid #1677ff;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;">Landing</div>
+    <div style="color:#999;">→</div>
+    <div style="background:#f6ffed;border:2px solid #52c41a;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;">上传与提交</div>
+    <div style="color:#999;">→</div>
+    <div style="background:#fff7e6;border:2px solid #faad14;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;">已提交(监控)</div>
+    <div style="color:#999;">→</div>
+    <div style="background:#f9f0ff;border:2px solid #722ed1;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;">结果查看</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+    <div style="background:#fff1f0;border:2px solid #ff4d4f;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;">AdminShell(后台壳)</div>
+    <div style="color:#999;">→</div>
+    <div style="display:flex;gap:8px;">
+      <div style="background:#fff1f0;border:1px solid #ff4d4f;border-radius:6px;padding:6px 10px;font-size:12px;">批次列表</div>
+      <div style="background:#fff1f0;border:1px solid #ff4d4f;border-radius:6px;padding:6px 10px;font-size:12px;">批次详情</div>
+      <div style="background:#fff1f0;border:1px solid #ff4d4f;border-radius:6px;padding:6px 10px;font-size:12px;">模板管理</div>
+    </div>
+  </div>
+</div>
+
+<!-- 前台4页 -->
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">前台 ① Landing 营销首页</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:16px auto;text-align:center;">
+        <h2 style="font-size:22px;margin:12px 0 6px;">上传标书，10 分钟拿到合规检查报告</h2>
+        <p style="color:#888;font-size:13px;margin-bottom:12px;">自动识别招标/应标文件，AI 逐项比对</p>
+        <button class="mock-button" style="margin-bottom:16px;">立即试用 →</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="placeholder" style="padding:12px;text-align:center;font-size:12px;">
+            <div style="font-size:18px;">⚡</div><b>自动识别</b>
+          </div>
+          <div class="placeholder" style="padding:12px;text-align:center;font-size:12px;">
+            <div style="font-size:18px;">🤖</div><b>AI 逐项</b>
+          </div>
+          <div class="placeholder" style="padding:12px;text-align:center;font-size:12px;">
+            <div style="font-size:18px;">📧</div><b>邮件交付</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">前台 ② 上传与提交</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:12px auto;">
+        <h3 style="margin:8px 0 4px;font-size:15px;">上传标书</h3>
+        <!-- Card ① -->
+        <div style="border:1px solid #d9d9d9;border-radius:6px;padding:10px;margin-bottom:8px;">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px;">① 上传与分类</div>
+          <div style="border:2px dashed #d9d9d9;border-radius:4px;padding:16px;text-align:center;color:#999;font-size:12px;">
+            📂 点击或拖拽文件上传
+          </div>
+          <div style="margin-top:6px;">
+            <div style="border:1px solid #e8e8e8;border-radius:3px;padding:4px 8px;display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:4px;">
+              <span style="color:#1677ff;">📄</span> 招标文件.pdf
+              <span style="background:#f6ffed;color:#52c41a;padding:0 4px;border-radius:2px;font-size:10px;margin-left:auto;">招标</span>
+            </div>
+            <div style="border:1px solid #e8e8e8;border-radius:3px;padding:4px 8px;display:flex;align-items:center;gap:6px;font-size:12px;">
+              <span style="color:#1677ff;">📄</span> 投标书.docx
+              <span style="background:#e6f4ff;color:#1677ff;padding:0 4px;border-radius:2px;font-size:10px;margin-left:auto;">应标</span>
+            </div>
+          </div>
+        </div>
+        <!-- Card ② -->
+        <div style="border:1px solid #d9d9d9;border-radius:6px;padding:10px;margin-bottom:8px;opacity:0.35;filter:grayscale(1);">
+          <div style="font-weight:600;font-size:13px;">② 联系信息（已跳过）</div>
+        </div>
+        <!-- Card ③ -->
+        <div style="border:1px solid #d9d9d9;border-radius:6px;padding:10px;">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px;">③ 提交</div>
+          <button class="mock-button" style="width:100%;font-size:12px;">开始合规检查</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="split" style="margin-top:12px;">
+  <div class="mockup">
+    <div class="mockup-header">前台 ③ 流水线监控</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:12px auto;">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="color:#52c41a;font-size:24px;">✓</div>
+          <h3 style="margin:2px 0;font-size:15px;">已收到请求</h3>
+        </div>
+        <div style="border:1px solid #d9d9d9;border-radius:6px;padding:10px;margin-bottom:10px;">
+          <div style="font-weight:600;font-size:13px;margin-bottom:10px;">处理阶段</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <div style="width:18px;height:18px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;">✓</div>
+              <span style="font-size:12px;">关键信息抽取 — 已完成</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <div style="width:18px;height:18px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;">✓</div>
+              <span style="font-size:12px;">整理检查项 — 已完成</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <div style="width:18px;height:18px;border-radius:50%;background:#1677ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;">⟳</div>
+              <span style="font-size:12px;color:#1677ff;font-weight:500;">逐项合规检查 — 5/12</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <div style="width:18px;height:18px;border-radius:50%;border:1.5px solid #d9d9d9;color:#bbb;display:flex;align-items:center;justify-content:center;font-size:9px;">4</div>
+              <span style="font-size:12px;color:#bbb;">生成审计报告</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <div style="width:18px;height:18px;border-radius:50%;border:1.5px solid #d9d9d9;color:#bbb;display:flex;align-items:center;justify-content:center;font-size:9px;">5</div>
+              <span style="font-size:12px;color:#bbb;">发送邮件</span>
+            </div>
+          </div>
+        </div>
+        <span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:2px;font-size:10px;">实时连接中</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">前台 ④ 结果查看</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:12px auto;">
+        <div style="border:1px solid #d9d9d9;border-radius:6px;padding:8px;margin-bottom:8px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;font-size:11px;">
+          <div><span style="color:#888;">项目</span><br>XX系统</div>
+          <div><span style="color:#888;">公司</span><br>方略有数</div>
+          <div><span style="color:#888;">邮箱</span><br>test@test.com</div>
+          <div><span style="color:#888;">状态</span><br><span style="background:#f6ffed;color:#52c41a;padding:0 4px;border-radius:2px;font-size:10px;">完成</span></div>
+        </div>
+        <div style="border-bottom:2px solid #1677ff;display:flex;margin-bottom:8px;">
+          <div style="padding:6px 12px;background:#1677ff;color:#fff;border-radius:3px 3px 0 0;font-size:12px;">报告</div>
+          <div style="padding:6px 12px;font-size:12px;color:#888;">检查项(12)</div>
+          <div style="padding:6px 12px;font-size:12px;color:#888;">原始文件(2)</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+          <button class="mock-button" style="font-size:11px;padding:3px 8px;">⬇ 下载DOCX</button>
+        </div>
+        <div style="border:1px solid #e8e8e8;border-radius:4px;padding:8px;font-size:12px;color:#888;line-height:1.6;">
+          <b>合规审查报告</b><br>一、项目概况与审查摘要...<br><span style="color:#ccc;">二、废标红线审查...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 后台3页 -->
+<div style="margin-top:16px;padding:10px;background:#fff1f0;border-radius:8px;border:1px solid #ffccc7;">
+  <h3 style="margin:0 0 12px;color:#cf1322;">🔧 管理后台（Admin）</h3>
+  <div style="margin-bottom:12px;font-size:13px;color:#666;">后台入口通过 Token 认证，独立侧栏导航，与前台完全隔离。</div>
+
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">后台 ① AdminShell 布局</div>
+      <div class="mockup-body" style="min-height:320px;">
+        <div style="display:flex;height:100%;">
+          <!-- 左侧深色侧栏 -->
+          <div style="width:140px;background:#001529;color:#fff;flex-shrink:0;font-size:11px;">
+            <div style="padding:10px;font-weight:600;border-bottom:1px solid #0b2038;font-size:12px;">🔒 V2 后台</div>
+            <div style="padding:8px 10px;background:#1677ff;color:#fff;">📋 合规检查批次</div>
+            <div style="padding:8px 10px;color:rgba(255,255,255,0.65);">📚 知识库</div>
+            <div style="padding:8px 10px;color:rgba(255,255,255,0.65);">📝 模板管理</div>
+          </div>
+          <!-- 右侧内容 -->
+          <div style="flex:1;display:flex;flex-direction:column;">
+            <div style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;color:#888;display:flex;justify-content:space-between;">
+              <span>← 返回前台</span>
+              <span>登出</span>
+            </div>
+            <div style="flex:1;padding:12px;background:#f5f5f5;font-size:11px;">
+              <span style="color:#888;">内容区域（Outlet）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">后台 ② 批次列表 AdminBatches</div>
+      <div class="mockup-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <h3 style="margin:0;font-size:14px;">合规检查批次</h3>
+          <div style="display:flex;gap:6px;">
+            <div style="border:1px solid #d9d9d9;border-radius:3px;padding:2px 8px;font-size:11px;color:#888;">全部状态 ▼</div>
+            <button class="mock-button" style="font-size:10px;padding:2px 8px;">🔄 刷新</button>
+          </div>
+        </div>
+        <!-- 表格 -->
+        <div style="border:1px solid #f0f0f0;border-radius:4px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1.2fr 0.8fr;gap:0;font-size:11px;background:#fafafa;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:6px 8px;font-weight:600;">批次 ID</div>
+            <div style="padding:6px 8px;font-weight:600;">状态</div>
+            <div style="padding:6px 8px;font-weight:600;">创建时间</div>
+            <div style="padding:6px 8px;font-weight:600;">更新时间</div>
+            <div style="padding:6px 8px;font-weight:600;">操作</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1.2fr 0.8fr;gap:0;font-size:11px;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:5px 8px;font-family:monospace;">abc-123</div>
+            <div style="padding:5px 8px;"><span style="background:#f6ffed;color:#52c41a;padding:0 4px;border-radius:2px;font-size:10px;">done</span></div>
+            <div style="padding:5px 8px;color:#888;">2026-05-01 10:00</div>
+            <div style="padding:5px 8px;color:#888;">2026-05-01 10:25</div>
+            <div style="padding:5px 8px;color:#1677ff;cursor:pointer;">详情</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1.2fr 0.8fr;gap:0;font-size:11px;border-bottom:1px solid #f0f0f0;">
+            <div style="padding:5px 8px;font-family:monospace;">def-456</div>
+            <div style="padding:5px 8px;"><span style="background:#e6f4ff;color:#1677ff;padding:0 4px;border-radius:2px;font-size:10px;">checking</span></div>
+            <div style="padding:5px 8px;color:#888;">2026-05-02 14:00</div>
+            <div style="padding:5px 8px;color:#888;">2026-05-02 14:15</div>
+            <div style="padding:5px 8px;color:#1677ff;cursor:pointer;">详情</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1.2fr 0.8fr;gap:0;font-size:11px;">
+            <div style="padding:5px 8px;font-family:monospace;">ghi-789</div>
+            <div style="padding:5px 8px;"><span style="background:#fff1f0;color:#ff4d4f;padding:0 4px;border-radius:2px;font-size:10px;">failed</span></div>
+            <div style="padding:5px 8px;color:#888;">2026-05-03 09:00</div>
+            <div style="padding:5px 8px;color:#888;">2026-05-03 09:05</div>
+            <div style="padding:5px 8px;color:#1677ff;cursor:pointer;">详情</div>
+          </div>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:#888;text-align:right;">分页: 1 2 3 ...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批次详情 -->
+  <div style="margin-top:12px;">
+    <div class="mockup">
+      <div class="mockup-header">后台 ③ 批次详情 AdminBatchDetail（核心管理页）</div>
+      <div class="mockup-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#1677ff;font-size:12px;">← 返回列表</span>
+            <h3 style="margin:0;font-size:14px;">批次详情</h3>
+          </div>
+          <button class="mock-button" style="font-size:10px;padding:2px 8px;">🔄 刷新</button>
+        </div>
+
+        <!-- Tabs -->
+        <div style="border-bottom:2px solid #1677ff;display:flex;margin-bottom:10px;">
+          <div style="padding:5px 12px;font-size:12px;color:#888;">概览</div>
+          <div style="padding:5px 12px;font-size:12px;color:#888;">文件 (3)</div>
+          <div style="padding:5px 12px;background:#1677ff;color:#fff;border-radius:3px 3px 0 0;font-size:12px;">流水线进度</div>
+          <div style="padding:5px 12px;font-size:12px;color:#888;">最终报告</div>
+        </div>
+
+        <!-- 流水线进度内容 -->
+        <div style="border:1px solid #d9d9d9;border-radius:6px;padding:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <b style="font-size:13px;">合规检查流水线</b>
+            <span style="font-size:11px;color:#888;">点击阶段查看详情</span>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="text-align:center;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;">✓</div>
+              <div style="font-size:10px;margin-top:4px;">抽取关键信息</div>
+            </div>
+            <div style="flex:1;height:2px;background:#52c41a;margin-top:11px;"></div>
+            <div style="text-align:center;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;">✓</div>
+              <div style="font-size:10px;margin-top:4px;">整理检查项</div>
+            </div>
+            <div style="flex:1;height:2px;background:#52c41a;margin-top:11px;"></div>
+            <div style="text-align:center;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#1677ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;">3</div>
+              <div style="font-size:10px;margin-top:4px;color:#1677ff;font-weight:500;">合规对照</div>
+            </div>
+            <div style="flex:1;height:2px;background:#d9d9d9;margin-top:11px;"></div>
+            <div style="text-align:center;">
+              <div style="width:24px;height:24px;border-radius:50%;border:2px solid #d9d9d9;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;">4</div>
+              <div style="font-size:10px;margin-top:4px;color:#bbb;">生成报告</div>
+            </div>
+            <div style="flex:1;height:2px;background:#d9d9d9;margin-top:11px;"></div>
+            <div style="text-align:center;">
+              <div style="width:24px;height:24px;border-radius:50%;border:2px solid #d9d9d9;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;">5</div>
+              <div style="font-size:10px;margin-top:4px;color:#bbb;">导出DOCX</div>
+            </div>
+            <div style="flex:1;height:2px;background:#d9d9d9;margin-top:11px;"></div>
+            <div style="text-align:center;">
+              <div style="width:24px;height:24px;border-radius:50%;border:2px solid #d9d9d9;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;">6</div>
+              <div style="font-size:10px;margin-top:4px;color:#bbb;">SMTP发送</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888;">💡 点击阶段可弹出 Drawer 查看详细数据</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:16px;padding:10px;background:#f0f5ff;border-radius:8px;border:1px solid #adc6ff;">
+  <h3 style="margin:0 0 8px;color:#1677ff;">📝 新旧版核心差异</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;">
+    <div style="background:#fff;border-radius:6px;padding:10px;">
+      <b>旧版 (SaaS)</b>
+      <ul style="margin:6px 0 0;padding-left:16px;color:#666;line-height:1.8;">
+        <li>营销首页 + 邮箱验证</li>
+        <li>3 阶段流水线（抽取→检查→报告）</li>
+        <li>上传后自动启动</li>
+        <li>结果通过邮件推送</li>
+        <li>后台管理：批次列表+详情+模板</li>
+      </ul>
+    </div>
+    <div style="background:#fff;border-radius:6px;padding:10px;">
+      <b>新版 (内部工具)</b>
+      <ul style="margin:6px 0 0;padding-left:16px;color:#666;line-height:1.8;">
+        <li>无需营销页，直接操作</li>
+        <li>4 智能体流水线（DPA→BCA+FCA→ORA）</li>
+        <li>项目管理 + 任务管理</li>
+        <li>5 种产物实时查看</li>
+        <li>需要管理页吗？由你决定</li>
+      </ul>
+    </div>
+  </div>
+</div>

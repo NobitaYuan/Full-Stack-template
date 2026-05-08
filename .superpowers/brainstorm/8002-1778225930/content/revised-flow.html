@@ -1,0 +1,249 @@
+<h2>修订后的页面设计方案</h2>
+<p class="subtitle">入口 = 文件上传，无需登录/创建项目</p>
+
+<div style="background:#fff7e6;border-radius:8px;padding:12px;margin-bottom:16px;border:1px solid #ffe58f;">
+  <b>📌 用户确认：</b>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+    <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #faad14;">❌ 不需要登录</span>
+    <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #faad14;">❌ 不需要创建项目</span>
+    <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #52c41a;">✅ 入口是文件上传</span>
+    <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #52c41a;">✅ 提交联系方式(邮箱/手机+验证码)</span>
+    <span style="background:#fff;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid #52c41a;">✅ Token 链接查看结果</span>
+  </div>
+</div>
+
+<!-- 新的用户流程 -->
+<div style="margin-bottom:16px;">
+  <h3>用户流程</h3>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+    <div style="background:#e6f4ff;border:2px solid #1677ff;border-radius:8px;padding:8px 12px;font-weight:600;font-size:12px;">① 上传文件</div>
+    <div style="color:#999;">→</div>
+    <div style="background:#f6ffed;border:2px solid #52c41a;border-radius:8px;padding:8px 12px;font-weight:600;font-size:12px;">② 联系方式+验证</div>
+    <div style="color:#999;">→</div>
+    <div style="background:#fff7e6;border:2px solid #faad14;border-radius:8px;padding:8px 12px;font-weight:600;font-size:12px;">③ 确认提交</div>
+    <div style="color:#999;">→</div>
+    <div style="background:#f9f0ff;border:2px solid #722ed1;border-radius:8px;padding:8px 12px;font-weight:600;font-size:12px;">④ 监控+查看结果</div>
+  </div>
+  <div style="font-size:12px;color:#888;">后端自动创建 project + task，用户无感知</div>
+</div>
+
+<!-- 路由 -->
+<h3>路由结构（2 个路由 + Token 机制）</h3>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+  <div style="border:2px solid #1677ff;border-radius:8px;padding:10px 14px;flex:1;min-width:200px;">
+    <div style="font-size:11px;color:#888;">/reviewer/new</div>
+    <b style="font-size:14px;">上传与提交（入口）</b>
+    <div style="font-size:11px;color:#888;margin-top:4px;">🔒 保留旧版布局</div>
+  </div>
+  <div style="border:2px solid #722ed1;border-radius:8px;padding:10px 14px;flex:1;min-width:200px;">
+    <div style="font-size:11px;color:#888;">/reviewer/results/:id?token=xxx</div>
+    <b style="font-size:14px;">结果页（Token 保护）</b>
+    <div style="font-size:11px;color:#888;margin-top:4px;">🆕 监控+产物+报告</div>
+  </div>
+</div>
+
+<!-- 页面 1：上传与提交（保留旧版布局） -->
+<div class="mockup" style="margin-bottom:16px;">
+  <div class="mockup-header">页面 1：上传与提交 /reviewer/new（🔒 保留旧版三步 Card 布局）</div>
+  <div class="mockup-body">
+    <div class="mock-nav">🔒 标书合规审查</div>
+    <div style="max-width:800px;margin:12px auto;">
+      <h2 style="margin:0 0 4px;font-size:18px;">上传标书，AI 合规审查</h2>
+      <p style="color:#888;font-size:13px;margin:0 0 16px;">支持 PDF / DOCX，系统自动提取文本并启动四智能体审查流水线。</p>
+
+      <!-- Card ① 上传 -->
+      <div style="border:1px solid #d9d9d9;border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-weight:600;margin-bottom:10px;font-size:14px;">① 上传文件</div>
+
+        <!-- 单个上传区 -->
+        <div style="border:2px dashed #d9d9d9;border-radius:4px;padding:16px;text-align:center;color:#999;font-size:12px;">
+          📂 点击或拖拽文件到此处上传<br><span style="font-size:11px;">系统会自动识别招标/投标文件，招标文件限 1 份 · 支持 .pdf / .docx</span>
+        </div>
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+            <div style="border:1px solid #e8e8e8;border-radius:4px;padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span style="color:#1677ff;">📝</span>
+              <span style="font-weight:500;flex:1;">投标函.pdf</span>
+              <span style="font-size:11px;color:#888;">3,200 字</span>
+              <span style="background:#e6f4ff;color:#1677ff;padding:1px 6px;border-radius:2px;font-size:10px;">投标文件</span>
+              <span style="color:#ff4d4f;cursor:pointer;font-size:11px;">🗑</span>
+            </div>
+            <div style="border:1px solid #e8e8e8;border-radius:4px;padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span style="color:#1677ff;">📝</span>
+              <span style="font-weight:500;flex:1;">报价表.docx</span>
+              <span style="font-size:11px;color:#888;">5,100 字</span>
+              <span style="background:#e6f4ff;color:#1677ff;padding:1px 6px;border-radius:2px;font-size:10px;">投标文件</span>
+              <span style="color:#ff4d4f;cursor:pointer;font-size:11px;">🗑</span>
+            </div>
+          </div>
+          <div style="margin-top:4px;font-size:11px;color:#888;">共 1 份招标 + 2 份投标 · 全部解析完成</div>
+        </div>
+      </div>
+
+      <!-- Card ② 联系方式 -->
+      <div style="border:1px solid #d9d9d9;border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-weight:600;margin-bottom:10px;font-size:14px;">② 联系方式</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <div style="background:#1677ff;color:#fff;padding:4px 12px;border-radius:3px;font-size:12px;">📧 邮箱验证</div>
+          <div style="border:1px solid #d9d9d9;padding:4px 12px;border-radius:3px;font-size:12px;color:#888;">📱 手机验证</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <input class="mock-input" placeholder="您的姓名" style="flex:1;min-width:120px;">
+          <input class="mock-input" placeholder="邮箱地址" style="flex:1;min-width:180px;">
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="mock-input" placeholder="6 位验证码" style="width:140px;">
+          <button class="mock-button" style="font-size:11px;padding:4px 12px;">发送验证码</button>
+          <button class="mock-button" style="font-size:11px;padding:4px 12px;">校验</button>
+        </div>
+      </div>
+
+      <!-- Card ③ 提交 -->
+      <div style="border:1px solid #d9d9d9;border-radius:8px;padding:14px;">
+        <div style="font-weight:600;margin-bottom:8px;font-size:14px;">③ 提交审查</div>
+        <div style="background:#e6f4ff;border-radius:4px;padding:8px;font-size:12px;margin-bottom:10px;">
+          ℹ️ 提交后启动四智能体审查流水线（DPA → BCA+FCA → ORA），预计 10-30 分钟完成。结果将通过邮件推送链接。
+        </div>
+        <button class="mock-button" style="width:100%;padding:8px;font-size:14px;">▶ 启动合规审查</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面 2：结果页 -->
+<div class="mockup" style="margin-bottom:16px;">
+  <div class="mockup-header">页面 2：结果页 /reviewer/results/:id?token=xxx（🆕 全新设计）</div>
+  <div class="mockup-body">
+    <div class="mock-nav">🔒 标书合规审查</div>
+    <div style="max-width:1000px;margin:12px auto;">
+      <!-- Token 失效态 -->
+      <div style="border:1px solid #ffccc7;border-radius:8px;padding:16px;text-align:center;margin-bottom:16px;background:#fff1f0;">
+        <div style="font-size:20px;margin-bottom:4px;">⚠️</div>
+        <b style="font-size:14px;">链接无效或已过期</b>
+        <div style="font-size:12px;color:#888;margin-top:4px;">请检查邮件中的最新链接</div>
+      </div>
+
+      <div style="font-size:12px;color:#888;margin-bottom:12px;">— 以上为 Token 失效态，以下是正常态 —</div>
+
+      <!-- 信息条 -->
+      <div style="border:1px solid #d9d9d9;border-radius:8px;padding:10px;margin-bottom:12px;display:grid;grid-template-columns:1.5fr 1fr 1.5fr 0.8fr;gap:8px;font-size:12px;">
+        <div><span style="color:#888;">项目</span><br>XX系统采购项目</div>
+        <div><span style="color:#888;">提交邮箱</span><br>user@test.com</div>
+        <div><span style="color:#888;">提交时间</span><br>2026-05-08 14:30</div>
+        <div><span style="color:#888;">状态</span><br><span style="background:#e6f4ff;color:#1677ff;padding:1px 6px;border-radius:2px;font-size:10px;">审查中</span></div>
+      </div>
+
+      <!-- 四个 Tab -->
+      <div style="border-bottom:2px solid #1677ff;display:flex;margin-bottom:12px;">
+        <div style="padding:6px 12px;font-size:12px;color:#888;">流水线监控</div>
+        <div style="padding:6px 12px;background:#1677ff;color:#fff;border-radius:3px 3px 0 0;font-size:12px;">审查产物</div>
+        <div style="padding:6px 12px;font-size:12px;color:#888;">最终报告</div>
+        <div style="padding:6px 12px;font-size:12px;color:#888;">原始文件</div>
+      </div>
+
+      <!-- 审查产物 Tab 内容 -->
+      <div>
+        <div style="border-bottom:1px solid #f0f0f0;display:flex;margin-bottom:10px;">
+          <div style="padding:5px 10px;font-size:12px;color:#52c41a;border-bottom:2px solid #52c41a;">审查基准 ✓</div>
+          <div style="padding:5px 10px;font-size:12px;color:#52c41a;">字段护照 ✓</div>
+          <div style="padding:5px 10px;font-size:12px;color:#bbb;cursor:not-allowed;">BCA 结果</div>
+          <div style="padding:5px 10px;font-size:12px;color:#bbb;cursor:not-allowed;">FCA 结果</div>
+          <div style="padding:5px 10px;font-size:12px;color:#bbb;cursor:not-allowed;">审查报告</div>
+        </div>
+        <div style="border:1px solid #e8e8e8;border-radius:6px;padding:10px;font-size:12px;color:#888;">
+          <b>审查基准（DPA Round 1 产物）</b>
+          <p>四张表：★号条款 / 资格准入 / 评分标准 / 格式要求 — Markdown 渲染</p>
+          <p style="color:#ccc;">已就绪的产物可点击查看，未就绪的等待流水线完成自动激活</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 流水线监控 Tab 详细 -->
+<div class="split" style="margin-top:12px;">
+  <div class="mockup">
+    <div class="mockup-header">结果页 Tab 1：流水线监控</div>
+    <div class="mockup-body">
+      <div style="padding:12px;">
+        <div style="font-weight:600;margin-bottom:12px;">四智能体审查流水线</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+            <div>
+              <div style="font-weight:500;font-size:12px;">DPA Round 1 — 审查基准</div>
+              <div style="font-size:10px;color:#52c41a;">✅ 已完成 · 45s</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">✓</div>
+            <div>
+              <div style="font-weight:500;font-size:12px;">DPA Round 2 — 字段护照</div>
+              <div style="font-size:10px;color:#52c41a;">✅ 已完成 · 38s</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#1677ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">⟳</div>
+            <div>
+              <div style="font-weight:500;font-size:12px;color:#1677ff;">BCA + FCA — 并行审查中</div>
+              <div style="font-size:10px;color:#1677ff;">⏳ BCA: 废标红线+中标胜算 · FCA: 隐蔽风险+电子安检</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #d9d9d9;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;flex-shrink:0;">4</div>
+            <div style="font-size:12px;color:#bbb;">ORA — 报告编译</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;"><span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:2px;font-size:10px;">WebSocket 实时更新</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">结果页 Tab 3：最终报告</div>
+    <div class="mockup-body">
+      <div style="display:flex;min-height:250px;">
+        <div style="width:150px;border-right:1px solid #f0f0f0;padding:8px;font-size:10px;flex-shrink:0;">
+          <b style="font-size:11px;margin-bottom:6px;display:block;">报告目录</b>
+          <div style="color:#1677ff;font-weight:500;margin-bottom:3px;">一、项目概况</div>
+          <div style="color:#888;margin-bottom:3px;">二、废标红线</div>
+          <div style="color:#888;margin-bottom:3px;">三、中标胜算</div>
+          <div style="color:#888;margin-bottom:3px;">四、隐蔽风险</div>
+          <div style="color:#888;margin-bottom:3px;">五、电子文件</div>
+          <div style="color:#888;margin-bottom:3px;">六、整改建议</div>
+          <div style="color:#888;margin-bottom:3px;">七、人工复核</div>
+          <div style="color:#888;margin-bottom:3px;">签署</div>
+          <div style="color:#bbb;margin-bottom:3px;">附录 A-G</div>
+        </div>
+        <div style="flex:1;padding:10px;">
+          <h3 style="font-size:14px;margin:0 0 8px;">标书合规审查报告</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+            <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+              <span style="color:#888;">废标红线</span><br><b style="color:#52c41a;">合格</b>
+            </div>
+            <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+              <span style="color:#888;">中标胜算</span><br><b style="color:#1677ff;">良</b>
+            </div>
+            <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+              <span style="color:#888;">隐蔽风险</span><br><b style="color:#52c41a;">严谨</b>
+            </div>
+            <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+              <span style="color:#888;">电子安检</span><br><b style="color:#faad14;">有风险</b>
+            </div>
+          </div>
+          <div style="background:#f6ffed;border-radius:4px;padding:6px;font-size:11px;color:#52c41a;margin-bottom:8px;">
+            <b>投标建议：有条件递交</b>
+          </div>
+          <div style="font-size:11px;color:#888;line-height:1.6;">报告正文 Markdown 渲染...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:16px;padding:10px;background:#f0f5ff;border-radius:8px;border:1px solid #adc6ff;">
+  <b>💡 数据模型建议：</b>
+  <div style="font-size:13px;margin-top:6px;color:#666;">
+    <p style="margin:4px 0;">保留 PRD 中的 projects + tasks 数据模型不变（后端不用改），但 <b>前端不暴露项目管理界面</b>。</p>
+    <p style="margin:4px 0;">用户上传文件时，后端自动创建 project（从招标文件中提取项目名称/编号）+ task，用户只看到任务级别。</p>
+  </div>
+</div>

@@ -1,0 +1,195 @@
+<h2>旧版页面布局概览</h2>
+<p class="subtitle">compliance_v2 — React + Ant Design，共 5 个页面</p>
+
+<div class="section">
+  <h3>页面流程</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+    <div style="background:#e6f4ff;border:2px solid #1677ff;border-radius:8px;padding:10px 16px;font-weight:600;">Landing 首页</div>
+    <div style="align-self:center;color:#999;">→</div>
+    <div style="background:#f6ffed;border:2px solid #52c41a;border-radius:8px;padding:10px 16px;font-weight:600;">上传与提交</div>
+    <div style="align-self:center;color:#999;">→</div>
+    <div style="background:#fff7e6;border:2px solid #faad14;border-radius:8px;padding:10px 16px;font-weight:600;">已提交(监控)</div>
+    <div style="align-self:center;color:#999;">→</div>
+    <div style="background:#f9f0ff;border:2px solid #722ed1;border-radius:8px;padding:10px 16px;font-weight:600;">结果查看</div>
+  </div>
+</div>
+
+<div class="split">
+  <!-- 左侧：旧版页面 -->
+  <div class="mockup">
+    <div class="mockup-header">旧版：Landing 营销首页</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:20px auto;text-align:center;">
+        <h2 style="font-size:24px;margin-bottom:8px;">上传标书，10 分钟拿到合规检查报告</h2>
+        <p style="color:#888;margin-bottom:16px;">自动识别招标/应标文件，AI 逐项比对数十个合规检查点</p>
+        <button class="mock-button" style="margin-bottom:20px;">立即试用 →</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:20px;">
+          <div class="placeholder" style="padding:16px;text-align:center;">
+            <div style="font-size:20px;">⚡</div>
+            <b>自动识别</b>
+            <p style="font-size:12px;color:#888;margin:4px 0 0;">上传即分类</p>
+          </div>
+          <div class="placeholder" style="padding:16px;text-align:center;">
+            <div style="font-size:20px;">🤖</div>
+            <b>AI 逐项</b>
+            <p style="font-size:12px;color:#888;margin:4px 0 0;">逐条比对判定</p>
+          </div>
+          <div class="placeholder" style="padding:16px;text-align:center;">
+            <div style="font-size:20px;">📧</div>
+            <b>邮件交付</b>
+            <p style="font-size:12px;color:#888;margin:4px 0 0;">PDF 报告推送</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧：旧版上传页 -->
+  <div class="mockup">
+    <div class="mockup-header">旧版：UploadAndSubmit 核心操作页</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:12px auto;">
+        <h3 style="margin:8px 0 4px;">上传标书</h3>
+
+        <!-- Card ① -->
+        <div style="border:1px solid #d9d9d9;border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="font-weight:600;margin-bottom:8px;">① 上传与分类</div>
+          <div class="placeholder" style="border:2px dashed #d9d9d9;border-radius:6px;padding:24px;text-align:center;color:#999;">
+            📂 点击或拖拽文件到此处上传<br><span style="font-size:12px;">系统会自动识别招标/应标文件</span>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+            <div style="flex:1;border:1px solid #e8e8e8;border-radius:4px;padding:6px;display:flex;align-items:center;gap:6px;">
+              <span style="color:#1677ff;">📄</span>
+              <span style="font-size:13px;flex:1;">招标文件.pdf</span>
+              <span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:3px;font-size:11px;">招标</span>
+            </div>
+          </div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;">
+            <div style="flex:1;border:1px solid #e8e8e8;border-radius:4px;padding:6px;display:flex;align-items:center;gap:6px;">
+              <span style="color:#1677ff;">📄</span>
+              <span style="font-size:13px;flex:1;">投标书.docx</span>
+              <span style="background:#e6f4ff;color:#1677ff;padding:1px 6px;border-radius:3px;font-size:11px;">应标</span>
+            </div>
+          </div>
+          <div style="margin-top:4px;font-size:12px;color:#888;">共 2 个文件（招标 1 / 应标 1）</div>
+        </div>
+
+        <!-- Card ② -->
+        <div style="border:1px solid #d9d9d9;border-radius:8px;padding:12px;margin-bottom:12px;opacity:0.4;filter:grayscale(1);">
+          <div style="font-weight:600;margin-bottom:4px;">② 联系信息（开发模式已跳过）</div>
+          <div style="font-size:12px;color:#888;">邮箱验证...</div>
+        </div>
+
+        <!-- Card ③ -->
+        <div style="border:1px solid #d9d9d9;border-radius:8px;padding:12px;">
+          <div style="font-weight:600;margin-bottom:8px;">③ 提交</div>
+          <div style="background:#e6f4ff;border-radius:4px;padding:8px;font-size:12px;margin-bottom:8px;">ℹ 提交后将启动合规检查流水线，预计 2~10 分钟</div>
+          <button class="mock-button" style="width:100%;">开始合规检查</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="split" style="margin-top:16px;">
+  <!-- 左侧：已提交监控页 -->
+  <div class="mockup">
+    <div class="mockup-header">旧版：Submitted 流水线监控</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:12px auto;">
+        <div style="text-align:center;padding:12px 0;">
+          <div style="color:#52c41a;font-size:28px;">✓</div>
+          <h3 style="margin:4px 0;">已收到您的试用请求</h3>
+          <p style="color:#888;font-size:13px;">请留意您的邮箱，报告将在 10-30 分钟内送达</p>
+        </div>
+
+        <div style="border:1px solid #d9d9d9;border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="font-weight:600;margin-bottom:12px;">处理阶段</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+              <div>
+                <div style="font-weight:500;">关键信息抽取</div>
+                <div style="font-size:11px;color:#888;">已抽取 2/2 个文件</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:50%;background:#52c41a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+              <div>
+                <div style="font-weight:500;">整理检查项</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:50%;background:#1677ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;">⟳</div>
+              <div>
+                <div style="font-weight:500;color:#1677ff;">逐项合规检查</div>
+                <div style="font-size:11px;color:#888;">已完成 5/12 项检查</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid #d9d9d9;color:#d9d9d9;display:flex;align-items:center;justify-content:center;font-size:12px;">4</div>
+              <div>
+                <div style="color:#999;">生成审计报告</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid #d9d9d9;color:#d9d9d9;display:flex;align-items:center;justify-content:center;font-size:12px;">5</div>
+              <div>
+                <div style="color:#999;">发送邮件</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:3px;font-size:11px;">实时连接中</span>
+        </div>
+
+        <div style="border:1px solid #d9d9d9;border-radius:8px;padding:12px;">
+          <div style="font-weight:600;margin-bottom:8px;">本轮已完成 5 项</div>
+          <div style="border:1px solid #f0f0f0;border-radius:4px;padding:6px;font-size:12px;color:#888;">点击展开已完成的 5 项检查 ▼</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧：结果页 -->
+  <div class="mockup">
+    <div class="mockup-header">旧版：Result 结果查看</div>
+    <div class="mockup-body">
+      <div class="mock-nav">🔒 合规检查 V2</div>
+      <div style="max-width:800px;margin:12px auto;">
+        <!-- 信息条 -->
+        <div style="border:1px solid #d9d9d9;border-radius:8px;padding:10px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;font-size:12px;">
+          <div><span style="color:#888;">项目</span><br>XX系统</div>
+          <div><span style="color:#888;">公司</span><br>方略有数</div>
+          <div><span style="color:#888;">邮箱</span><br>test@test.com</div>
+          <div><span style="color:#888;">状态</span><br><span style="background:#f6ffed;color:#52c41a;padding:1px 6px;border-radius:3px;font-size:11px;">完成</span></div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="border-bottom:2px solid #1677ff;display:flex;gap:0;margin-bottom:12px;">
+          <div style="padding:8px 16px;background:#1677ff;color:#fff;border-radius:4px 4px 0 0;font-size:13px;">报告</div>
+          <div style="padding:8px 16px;font-size:13px;color:#888;">检查项 (12)</div>
+          <div style="padding:8px 16px;font-size:13px;color:#888;">原始文件 (2)</div>
+        </div>
+
+        <!-- 报告内容 -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+          <button class="mock-button" style="font-size:12px;padding:4px 12px;">⬇ 下载 DOCX</button>
+        </div>
+        <div style="border:1px solid #e8e8e8;border-radius:4px;padding:12px;">
+          <h4 style="margin:0 0 8px;">合规审查报告</h4>
+          <div style="font-size:12px;color:#888;line-height:1.8;">
+            <p>一、项目概况与审查摘要...</p>
+            <p style="color:#bbb;">二、废标红线审查...</p>
+            <p style="color:#bbb;">三、中标胜算评估...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
