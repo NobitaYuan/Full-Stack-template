@@ -152,7 +152,7 @@ import { getToken, setToken, clearUserToken, clearAllLocalStorage } from '@/util
 
 ### 5. API 请求与封装
 
-使用 openapi-fetch（类型安全，新模块必须用），request 自动处理 Bearer token、401 登出、业务错误 MessagePlugin 提示。
+使用 openapi-fetch（类型安全，新模块必须用），request 自动处理 Bearer token、401 登出、业务错误 message 提示。
 
 **不要设 baseUrl**：OpenAPI spec 中的路径已包含 `/api/v1` 前缀。
 
@@ -207,18 +207,19 @@ export function deletePost(id: string) {
 
 ### 6. UI 组件选择
 
-**TDesign Vue Next** 为唯一 UI 框架，`t-` 前缀组件自动导入，无需 import。
+**Ant Design Vue 4** 为唯一 UI 框架，`a-` 前缀组件自动导入，无需 import。
 
 ```vue
-<t-button theme="primary">按钮</t-button>
-<t-input v-model="value" />
+<a-button type="primary">按钮</a-button>
+<a-input v-model:value="value" />
 ```
 
 ```typescript
-// 需要类型时手动导入
-import { FormProps, MessagePlugin } from 'tdesign-vue-next'
+// 需要类型或 API 时手动导入
+import { message, Modal } from 'ant-design-vue'
+import type { FormInstance } from 'ant-design-vue'
 // 图标
-import { SunnyIcon } from 'tdesign-icons-vue-next'
+import { SunOutlined, UserOutlined } from '@ant-design/icons-vue'
 ```
 
 `src/types/components.d.ts` 和 `auto-imports.d.ts` 为自动生成，禁止手动编辑。
@@ -257,7 +258,7 @@ const fetchData = async () => {
   loading.value = true
   try {
     const { data: res, error } = await getList()
-    if (error) return // client 中间件已自动弹 MessagePlugin
+    if (error) return // client 中间件已自动弹 message
     data.value = res!.data
   } finally {
     loading.value = false
@@ -271,7 +272,7 @@ const handleAction = async () => {
   try {
     const { error } = await someApiCall(/* 数据 */)
     if (error) return
-    MessagePlugin.success('成功')
+    message.success('成功')
     await fetchData() // 统一刷新
   } finally {
     loading.value = false
@@ -283,7 +284,7 @@ const handleAction = async () => {
 
 1. `loading.value` 统一管理，try-finally 确保重置
 2. 用 `{ data, error }` 解构 — `error` 有值时 return（client 中间件已弹错误提示）
-3. 成功时手动 `MessagePlugin.success()`，修改/删除后统一 `fetchData()` 刷新，禁止手动 push/filter
+3. 成功时手动 `message.success()`，修改/删除后统一 `fetchData()` 刷新，禁止手动 push/filter
 4. 使用 `ref()` 包装状态，`.value` 访问修改
 
 ### 10. 状态管理(Pinia)
@@ -320,9 +321,9 @@ await userStore.login(params) // action
 
 - **Vue API**: `ref`, `reactive`, `computed`, `watch`, `onMounted`, `nextTick` 等
 - **Vue Router**: `useRouter`, `useRoute`
-- **TDesign**: `<t-button>`, `<t-input>` 等 `t-` 前缀组件
+- **Ant Design Vue**: `<a-button>`, `<a-input>` 等 `a-` 前缀组件
 
-需导入**类型**时才手动 import（如 `FormProps`, `MessagePlugin`）
+需导入**类型**时才手动 import（如 `FormInstance`, `message`）
 
 ---
 

@@ -4,7 +4,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import { visualizer } from 'rollup-plugin-visualizer'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { TDesignResolver } from 'unplugin-vue-components/resolvers'
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 export default defineConfig((env: ConfigEnv) => {
@@ -34,11 +34,7 @@ export default defineConfig((env: ConfigEnv) => {
         dts: 'src/types/auto-imports.d.ts',
       }),
       Components({
-        resolvers: [
-          TDesignResolver({
-            library: 'vue-next',
-          }),
-        ],
+        resolvers: [AntDesignVueResolver({ importStyle: false })],
         dts: 'src/types/components.d.ts',
       }),
       visualizer({

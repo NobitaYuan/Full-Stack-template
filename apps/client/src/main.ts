@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import './assets/style/main.css'
 // 引入组件库的少量全局样式变量
-import 'tdesign-vue-next/es/style/index.css'
+import 'ant-design-vue/dist/reset.css'
 // pinia持久化插件
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 

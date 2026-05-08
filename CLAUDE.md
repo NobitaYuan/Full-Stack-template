@@ -25,7 +25,7 @@ full-stack-template/
 
 | 应用 | 框架 | 构建 | 测试 | 规范 |
 |------|------|------|------|------|
-| client | Vue 3 + TDesign + Pinia | Vite 8 | — | Oxlint + Oxfmt |
+| client | Vue 3 + Ant Design Vue + Pinia | Vite 8 | — | Oxlint + Oxfmt |
 | server | Hono + Drizzle ORM + PostgreSQL | tsc | Vitest | Oxfmt |
 
 ### 根目录命令

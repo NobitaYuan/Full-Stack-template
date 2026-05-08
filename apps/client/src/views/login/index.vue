@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/useUserStore'
 import { isDev } from '@/utils/isDev'
-import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next'
+import { message } from 'ant-design-vue'
+import type { FormInstance } from 'ant-design-vue'
 
 const title = import.meta.env.VITE_APP_TITLE
 
@@ -14,39 +15,26 @@ interface LoginForm {
   password: string
 }
 
-// 表单内容
 const formData = ref<LoginForm>({
   username: '',
   password: '',
 })
-// 规则
-const rules: FormProps['rules'] = {
-  username: [
-    {
-      required: true,
-      message: '请输入账号',
-      trigger: 'blur',
-    },
-  ],
-  password: [
-    {
-      required: true,
-      message: '请输入密码',
-      trigger: 'blur',
-    },
-  ],
+
+const rules = {
+  username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
-const formRef = ref<FormInstanceFunctions | null>(null)
+
+const formRef = ref<FormInstance | null>(null)
 
 const isLoading = ref(false)
 const loginFn = async () => {
   isLoading.value = true
   if (!formRef.value) return
   try {
-    const res1 = await formRef.value.validate()
-    if (res1 !== true) return
+    await formRef.value.validate()
     await userStore.login(formData.value.username, formData.value.password)
-    MessagePlugin.success('登录成功')
+    message.success('登录成功')
     const redirect = route.query.redirect as string
     const toUrl = redirect ? decodeURIComponent(redirect) : '/'
     router.replace(toUrl)
@@ -57,7 +45,6 @@ const loginFn = async () => {
   }
 }
 
-// 开发环境下默认填入账号密码
 if (isDev) {
   formData.value.username = 'admin'
   formData.value.password = 'admin123'
@@ -69,17 +56,17 @@ if (isDev) {
     <div class="formbox">
       <div class="title">{{ title }}</div>
       <div class="form">
-        <t-form ref="formRef" :data="formData" :rules="rules" labelAlign="top">
-          <t-form-item :label="$t('account')" name="username">
-            <t-input size="large" v-model="formData.username" />
-          </t-form-item>
-          <t-form-item :label="$t('password')" name="password">
-            <t-input size="large" v-model="formData.password" type="password" />
-          </t-form-item>
-        </t-form>
+        <a-form ref="formRef" :model="formData" :rules="rules" layout="vertical">
+          <a-form-item :label="$t('account')" name="username">
+            <a-input size="large" v-model:value="formData.username" />
+          </a-form-item>
+          <a-form-item :label="$t('password')" name="password">
+            <a-input-password size="large" v-model:value="formData.password" />
+          </a-form-item>
+        </a-form>
       </div>
       <div class="btn">
-        <t-button block size="large" theme="primary" :loading="isLoading" @click="loginFn">{{ $t('login') }}</t-button>
+        <a-button block size="large" type="primary" :loading="isLoading" @click="loginFn">{{ $t('login') }}</a-button>
       </div>
     </div>
   </div>
@@ -106,17 +93,12 @@ if (isDev) {
     padding: 24px;
     padding-top: 36px;
     min-width: 450px;
-    background-color: var(--td-bg-color-container);
     background: rgba(0, 66, 108, 0.6);
     box-shadow:
       0 0 32.9px 11px rgba(0, 0, 0, 0.28),
       -1px 0 22.8px 4px rgba(0, 127, 181, 0.4) inset;
     margin-bottom: 10%;
     border-radius: 10px;
-    // background: rgb(0 66 108 / 60%);
-    // box-shadow:
-    //   0 0 32.9px 11px rgb(0 0 0 / 28%),
-    //   -1px 0 22.8px 4px rgb(0 127 181 / 40%) inset;
     .title {
       font-size: 36px;
       color: #fff;
@@ -124,12 +106,9 @@ if (isDev) {
     }
     .form {
       width: 100%;
-      :deep(.t-form__label) {
+      :deep(.ant-form-item-label > label) {
         color: #fff;
         font-size: 14px;
-        &:before {
-          display: none !important;
-        }
       }
     }
     .btn {

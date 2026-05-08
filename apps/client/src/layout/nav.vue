@@ -1,8 +1,16 @@
 <script lang="ts" setup>
+import { AppstoreOutlined, UserSwitchOutlined, RobotOutlined } from '@ant-design/icons-vue'
+
+const iconMap: Record<string, ReturnType<typeof AppstoreOutlined>> = {
+  app: AppstoreOutlined,
+  usergroup: UserSwitchOutlined,
+  chat: RobotOutlined,
+}
+
 const navList = [
   { name: '示例页面', path: '/index', icon: 'app' },
   { name: '用户管理', path: '/user-manage', icon: 'usergroup' },
-  { name: 'AI 助手', path: '/agent', icon: 'chat' },
+  // { name: 'AI 助手', path: '/agent', icon: 'chat' },
 ]
 
 const route = useRoute()
@@ -16,7 +24,7 @@ const isPathActive = (path: string) => {
 <template>
   <div class="nav">
     <RouterLink class="navItem" :class="{ active: isPathActive(item.path) }" v-for="item in navList" :key="item.path" :to="item.path">
-      <t-icon v-if="item.icon" :name="item.icon" />
+      <component :is="iconMap[item.icon]" v-if="item.icon" />
       <div class="text">{{ item.name }}</div>
     </RouterLink>
   </div>
@@ -44,11 +52,11 @@ const isPathActive = (path: string) => {
     }
     &.active {
       background-color: #fff;
-      color: var(--td-brand-color);
+      color: #1890ff;
     }
     &:hover {
       background-color: #fff;
-      color: var(--td-brand-color);
+      color: #1890ff;
     }
   }
 }

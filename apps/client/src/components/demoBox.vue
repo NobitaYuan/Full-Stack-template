@@ -13,24 +13,24 @@ const dev = import.meta.env
       <h1>{{ $t('proTitle') }}</h1>
     </viewport_animation>
     <div>
-      <t-radio-group v-model="curLang">
-        <t-radio :value="'zh-cn'" size="large">中文</t-radio>
-        <t-radio :value="'en'" size="large">English</t-radio>
-      </t-radio-group>
+      <a-radio-group v-model:value="curLang">
+        <a-radio value="zh-cn" size="large">中文</a-radio>
+        <a-radio value="en" size="large">English</a-radio>
+      </a-radio-group>
     </div>
     <div class="switch flex items-center gap-4">
-      <t-switch :size="'large'" v-model="darkModeStore.isDark"></t-switch>
+      <a-switch v-model:checked="darkModeStore.isDark" size="small"></a-switch>
       {{ $t('darkMode') }}
     </div>
 
-    <t-card :header="'环境变量'">
+    <a-card title="环境变量">
       <div class="flex flex-col gap-[12px] leading-[1.3]">
         <div class="flex w-full items-center" v-for="item of Object.entries(dev)" :key="item[0]">
           <label class="w-[200px] text-[13px]">{{ item[0] }}：</label>
           <div class="text-[18px]">{{ item[1] }}</div>
         </div>
       </div>
-    </t-card>
+    </a-card>
   </div>
 </template>
 
@@ -50,10 +50,9 @@ const dev = import.meta.env
   h1 {
     font-size: 40px;
     font-weight: bold;
-    color: var(--td-text-color-primary);
   }
   .switch {
-    color: var(--td-text-color-primary);
+    color: inherit;
   }
 }
 </style>

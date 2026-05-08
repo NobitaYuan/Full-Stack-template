@@ -5,7 +5,7 @@ import { useUserStore } from '@/stores/useUserStore/index'
 import { transParams } from '../transParams'
 import { getToken } from '../localStorage/token'
 import { Result } from './type'
-import { MessagePlugin } from 'tdesign-vue-next'
+import { message } from 'ant-design-vue'
 
 //设置默认请求头
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
@@ -53,14 +53,9 @@ service.interceptors.request.use(
         //存在相同的key，判断value的时间差
         const time = axiosMap.get(key)!
         if (new Date().getTime() - time < gapTime) {
-          const message = '数据正在处理，请勿重复提交'
-          MessagePlugin.warning({
-            content: message,
-            closeBtn: true,
-          })
-          console.warn(`[${config.url}]: ` + message)
-          axiosMap.set(key, new Date().getTime())
-          return Promise.reject(new Error(message))
+          const msg = '数据正在处理，请勿重复提交'
+          message.warning(msg)
+          console.warn(`[${config.url}]: ` + msg)
         } else {
           axiosMap.set(key, new Date().getTime())
         }
@@ -93,32 +88,26 @@ service.interceptors.response.use(
     if (code === 401) {
       const msg = '身份验证失效，请重新登录~'
       logInDev(res)
-      MessagePlugin.warning({
-        content: msg,
-        closeBtn: true,
-      })
+      message.warning(msg)
       useUserStore().logout()
       return Promise.reject(res)
     }
     logInDev(res)
-    MessagePlugin.error({ content: res.data.msg, closeBtn: true })
+    message.error(res.data.msg)
     return Promise.reject(res)
   },
   (err: any) => {
-    let { message } = err
-    if (message === 'Network Error') {
-      message = '后端接口连接异常'
+    let { message: errMsg } = err
+    if (errMsg === 'Network Error') {
+      errMsg = '后端接口连接异常'
       console.error('响应拦截：后端接口连接异常')
-    } else if (message.includes('timeout')) {
-      message = '系统接口请求超时'
+    } else if (errMsg.includes('timeout')) {
+      errMsg = '系统接口请求超时'
       console.error('响应拦截：系统接口请求超时')
     }
-    MessagePlugin.error({
-      content: message,
-      closeBtn: true,
-    })
+    message.error(errMsg)
     return Promise.reject({
-      msg: '响应拦截出错!' + message,
+      msg: '响应拦截出错!' + errMsg,
     })
   },
 )

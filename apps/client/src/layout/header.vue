@@ -1,7 +1,6 @@
 <script lang="tsx" setup>
 import { useDarkModeStore } from '@/stores'
-import { SunnyIcon, MoonIcon } from 'tdesign-icons-vue-next'
-import { SwitchProps } from 'tdesign-vue-next'
+import { BulbOutlined, BulbFilled } from '@ant-design/icons-vue'
 import { RouterLink } from 'vue-router'
 import navCom from './nav.vue'
 import userInfo from './components/userInfo.vue'
@@ -11,9 +10,12 @@ const logoUrl = new URL('@/assets/images/logo.png', import.meta.url).href
 const darkModeStore = useDarkModeStore()
 
 const title = import.meta.env.VITE_APP_TITLE
-const renderContent: SwitchProps['label'] = (h, data) => {
-  return data.value ? <SunnyIcon /> : <MoonIcon />
-}
+const checked = computed({
+  get: () => darkModeStore.isDark,
+  set: (val: boolean | undefined) => {
+    darkModeStore.toggleDark(val ?? false)
+  },
+})
 </script>
 
 <template>
@@ -28,7 +30,10 @@ const renderContent: SwitchProps['label'] = (h, data) => {
       <navCom />
     </div>
     <div class="setting">
-      <t-switch :size="'large'" v-model="darkModeStore.isDark" :label="renderContent"></t-switch>
+      <a-switch v-model:checked="checked" size="small">
+        <template #checkedIcon><BulbFilled /></template>
+        <template #uncheckedIcon><BulbOutlined /></template>
+      </a-switch>
       <userInfo />
     </div>
   </div>
@@ -69,9 +74,6 @@ const renderContent: SwitchProps['label'] = (h, data) => {
     align-items: center;
     gap: 12px;
     margin-left: auto;
-    :deep(.t-switch) {
-      background-color: var(--td-brand-color-6);
-    }
   }
 }
 </style>

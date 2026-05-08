@@ -66,53 +66,53 @@ function handleAnswer() {
 
 <template>
   <!-- AskUserQuestion：选项 UI -->
-  <t-card v-if="isAskUser()" class="permission-card">
+  <a-card v-if="isAskUser()" class="permission-card">
     <!-- 多个问题时用 Tab 切换 -->
-    <t-tabs v-if="questions.length > 1" v-model="activeTab">
-      <t-tab-panel v-for="(q, idx) in questions" :key="idx" :value="String(idx)" :label="q.header || `问题 ${idx + 1}`">
+    <a-tabs v-if="questions.length > 1" v-model:activeKey="activeTab">
+      <a-tab-pane v-for="(q, idx) in questions" :key="String(idx)" :tab="q.header || `问题 ${idx + 1}`">
         <div class="question-item">
           <p class="question-text">{{ q.question }}</p>
           <div class="options">
-            <t-button
+            <a-button
               v-for="opt in q.options"
               :key="opt.label"
-              :variant="isSelected(q.question, opt.label) ? 'base' : 'outline'"
+              :type="isSelected(q.question, opt.label) ? 'primary' : 'default'"
               @click="toggleOption(q.question, opt.label, q.multiSelect)"
             >
               {{ opt.label }}
               <span v-if="opt.description" class="opt-desc">{{ opt.description }}</span>
-            </t-button>
+            </a-button>
           </div>
-          <t-input v-model="answers[q.question]" placeholder="或输入自定义回答..." class="custom-input" />
+          <a-input v-model:value="answers[q.question]" placeholder="或输入自定义回答..." class="custom-input" />
         </div>
-      </t-tab-panel>
-    </t-tabs>
+      </a-tab-pane>
+    </a-tabs>
 
     <!-- 单个问题时不用 Tab -->
     <div v-else-if="questions.length === 1" class="question-item">
       <p class="question-text">{{ questions[0].question }}</p>
       <div class="options">
-        <t-button
+        <a-button
           v-for="opt in questions[0].options"
           :key="opt.label"
-          :variant="isSelected(questions[0].question, opt.label) ? 'base' : 'outline'"
+          :type="isSelected(questions[0].question, opt.label) ? 'primary' : 'default'"
           @click="toggleOption(questions[0].question, opt.label, questions[0].multiSelect)"
         >
           {{ opt.label }}
-        </t-button>
+        </a-button>
       </div>
-      <t-input v-model="answers[questions[0].question]" placeholder="或输入自定义回答..." class="custom-input" />
+      <a-input v-model:value="answers[questions[0].question]" placeholder="或输入自定义回答..." class="custom-input" />
     </div>
 
-    <t-button theme="primary" :disabled="!allAnswered" @click="handleAnswer"> 确认 </t-button>
-  </t-card>
+    <a-button type="primary" :disabled="!allAnswered" @click="handleAnswer"> 确认 </a-button>
+  </a-card>
 
   <!-- 其他工具：approve/deny -->
-  <t-card v-else class="permission-card">
+  <a-card v-else class="permission-card">
     <p>工具 {{ request.toolName }} 请求执行权限</p>
-    <t-button theme="primary" @click="emit('approve', request.requestId)">允许</t-button>
-    <t-button theme="danger" @click="emit('deny', request.requestId)">拒绝</t-button>
-  </t-card>
+    <a-button type="primary" @click="emit('approve', request.requestId)">允许</a-button>
+    <a-button danger @click="emit('deny', request.requestId)">拒绝</a-button>
+  </a-card>
 </template>
 
 <style lang="scss" scoped>
@@ -134,8 +134,8 @@ function handleAnswer() {
 }
 .opt-desc {
   font-size: 12px;
-  color: var(--td-text-color-secondary);
   margin-left: 4px;
+  opacity: 0.65;
 }
 .custom-input {
   margin-top: 8px;

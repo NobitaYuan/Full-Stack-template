@@ -1,7 +1,7 @@
 import createClient from 'openapi-fetch'
 import type { paths } from './api-types'
 import { getToken } from '@/utils/localStorage/token'
-import { MessagePlugin } from 'tdesign-vue-next'
+import { message } from 'ant-design-vue'
 import { useUserStore } from '@/stores/useUserStore'
 
 const request = createClient<paths>()
@@ -25,21 +25,21 @@ request.use({
 
     // 401：身份失效，跳转登录
     if (body.code === 401) {
-      MessagePlugin.warning({ content: '身份验证失效，请重新登录', closeBtn: true })
+      message.warning('身份验证失效，请重新登录')
       useUserStore().logout()
       return response
     }
 
     // 其他业务错误：弹出提示
     if (body.code && body.code !== 200) {
-      MessagePlugin.error({ content: body.message || '请求失败', closeBtn: true })
+      message.error(body.message || '请求失败')
     }
 
     return response
   },
   async onError({ error }) {
-    const message = error instanceof TypeError ? '网络连接异常，请检查网络' : '请求出错，请稍后重试'
-    MessagePlugin.error({ content: message, closeBtn: true })
+    const msg = error instanceof TypeError ? '网络连接异常，请检查网络' : '请求出错，请稍后重试'
+    message.error(msg)
     throw error
   },
 })

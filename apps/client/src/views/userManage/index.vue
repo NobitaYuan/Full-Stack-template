@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next'
+import { message, Modal } from 'ant-design-vue'
+import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import type { components } from '@/api/users/users'
 import { getUserList, updateUser, deleteUser } from '@/api/users'
 import { register } from '@/api/auth'
@@ -16,9 +17,9 @@ const pagination = reactive({
 })
 
 const columns = [
-  { colKey: 'username', title: '用户名' },
-  { colKey: 'createdAt', title: '注册时间' },
-  { colKey: 'op', title: '操作' },
+  { dataIndex: 'username', title: '用户名' },
+  { dataIndex: 'createdAt', title: '注册时间' },
+  { dataIndex: 'op', title: '操作' },
 ]
 
 const formatTime = (iso: string) => dayjs(iso).format('YYYY-MM-DD HH:mm:ss')
@@ -38,9 +39,9 @@ const fetchData = async () => {
   }
 }
 
-const handlePageChange = (params: { current: number; pageSize: number }) => {
-  pagination.current = params.current
-  pagination.pageSize = params.pageSize
+const handleTableChange = (pag: { current: number; pageSize: number }) => {
+  pagination.current = pag.current
+  pagination.pageSize = pag.pageSize
   fetchData()
 }
 
@@ -59,7 +60,7 @@ const handleAddSubmit = async () => {
   try {
     const { error } = await register(addForm.value.username, addForm.value.password, addForm.value.confirmPassword)
     if (error) return
-    MessagePlugin.success('注册成功')
+    message.success('注册成功')
     addDialogVisible.value = false
     await fetchData()
   } finally {
@@ -84,7 +85,7 @@ const handleEditSubmit = async () => {
       username: editForm.value.username,
     })
     if (error) return
-    MessagePlugin.success('更新成功')
+    message.success('更新成功')
     editDialogVisible.value = false
     await fetchData()
   } finally {
@@ -94,19 +95,16 @@ const handleEditSubmit = async () => {
 
 /* ===================删除===================== */
 const handleDelete = (row: User) => {
-  const confirmDialog = DialogPlugin.confirm({
-    header: '确认删除',
-    body: '确定要删除该用户吗？此操作不可恢复。',
-    theme: 'warning',
-    confirmBtn: '确定',
-    cancelBtn: '取消',
-    onConfirm: async () => {
-      confirmDialog.update({ confirmLoading: true })
+  Modal.confirm({
+    title: '确认删除',
+    content: '确定要删除该用户吗？此操作不可恢复。',
+    okType: 'danger',
+    okText: '确定',
+    cancelText: '取消',
+    onOk: async () => {
       const { error } = await deleteUser(row.id)
-      confirmDialog.update({ confirmLoading: false })
       if (error) return
-      confirmDialog.hide()
-      MessagePlugin.success('删除成功')
+      message.success('删除成功')
       await fetchData()
     },
   })
@@ -117,52 +115,54 @@ onMounted(() => fetchData())
 
 <template>
   <div class="user-manage-page">
-    <t-card title="用户管理">
-      <template #actions>
-        <t-button theme="primary" @click="handleAdd">
-          <template #icon><t-icon name="add" /></template>
+    <a-card title="用户管理">
+      <template #extra>
+        <a-button type="primary" @click="handleAdd">
+          <PlusOutlined />
           新增用户
-        </t-button>
-        <t-button theme="default" @click="fetchData">
-          <template #icon><t-icon name="refresh" /></template>
+        </a-button>
+        <a-button @click="fetchData">
+          <ReloadOutlined />
           刷新
-        </t-button>
+        </a-button>
       </template>
 
-      <t-table :data="userList" :loading="loading" :columns="columns" row-key="id" :pagination="pagination" @page-change="handlePageChange">
-        <template #createdAt="{ row }">
-          {{ formatTime(row.createdAt) }}
+      <a-table :data-source="userList" :loading="loading" :columns="columns" row-key="id" :pagination="pagination" @change="handleTableChange">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'createdAt'">
+            {{ formatTime(record.createdAt) }}
+          </template>
+          <template v-if="column.dataIndex === 'op'">
+            <a-button type="link" @click="handleEdit(record)"> <EditOutlined />编辑 </a-button>
+            <a-button type="link" danger @click="handleDelete(record)"> <DeleteOutlined />删除 </a-button>
+          </template>
         </template>
-        <template #op="{ row }">
-          <t-button variant="text" theme="primary" @click="handleEdit(row)">编辑</t-button>
-          <t-button variant="text" theme="danger" @click="handleDelete(row)">删除</t-button>
-        </template>
-      </t-table>
-    </t-card>
+      </a-table>
+    </a-card>
 
     <!-- 新增用户弹窗 -->
-    <t-dialog v-model:visible="addDialogVisible" header="新增用户" :confirm-btn="{ loading: addLoading }" @confirm="handleAddSubmit">
-      <t-form label-width="80px">
-        <t-form-item label="用户名">
-          <t-input v-model="addForm.username" autocomplete="username" />
-        </t-form-item>
-        <t-form-item label="密码">
-          <t-input v-model="addForm.password" type="password" autocomplete="new-password" />
-        </t-form-item>
-        <t-form-item label="确认密码">
-          <t-input v-model="addForm.confirmPassword" type="password" autocomplete="new-password" />
-        </t-form-item>
-      </t-form>
-    </t-dialog>
+    <a-modal v-model:open="addDialogVisible" title="新增用户" :confirm-loading="addLoading" @ok="handleAddSubmit">
+      <a-form>
+        <a-form-item label="用户名">
+          <a-input v-model:value="addForm.username" autocomplete="username" />
+        </a-form-item>
+        <a-form-item label="密码">
+          <a-input-password v-model:value="addForm.password" autocomplete="new-password" />
+        </a-form-item>
+        <a-form-item label="确认密码">
+          <a-input-password v-model:value="addForm.confirmPassword" autocomplete="new-password" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
 
     <!-- 编辑弹窗 -->
-    <t-dialog v-model:visible="editDialogVisible" header="编辑用户" :confirm-btn="{ loading: editLoading }" @confirm="handleEditSubmit">
-      <t-form label-width="80px">
-        <t-form-item label="用户名">
-          <t-input v-model="editForm.username" />
-        </t-form-item>
-      </t-form>
-    </t-dialog>
+    <a-modal v-model:open="editDialogVisible" title="编辑用户" :confirm-loading="editLoading" @ok="handleEditSubmit">
+      <a-form>
+        <a-form-item label="用户名">
+          <a-input v-model:value="editForm.username" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -171,9 +171,5 @@ onMounted(() => fetchData())
   padding: 16px;
   height: 100%;
   box-sizing: border-box;
-
-  :deep(.t-card) {
-    height: 100%;
-  }
 }
 </style>

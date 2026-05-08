@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useAgentStore } from '@/stores/useAgentStore'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
 const agentStore = useAgentStore()
 const { sessions, currentSessionId } = storeToRefs(agentStore)
@@ -28,7 +29,7 @@ onMounted(() => {
   <div class="session-list">
     <div class="session-header">
       <span class="session-title">会话列表</span>
-      <t-button theme="primary" size="small" @click="handleCreate">新建</t-button>
+      <a-button type="primary" size="small" @click="handleCreate">新建</a-button>
     </div>
     <div class="session-items">
       <div
@@ -41,11 +42,11 @@ onMounted(() => {
         @mouseleave="hoverId = null"
       >
         <span class="session-name">{{ session.title || '新对话' }}</span>
-        <t-popconfirm content="确定删除此会话？" @confirm="handleDelete(session.id)">
-          <t-button v-show="hoverId === session.id || currentSessionId === session.id" theme="danger" variant="text" size="small" @click.stop>
-            <template #icon><t-icon name="delete" /></template>
-          </t-button>
-        </t-popconfirm>
+        <a-popconfirm title="确定删除此会话？" @confirm="handleDelete(session.id)">
+          <a-button v-show="hoverId === session.id || currentSessionId === session.id" danger type="text" size="small" @click.stop>
+            <DeleteOutlined />
+          </a-button>
+        </a-popconfirm>
       </div>
     </div>
   </div>

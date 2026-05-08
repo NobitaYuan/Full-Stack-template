@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import Layout from '@/layout/index.vue'
-import { TdConfigProviderProps } from 'tdesign-vue-next'
-import zh_CN_Config from 'tdesign-vue-next/es/locale/zh_CN'
-const globalConfig = { ...zh_CN_Config } as unknown as TdConfigProviderProps['globalConfig']
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
+import { theme } from 'ant-design-vue'
+import { useDarkModeStore } from '@/stores'
+
+const darkModeStore = useDarkModeStore()
+
+const themeConfig = computed(() => ({
+  algorithm: darkModeStore.isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+}))
 </script>
 
 <template>
-  <t-config-provider :global-config="globalConfig">
+  <a-config-provider :locale="zhCN" :theme="themeConfig">
     <Layout />
-  </t-config-provider>
+  </a-config-provider>
 </template>
 
 <style lang="scss" scoped></style>
