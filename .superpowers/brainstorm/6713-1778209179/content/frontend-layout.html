@@ -1,0 +1,48 @@
+<h2>标书审查系统 — 前端页面结构</h2>
+<p class="subtitle">三个核心页面，点击查看每个页面的布局方案</p>
+
+<div class="options">
+  <div class="option" data-choice="project-list" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>项目列表页</h3>
+      <p>审查项目的 CRUD 管理，入口页</p>
+    </div>
+  </div>
+  <div class="option" data-choice="task-detail" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>任务详情页（核心）</h3>
+      <p>文件上传 → 启动审查 → 实时监控 → 查看产物</p>
+    </div>
+  </div>
+  <div class="option" data-choice="report-view" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>报告查看页</h3>
+      <p>最终审查报告的渲染和导出</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem;">
+  <h3>页面关系</h3>
+  <div class="mockup">
+    <div class="mockup-header">Navigation Flow</div>
+    <div class="mockup-body" style="padding: 1.5rem; text-align: center; font-size: 14px;">
+      <div style="display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <div style="border: 2px solid var(--accent); border-radius: 8px; padding: 12px 20px; min-width: 120px;">
+          <strong>项目列表</strong><br><span style="color: var(--muted);">/reviewer/projects</span>
+        </div>
+        <span style="font-size: 20px;">→</span>
+        <div style="border: 2px solid var(--accent); border-radius: 8px; padding: 12px 20px; min-width: 120px; background: var(--accent-light);">
+          <strong>任务详情</strong><br><span style="color: var(--muted);">/reviewer/tasks/:id</span>
+        </div>
+        <span style="font-size: 20px;">→</span>
+        <div style="border: 2px solid var(--accent); border-radius: 8px; padding: 12px 20px; min-width: 120px;">
+          <strong>报告查看</strong><br><span style="color: var(--muted);">/reviewer/reports/:id</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

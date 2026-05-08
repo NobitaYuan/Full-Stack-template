@@ -1,0 +1,145 @@
+<h2>任务详情页 — 布局方案</h2>
+<p class="subtitle">这是整个系统的核心页面，包含文件上传、流水线监控、产物查看三个功能区</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">方案 A：左右分栏（推荐）</div>
+    <div class="mockup-body" style="padding: 0;">
+      <div style="display: flex; min-height: 400px; font-size: 12px;">
+        <!-- 左侧：流水线状态 -->
+        <div style="width: 300px; border-right: 1px solid var(--border); padding: 12px; flex-shrink: 0;">
+          <div style="font-weight: 600; margin-bottom: 12px; color: var(--accent);">流水线状态</div>
+
+          <!-- 阶段列表 -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; background: var(--accent-light);">
+              <span style="width: 20px; height: 20px; border-radius: 50%; background: #52c41a; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">✓</span>
+              <div>
+                <div style="font-weight: 500;">DPA Round 1</div>
+                <div style="color: var(--muted); font-size: 11px;">审查基准提取</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; background: var(--accent-light);">
+              <span style="width: 20px; height: 20px; border-radius: 50%; background: #52c41a; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">✓</span>
+              <div>
+                <div style="font-weight: 500;">DPA Round 2</div>
+                <div style="color: var(--muted); font-size: 11px;">字段护照提取</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; background: #e6f7ff; border: 1px solid #1890ff;">
+              <span style="width: 20px; height: 20px; border-radius: 50%; background: #1890ff; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">⟳</span>
+              <div>
+                <div style="font-weight: 500; color: #1890ff;">BCA + FCA</div>
+                <div style="color: var(--muted); font-size: 11px;">并行审查中...</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; opacity: 0.5;">
+              <span style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px;"></span>
+              <div>
+                <div style="font-weight: 500;">ORA 报告编译</div>
+                <div style="color: var(--muted); font-size: 11px;">等待中</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+            <div style="font-weight: 600; margin-bottom: 8px; color: var(--accent);">已上传文件</div>
+            <div style="font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 4px;">
+              <div>📄 招标文件.pdf <span style="color: #52c41a;">(82,340字)</span></div>
+              <div>📄 投标函.pdf <span style="color: #52c41a;">(3,200字)</span></div>
+              <div>📄 报价表.pdf <span style="color: #52c41a;">(5,100字)</span></div>
+              <div>📄 资质证书.pdf <span style="color: #faad14;">(扫描件)</span></div>
+              <div style="color: var(--accent); cursor: pointer;">+ 添加投标文件</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：产物查看 -->
+        <div style="flex: 1; padding: 12px; overflow: auto;">
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button class="mock-button" style="background: var(--accent); color: white; font-size: 11px; padding: 4px 12px;">审查基准</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px;">字段护照</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px; opacity: 0.5;">BCA 结果</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px; opacity: 0.5;">FCA 结果</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px; opacity: 0.5;">审查报告</button>
+          </div>
+
+          <div style="background: #fafafa; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 11px; line-height: 1.6; white-space: pre-wrap; color: #333;">
+## A. ★号条款提取
+| 序号 | ★条款编号 | 条款原文摘要 | 所在章节 | 是否接受负偏离 |
+|------|----------|-------------|---------|---------------|
+| 1 | 3.2.1 | 投标人须具有武器装备科研... | 第三章 | 否 |
+| 2 | 3.2.3 | 项目经理须具备PMP或等同... | 第三章 | 否 |
+| 3 | 4.1.2 | 系统响应时间不超过2秒... | 第四章 | 是 |
+
+## B. 资格准入条件提取
+| 序号 | 条件类型 | 招标要求摘要 | 是否废标项 |
+|------|---------|-------------|-----------|
+| 1 | 保密资质 | 二级（含）以上... | 是 |
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">方案 B：上下布局</div>
+    <div class="mockup-body" style="padding: 0;">
+      <div style="min-height: 400px; font-size: 12px;">
+        <!-- 顶部：流水线状态条 -->
+        <div style="padding: 16px; border-bottom: 1px solid var(--border); background: #fafafa;">
+          <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+            <div style="padding: 6px 16px; border-radius: 20px; background: #f6ffed; color: #52c41a; font-weight: 500; font-size: 11px;">✓ DPA R1</div>
+            <div style="color: var(--border);">→</div>
+            <div style="padding: 6px 16px; border-radius: 20px; background: #f6ffed; color: #52c41a; font-weight: 500; font-size: 11px;">✓ DPA R2</div>
+            <div style="color: var(--border);">→</div>
+            <div style="padding: 6px 16px; border-radius: 20px; background: #e6f7ff; color: #1890ff; font-weight: 500; font-size: 11px;">⟳ BCA+FCA</div>
+            <div style="color: var(--border);">→</div>
+            <div style="padding: 6px 16px; border-radius: 20px; background: #f5f5f5; color: #999; font-size: 11px;">ORA</div>
+          </div>
+        </div>
+
+        <!-- 文件上传区（可折叠） -->
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 500;">已上传 4 个文件</span>
+            <button class="mock-button" style="font-size: 11px;">管理文件</button>
+          </div>
+        </div>
+
+        <!-- 产物内容区 -->
+        <div style="padding: 16px;">
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button class="mock-button" style="background: var(--accent); color: white; font-size: 11px; padding: 4px 12px;">审查基准</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px;">字段护照</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px; opacity: 0.5;">BCA 结果</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px; opacity: 0.5;">FCA 结果</button>
+            <button class="mock-button" style="font-size: 11px; padding: 4px 12px; opacity: 0.5;">审查报告</button>
+          </div>
+          <div class="placeholder" style="height: 200px;">产物内容渲染区域</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 1.5rem;">
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>方案 A 左右分栏</h4>
+      <ul>
+        <li>流水线状态始终可见，不影响产物浏览</li>
+        <li>左侧信息密度高，适合监控</li>
+        <li>和 writer 模块风格统一</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>方案 B 上下布局</h4>
+      <ul>
+        <li>产物内容区更宽，报告渲染更好</li>
+        <li>状态条信息密度低</li>
+        <li>文件管理需要额外弹窗</li>
+      </ul>
+    </div>
+  </div>
+</div>
