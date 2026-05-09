@@ -145,6 +145,11 @@ function startManualConfirm(taskId: string) {
   manualNote.value = ''
 }
 
+function cancelManualConfirm() {
+  pendingManualTaskId.value = null
+  manualNote.value = ''
+}
+
 function handleManualConfirm() {
   const next = new Set(manualConfirmedSet.value)
   if (pendingManualTaskId.value) next.add(pendingManualTaskId.value)
@@ -455,14 +460,7 @@ function closeDroolsModal() {
                 >
                   <template #icon><CheckOutlined /></template>确认通过，恢复队列
                 </a-button>
-                <a-button
-                  danger
-                  style="flex: 1"
-                  @click="
-                    pendingManualTaskId = null
-                    manualNote = ''
-                  "
-                >
+                <a-button danger style="flex: 1" @click="cancelManualConfirm">
                   <template #icon><StopOutlined /></template>取消（保持挂起）
                 </a-button>
               </div>
