@@ -46,7 +46,7 @@ ORA (报告编译)
 
 1. 保存联系人和项目信息到 task（`contactName`, `contactEmail`, `contactPhone`, `contactCompany`, `projectShortName`, `projectDescription`）
 2. 生成 `progress_token`（用于结果页免登录访问）
-3. 调用 `scheduler.enqueue(taskId)`（详见 §11）：
+3. 调用 `scheduler.enqueue(taskId)`（详见 §9.4）：
    - **有空闲槽位**：`status = 'running'`，异步启动 `engine.start(taskId)`
    - **无空闲槽位**：`status = 'queued'`，`phase = 'QUEUED'`，等待出队
 
@@ -55,14 +55,14 @@ ORA (报告编译)
 §1.1 的流程图只展示了阶段顺序。实际运行时涉及并发控制、内存状态、两层重试、持久化与通知等多个关注点，用下面的总览图串联：
 
 ```
-┌────────────────── TaskScheduler (§11) ──────────────────┐
+┌────────────────── TaskScheduler (§9.4) ─────────────────┐
 │ maxConcurrent=2 · FIFO排队 · 看门狗120min · 崩溃恢复      │
 │                                                          │
 │  POST /start → enqueue                                   │
 │    有空位 → status=running，立即启动                       │
 │    无空位 → status=queued，排队等待                        │
 │                                                          │
-│  ┌── PipelineState (§8.2) ────────────────────────────┐  │
+│  ┌── PipelineState (§7.2) ────────────────────────────┐  │
 │  │ 内存共享对象，贯穿全流程，流水线结束后释放               │  │
 │  │                                                    │  │
 │  │ tenderDoc ──→ reviewBaseline ──→ extractedFields   │  │
@@ -80,7 +80,7 @@ ORA (报告编译)
 │  │         ↓                                            │  │
 │  │      DPA R1 → DPA R2                                 │  │
 │  │                  ↓                                   │  │
-│  │           ┌ BCA ─┐  ← Promise.allSettled 并行(§9.2) │  │
+│  │           ┌ BCA ─┐  ← Promise.allSettled 并行(§9.3) │  │
 │  │           │      │                                   │  │
 │  │           └ FCA ─┘                                   │  │
 │  │                  ↓                                   │  │
@@ -88,21 +88,21 @@ ORA (报告编译)
 │  │                                                      │  │
 │  │  ············ 单阶段执行细节 ············              │  │
 │  │                                                      │  │
-│  │  Phase 层重试 (§6, 最多3次)                           │  │
+│  │  Phase 层重试 (§9.1, 最多3次)                          │  │
 │  │  ┌────────────────────────────────────────────────┐  │  │
 │  │  │ buildPrompt → callLlm() → validate(result)     │  │  │
 │  │  │                           │                    │  │  │
 │  │  │                    通过 → 写回state + 持久化     │  │  │
 │  │  │                    不通过 → 追加修正prompt重试    │  │  │
 │  │  │                                                │  │  │
-│  │  │ callLlm 内部 (§13, 最多3次HTTP重试)              │  │  │
+│  │  │ callLlm 内部 (§9.2, 最多3次HTTP重试)              │  │  │
 │  │  │ ┌────────────────────────────────────────────┐ │  │  │
 │  │  │ │ LLM API → 429/5xx/超时 → 指数退避重试       │ │  │  │
 │  │  │ │         → 401/400/Quota → 直接抛出          │ │  │  │
 │  │  │ └────────────────────────────────────────────┘ │  │  │
 │  │  └────────────────────────────────────────────────┘  │  │
 │  │                                                      │  │
-│  │  BCA/FCA 容错路径 (§9.2):                             │  │
+│  │  BCA/FCA 容错路径 (§9.3):                             │  │
 │  │  · 部分失败 → buildDegradedInput → ORA 降级编译       │  │
 │  │    （失败章节标注 [Human_Required]，正常章节照常生成）   │  │
 │  │  · 全部失败 → pipeline failed，不进入 ORA             │  │
@@ -126,19 +126,19 @@ ORA (报告编译)
 
 | 关注点 | 章节 | 在图中的位置 |
 |--------|------|-------------|
-| 并发控制与排队 | §11 | 最外层 TaskScheduler |
-| 内存状态生命周期 | §8.2 | PipelineState 框 |
+| 并发控制与排队 | §9.4 | 最外层 TaskScheduler |
+| 内存状态生命周期 | §7.2 | PipelineState 框 |
 | 阶段顺序与依赖 | §1.1 / §1.2 | Engine 内部流程 |
 | Prompt 构建细节 | §3 | buildPrompt |
 | 格式校验规则 | §4 | validate |
 | 报告质量校验 | §5 | validate（ORA 专用） |
-| Phase 层重试 | §6 | Engine 单阶段细节 |
-| LLM 调用层重试 | §13 | callLlm 内部 |
-| BCA/FCA 并行容错 | §9.2 | 容错路径 |
-| 截断阈值 | §7 | buildPrompt 内部（表中列出各阶段阈值） |
-| DB 持久化策略 | §8.3 / §8.4 | DB 持久化框 |
-| WS 事件设计 | §8.5 | WebSocket 通知框 |
-| 崩溃恢复与看门狗 | §12 | TaskScheduler（崩溃恢复 + 看门狗） |
+| Phase 层重试 | §9.1 | Engine 单阶段细节 |
+| LLM 调用层重试 | §9.2 | callLlm 内部 |
+| BCA/FCA 并行容错 | §9.3 | 容错路径 |
+| 截断阈值 | §6 | buildPrompt 内部（表中列出各阶段阈值） |
+| DB 持久化策略 | §7.3 / §7.4 | DB 持久化框 |
+| WS 事件设计 | §7.5 | WebSocket 通知框 |
+| 崩溃恢复与看门狗 | §9.5 | TaskScheduler（崩溃恢复 + 看门狗） |
 | Agent 配置 | §2 | buildPrompt 使用的 temperature/maxTokens |
 | System Prompt 管理 | §2.3 | buildPrompt 从 DB 加载 system prompt |
 
@@ -603,60 +603,10 @@ const messages = [
 通过条件：score >= 60 且 缺少章节 <= 2
 ```
 
----
-
-## 6. 重试策略（Phase 层）
-
-> **本章描述的是 Phase 层重试**——处理 LLM 输出格式/质量不达标的情况。每次 Phase 重试内部调用 `callLlm()`，该函数自身还有一层 HTTP 级重试（处理 429/5xx/超时），详见 [§13 LLM 调用层容错](#13-llm-调用层容错)。两层关系：`Phase 重试(§6, ×3) → callLlm 内部重试(§13, ×3)`。
-
-### 6.1 单阶段重试
-
-每个阶段最多重试 3 次：
-
-```
-attempt 0: 构建初始 prompt → 调用 LLM
-  ├── 空响应 → 重试
-  └── 格式校验不通过 → 追加修正要求 → 重试
-
-attempt 1: 修正后的 prompt → 调用 LLM
-  ├── 空响应 → 重试
-  └── 格式校验不通过 → 追加修正要求 → 重试
-
-attempt 2: 再次修正的 prompt → 调用 LLM
-  └── 无论结果如何 → 保留（最后一次兜底）
-```
-
-### 6.2 格式修正 Prompt
-
-在原始 prompt 后追加：
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠ 格式修正要求（上一轮输出存在以下格式问题）
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 缺少★号条款提取表
-- 缺少明确的 PASS/FAIL 判定
-
-请重新输出，务必修正上述格式问题。其余内容不变。
-```
-
-### 6.3 报告质量修正
-
-ORA 阶段使用报告质量校验替代格式校验，修正 prompt：
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠ 上一版报告存在以下问题，请修正后重新编译完整报告：
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 缺少「审查结论总览」章节
-- 报告表格行数过少（3行）
-
-请确保报告包含全部七个部分。直接输出完整报告，不要输出任何解释或说明。
-```
 
 ---
 
-## 7. 文本截断策略
+## 6. 文本截断策略
 
 各阶段的截断阈值（从 demo 的 qwen3.6-27b 适配参数）：
 
@@ -677,17 +627,18 @@ ORA 阶段使用报告质量校验替代格式校验，修正 prompt：
 
 ---
 
-## 8. 数据流转与产物生命周期
+## 7. 数据流转与产物生命周期
 
-> 本章是文档中最长的章节，涵盖从产物定义到前端消费的完整链路。建议按需阅读：
-> - **产物结构与格式**（8.1）— 五种 artifact 的内容定义
-> - **内存模型**（8.2）— PipelineState 的字段与生命周期
-> - **阶段间数据流**（8.3）— 完整的流程图 + 每阶段输入/输出总结
-> - **DB 持久化**（8.4）— task_artifacts 表的使用规则与版本策略
-> - **WebSocket 事件**（8.5）— 8 种事件类型定义、触发时机、前端消费示例
+> 本章涵盖从产物定义到前端消费的完整链路。建议按需阅读：
+> - **产物结构与格式**（7.1）— 五种 artifact 的内容定义
+> - **内存模型**（7.2）— PipelineState 的字段与生命周期
+> - **阶段间数据流**（7.3）— 完整的流程图 + 每阶段输入/输出总结
+> - **DB 持久化**（7.4）— task_artifacts 表的使用规则与版本策略
+> - **WebSocket 事件**（7.5）— 8 种事件类型定义、触发时机、前端消费示例
+> - **前端数据获取**（7.6）— 初始化流程、产物 Tab 按需加载、PipelineMonitor 步骤映射
 > - **前端数据获取**（8.6）— 初始化流程、产物 Tab 按需加载、PipelineMonitor 步骤映射
 
-### 8.1 产物类型与格式定义
+### 7.1 产物类型与格式定义
 
 每个流水线阶段产出一种结构化数据，存入 `task_artifacts` 表的 `content` 字段（Markdown 格式）：
 
@@ -701,7 +652,7 @@ ORA 阶段使用报告质量校验替代格式校验，修正 prompt：
 
 **产物命名约定：** `{项目代号}-{artifactType}`，例如 `LZ270-review_baseline`
 
-### 8.2 流水线内存模型
+### 7.2 流水线内存模型
 
 流水线运行时在内存中维护一个 `PipelineState` 对象，所有阶段共享同一实例：
 
@@ -735,7 +686,7 @@ interface PipelineState {
 3. 每个阶段成功后立即持久化到 DB
 4. 流水线结束时 state 被释放
 
-### 8.3 阶段间数据流转
+### 7.3 阶段间数据流转
 
 #### 整体流程
 
@@ -874,7 +825,7 @@ setPhase(COMPLETED)                → WS: completed { qualityScore }
 | FCA | `bidDocs` + `extractedFields` | 投标文件(15K) + 字段(8K) + 文件索引 | `fcaResult` | `fca_result` |
 | ORA | `tenderDoc` + `reviewBaseline` + `bcaResult` + `fcaResult` | 招标摘要(4K) + 基准(6K) + BCA(12K) + FCA(12K) | `reviewReport` | `review_report` |
 
-### 8.4 数据库持久化策略
+### 7.4 数据库持久化策略
 
 #### task_artifacts 表使用规则
 
@@ -964,7 +915,7 @@ interface LlmCallLog {
 }
 ```
 
-### 8.5 WebSocket 事件设计
+### 7.5 WebSocket 事件设计
 
 前端通过 `GET /api/v1/reviewer/ws/tasks/:id` 建立 WebSocket 连接，接收实时事件。
 
@@ -1122,7 +1073,7 @@ async function onTabClick(artifactType: string) {
 }
 ```
 
-### 8.6 前端数据获取
+### 7.6 前端数据获取
 
 #### 初始化流程
 
@@ -1151,11 +1102,215 @@ async function onTabClick(artifactType: string) {
 | 3. 四维度审查 | BCA_FCA_RUNNING | `phase_changed { to: BCA_FCA_RUNNING }` |
 | 4. 报告生成 | REPORT_COMPILING → COMPLETED | `phase_changed { to: REPORT_COMPILING }` |
 
+## 8. 从 Demo Port 的文件映射
+
+| Demo 文件 (Python) | 目标文件 (TypeScript) | 说明 |
+|--------------------|-----------------------|------|
+| `src/shared/models.py` | `types.ts` | 枚举和类型定义，去掉 dataclass 装饰器 |
+| `src/orchestrator/state.py` | 数据库 tasks 表 | 状态管理从 JSON 文件改为数据库驱动 |
+| `src/orchestrator/pipeline.py` | `pipeline/engine.ts` | 流水线主逻辑，async/await 替代 Python asyncio |
+| `src/orchestrator/context_builder.py` | `pipeline/context-builder.ts` | Prompt 构建，截断参数保持一致 |
+| `src/orchestrator/context_builder.py::validate_review_format` | `pipeline/format-validator.ts` | 格式校验逻辑原样 port |
+| `src/orchestrator/report_validator.py` | `pipeline/report-validator.ts` | 报告质量校验，全部校验规则原样 port |
+| `src/agents/client.py` | `llm/gateway.ts` | 复用 writer 的 callAgent 模式 |
+| `src/agents/options.py` | `llm/config.ts` | Agent 配置工厂 |
+| `docs/prompts/01-ora.md` | 系统提示词（ORA） | 从指令手册完整摘取，运行时加载 |
+| `docs/prompts/02-dpa.md` | 系统提示词（DPA） | 从指令手册完整摘取，运行时加载 |
+| `docs/prompts/03-bca.md` | 系统提示词（BCA） | 从指令手册完整摘取，运行时加载 |
+| `docs/prompts/04-fca.md` | 系统提示词（FCA） | 从指令手册完整摘取，运行时加载 |
+| `config/pipeline.toml` | 环境变量 + 硬编码默认值 | 配置项合并到代码常量 |
+
+
 ---
 
-## 9. 错误处理
+## 9. 可靠性与容错设计
 
-### 9.1 异常传播
+本章将流水线运行中所有"出错时怎么办"的机制统一收拢，包括重试、错误处理、并发控制与崩溃恢复。
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ 可靠性全景                                                    │
+│                                                              │
+│  正常路径 ──→ Phase 层重试(§9.1) ──→ LLM 调用层重试(§9.2)    │
+│                格式/质量不达标        429/5xx/超时             │
+│                                                              │
+│  异常路径 ──→ 错误处理(§9.3)                                  │
+│                异常传播 + BCA/FCA 并行容错                     │
+│                                                              │
+│  系统层面 ──→ 并发控制(§9.4) + 崩溃恢复(§9.5)                 │
+│                排队/出队/幂等     看门狗/僵尸检测/状态流转      │
+└──────────────────────────────────────────────────────────────┘
+```
+### 9.1 Phase 层重试策略
+
+> 处理 LLM 输出格式/质量不达标的情况。每次 Phase 重试内部调用 `callLlm()`，该函数自身还有一层 HTTP 级重试（§9.2）。两层关系：`Phase 重试(§9.1, ×3) → callLlm 内部重试(§9.2, ×3)`。
+#### 9.1.1 单阶段重试
+
+每个阶段最多重试 3 次：
+
+```
+attempt 0: 构建初始 prompt → 调用 LLM
+  ├── 空响应 → 重试
+  └── 格式校验不通过 → 追加修正要求 → 重试
+
+attempt 1: 修正后的 prompt → 调用 LLM
+  ├── 空响应 → 重试
+  └── 格式校验不通过 → 追加修正要求 → 重试
+
+attempt 2: 再次修正的 prompt → 调用 LLM
+  └── 无论结果如何 → 保留（最后一次兜底）
+```
+
+#### 9.1.2 格式修正 Prompt
+
+在原始 prompt 后追加：
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠ 格式修正要求（上一轮输出存在以下格式问题）
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 缺少★号条款提取表
+- 缺少明确的 PASS/FAIL 判定
+
+请重新输出，务必修正上述格式问题。其余内容不变。
+```
+
+#### 9.1.3 报告质量修正
+
+ORA 阶段使用报告质量校验替代格式校验，修正 prompt：
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠ 上一版报告存在以下问题，请修正后重新编译完整报告：
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 缺少「审查结论总览」章节
+- 报告表格行数过少（3行）
+
+请确保报告包含全部七个部分。直接输出完整报告，不要输出任何解释或说明。
+```
+### 9.2 LLM 调用层容错
+
+#### 9.2.1 两层重试架构
+
+```
+Phase 层重试（§9.1，最多 3 次）
+  └── 每次 attempt 调用 callLlm()
+      └── LLM 调用层重试（§9.2，最多 3 次）
+           └── 单次 HTTP 请求 → LLM API
+```
+
+- **LLM 调用层**：处理 API 本身的故障（429、5xx、超时、网络错误）
+- **Phase 层**：处理业务逻辑问题（格式不对、质量不达标），用修正 prompt 重试
+
+两层各管各的，最坏情况单个阶段 3 × 3 = 9 次 API 调用（极端场景，正常 1 次即成功）。
+
+#### 9.2.2 错误分类
+
+| 错误类型 | 例子 | 是否重试 | 处理方式 |
+|---------|------|---------|---------|
+| 速率限制 | HTTP 429 | ✅ | 读 Retry-After，否则指数退避 |
+| 服务端错误 | HTTP 500/502/503 | ✅ | 指数退避 |
+| 调用超时 | 15 分钟内无响应 | ✅ | 指数退避 |
+| 网络错误 | ECONNRESET / DNS 失败 | ✅ | 指数退避 |
+| 认证错误 | HTTP 401/403 | ❌ | 直接抛出，不浪费 attempt |
+| 请求错误 | HTTP 400 | ❌ | 直接抛出（说明 prompt 本身有问题） |
+
+#### 9.2.3 指数退避
+
+```
+delay = base × 2^attempt + random(0, base)
+base = 2000ms
+
+attempt 0 → ~2s
+attempt 1 → ~4s
+attempt 2 → ~8s
+```
+
+429 时优先使用 `Retry-After` header 的值，没有则走指数退避。加 jitter（随机偏移）避免多个任务同时重试造成"惊群"。
+
+#### 9.2.4 callLlm 实现
+
+```typescript
+async function callLlm(prompt: string, options: AgentOptions): Promise<string> {
+  const maxRetries = getLLMMaxRetries()    // 默认 3
+  const timeoutMs = getLLMCallTimeoutMs()  // 默认 900000 (15 分钟)
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await withTimeout(
+        llmApiCall(prompt, options),
+        timeoutMs
+      )
+    } catch (error) {
+      // 不可重试的错误直接抛出
+      if (!isRetryable(error) || attempt === maxRetries) {
+        throw error
+      }
+
+      // 429 优先读 Retry-After，否则指数退避
+      const delay = error.status === 429
+        ? getRetryAfterMs(error) ?? backoff(attempt)
+        : backoff(attempt)
+
+      await sleep(delay)
+    }
+  }
+
+  throw new Error('unreachable')
+}
+```
+
+#### 9.2.5 与 Phase 层的配合
+
+```typescript
+// pipeline/engine.ts 中的 runPhase 伪代码
+async function runPhase(taskId, agentRole, prompt) {
+  const maxAttempts = 3
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const result = await callLlm(prompt, options)  // ← 调用层重试在这里
+      const issues = validateReviewFormat(result, agentRole)
+
+      if (issues.length === 0) return result          // 格式正确，完成
+
+      if (attempt < maxAttempts - 1) {
+        prompt = buildFormatFixPrompt(prompt, issues)  // 追加修正 prompt
+      } else {
+        return result                                   // 最后一次，兜底保留
+      }
+    } catch (error) {
+      // callLlm 所有重试耗尽后抛出 → 当前 phase attempt 失败
+      if (attempt === maxAttempts - 1) throw error
+      // 否则继续下一次 phase attempt（同样的 prompt）
+    }
+  }
+}
+```
+
+#### 9.2.6 调用层对前端透明
+
+LLM 调用层的重试对前端完全不可见。前端只看到：
+
+- `agent_call_started { agentRole, attempt }` — phase 层的 attempt 编号
+- `agent_call_completed { agentRole, latencyMs, tokens }` — 最终成功的那次调用
+
+调用层内部的 429/5xx 重试不触发 WS 事件，不影响 PipelineMonitor 显示。
+
+#### 9.2.7 配置
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `LLM_CALL_TIMEOUT_MS` | 900000 | 单次 API 调用超时（毫秒），默认 15 分钟 |
+| `LLM_MAX_RETRIES` | 3 | 调用层最大重试次数 |
+| `LLM_RETRY_BASE_MS` | 2000 | 退避基数（毫秒） |
+
+> 单阶段最坏情况：3 phase attempt × (1 + 3 call retry) = 12 次 API 调用 × 15 分钟 = 理论最大 180 分钟。
+> 但实际不可能所有调用都超时，看门狗 120 分钟兜底会先触发。
+
+### 9.3 错误处理
+
+#### 9.3.1 异常传播
 
 ```
 runPipeline()
@@ -1169,9 +1324,9 @@ runPipeline()
   └── 未捕获异常 → 设置 FAILED，广播 failed
 ```
 
-### 9.2 BCA+FCA 并行容错
+#### 9.3.2 BCA+FCA 并行容错 — 执行逻辑
 
-#### 9.2.1 执行逻辑
+
 
 BCA 和 FCA 通过 `Promise.allSettled` 并行执行，任一失败不阻塞另一个。两个都失败则流水线整体标记 failed。
 
@@ -1194,7 +1349,7 @@ await saveArtifact(taskId, 'bca_result', 'BCA_FCA_RUNNING', bcaText)
 await saveArtifact(taskId, 'fca_result', 'BCA_FCA_RUNNING', fcaText)
 ```
 
-#### 9.2.2 失败降级文本（buildDegradedInput）
+#### 9.3.3 失败降级文本（buildDegradedInput）
 
 当 BCA 或 FCA 执行失败时，不能把原始错误信息直接喂给 ORA（如 `"BCA 审查异常: TimeoutError"`），ORA 无法理解这是何种失败、该如何处理。需要生成结构化的降级文本，让 ORA 按指令手册的规则生成对应章节。
 
@@ -1251,7 +1406,7 @@ function buildDegradedInput(
 报告其余章节（有数据的部分）正常生成。
 ```
 
-#### 9.2.3 与 ORA 的配合
+#### 9.3.4 与 ORA 的配合
 
 ORA 收到降级文本后，按指令手册的规则处理：
 
@@ -1277,36 +1432,14 @@ ORA 收到降级文本后，按指令手册的规则处理：
 ```
 
 ---
-
-## 10. 从 Demo Port 的文件映射
-
-| Demo 文件 (Python) | 目标文件 (TypeScript) | 说明 |
-|--------------------|-----------------------|------|
-| `src/shared/models.py` | `types.ts` | 枚举和类型定义，去掉 dataclass 装饰器 |
-| `src/orchestrator/state.py` | 数据库 tasks 表 | 状态管理从 JSON 文件改为数据库驱动 |
-| `src/orchestrator/pipeline.py` | `pipeline/engine.ts` | 流水线主逻辑，async/await 替代 Python asyncio |
-| `src/orchestrator/context_builder.py` | `pipeline/context-builder.ts` | Prompt 构建，截断参数保持一致 |
-| `src/orchestrator/context_builder.py::validate_review_format` | `pipeline/format-validator.ts` | 格式校验逻辑原样 port |
-| `src/orchestrator/report_validator.py` | `pipeline/report-validator.ts` | 报告质量校验，全部校验规则原样 port |
-| `src/agents/client.py` | `llm/gateway.ts` | 复用 writer 的 callAgent 模式 |
-| `src/agents/options.py` | `llm/config.ts` | Agent 配置工厂 |
-| `docs/prompts/01-ora.md` | 系统提示词（ORA） | 从指令手册完整摘取，运行时加载 |
-| `docs/prompts/02-dpa.md` | 系统提示词（DPA） | 从指令手册完整摘取，运行时加载 |
-| `docs/prompts/03-bca.md` | 系统提示词（BCA） | 从指令手册完整摘取，运行时加载 |
-| `docs/prompts/04-fca.md` | 系统提示词（FCA） | 从指令手册完整摘取，运行时加载 |
-| `config/pipeline.toml` | 环境变量 + 硬编码默认值 | 配置项合并到代码常量 |
-
----
-
-## 11. TaskScheduler 与并发控制
-
-### 11.1 设计目标
+### 9.4 并发控制（TaskScheduler）
+#### 9.4.1 设计目标
 
 - 限制同时执行的流水线数量，防止 LLM API 限流
 - 多用户同时提交时公平排队（FIFO）
 - 服务重启后队列不丢失
 
-### 11.2 架构
+#### 9.4.2 架构
 
 TaskScheduler 是进程级单例，在服务启动时初始化：
 
@@ -1338,7 +1471,7 @@ interface EnqueueResult {
 }
 ```
 
-### 11.3 幂等保护（防止重复启动）
+#### 9.4.3 幂等保护（防止重复启动）
 
 `POST /tasks/:id/start` 通过数据库条件更新保证幂等：
 
@@ -1352,7 +1485,7 @@ WHERE id = $1 AND status = 'created'
 
 覆盖场景：用户重复点击、前端网络重试、并发请求。
 
-### 11.4 排队流程
+#### 9.4.4 排队流程
 
 ```
 POST /tasks/:id/start → 校验通过 → 幂等检查通过 → scheduler.enqueue(taskId)
@@ -1373,7 +1506,7 @@ POST /tasks/:id/start → 校验通过 → 幂等检查通过 → scheduler.enqu
           └─ 返回 { started: false, queuePosition }
 ```
 
-### 11.5 出队流程
+#### 9.4.5 出队流程
 
 ```
 Pipeline 完成/失败
@@ -1401,7 +1534,7 @@ scheduler.onTaskFinished(taskId)
     └─ 广播 WS: queue_position 给剩余排队任务（位置前移）
 ```
 
-### 11.6 排队位置推送
+#### 9.4.6 排队位置推送
 
 当出队触发后，所有排队任务的位置需要更新：
 
@@ -1421,7 +1554,7 @@ for (let i = 0; i < queuedTasks.length; i++) {
 }
 ```
 
-### 11.7 启动恢复
+#### 9.4.7 启动恢复
 
 服务启动时，`TaskScheduler.recover()` 执行：
 
@@ -1429,7 +1562,7 @@ for (let i = 0; i < queuedTasks.length; i++) {
 1. 查询 status = 'running' 的任务：
    - 内存中的 PipelineState 已丢失，无法恢复运行进度
    - 策略：标记为 failed（phase 记录崩溃前的阶段）
-   - 可选优化：检查 task_artifacts 是否有完整产物链，如有则标记 completed（见 §12 崩溃恢复）
+   - 可选优化：检查 task_artifacts 是否有完整产物链，如有则标记 completed（见 §9.5 崩溃恢复）
 
 2. 查询 status = 'queued' 的任务：
    - 按 createdAt 排序，依次尝试出队执行
@@ -1438,15 +1571,15 @@ for (let i = 0; i < queuedTasks.length; i++) {
 3. 初始化完成，scheduler 进入正常工作状态
 ```
 
-### 11.8 配置
+#### 9.4.8 配置
 
 | 环境变量 | 默认值 | 说明 |
 |---------|--------|------|
-| `MAX_CONCURRENT_TASKS` | 2 | 最大同时运行的任务数 |
+| `MAX_CONCURRENT_TASKS` | 3 | 最大同时运行的任务数 |
 
 > 该值取决于 LLM API 的 RPM/TPM 限制。每个任务峰值并发 2 个 LLM 调用（BCA+FCA 阶段），因此 `MAX_CONCURRENT_TASKS = N` 意味着最坏情况下同时 `2N` 个 LLM 请求。设置时需确保 `2N ≤ API 并发上限`。
 
-### 11.9 前端交互
+#### 9.4.9 前端交互
 
 **排队状态展示：**
 
@@ -1477,11 +1610,8 @@ ws.onmessage = (event) => {
 }
 ```
 
----
-
-## 12. 状态机健壮性与崩溃恢复
-
-### 12.1 需要应对的异常场景
+### 9.5 状态机健壮性与崩溃恢复
+#### 9.5.1 需要应对的异常场景
 
 | # | 场景 | 后果 |
 |---|------|------|
@@ -1491,7 +1621,7 @@ ws.onmessage = (event) => {
 | 4 | WS 断连后重连 | 客户端漏掉中间事件 |
 | 5 | 任务卡死（未捕获异常/死锁） | task.status 永远是 running |
 
-### 12.2 崩溃恢复（覆盖 #1-#3）
+#### 9.5.2 崩溃恢复（覆盖 #1-#3）
 
 **策略：服务重启时，所有 status = 'running' 的任务直接标记为 failed。**
 
@@ -1522,7 +1652,7 @@ async function recoverCrashedTasks(): Promise<void> {
 | 产物不丢失 | 已保存的 artifact 仍在 DB 中，用户和管理员可随时查看已生成的中间产物 |
 | Token 浪费 | #2 场景（LLM 结果未持久化）概率极低（窗口在毫秒级），接受损失 |
 
-### 12.3 WS 断连重连（覆盖 #4）
+#### 9.5.3 WS 断连重连（覆盖 #4）
 
 **策略：前端重连后主动拉取最新状态，不依赖服务端缓存事件。**
 
@@ -1534,7 +1664,7 @@ WS 断连 → 自动重连 → 前端调用 GET /tasks/:id
 
 服务端无需特殊处理，WS 连接是幂等的。
 
-### 12.4 僵尸任务检测（覆盖 #5）
+#### 9.5.4 僵尸任务检测（覆盖 #5）
 
 **策略：后台看门狗定时扫描超时的 running 任务。**
 
@@ -1571,7 +1701,7 @@ setInterval(async () => {
 
 > 正常流水线 5-15 分钟跑完，但含大量重试或 LLM API 响应慢时可能需要 30-60 分钟。2 小时阈值覆盖极端情况，超过则说明遇到了 API 长时间不可用或服务内部死锁。
 
-### 12.5 完整的状态流转
+#### 9.5.5 完整的状态流转
 
 ```
 created ──→ queued ──→ running ──→ completed
@@ -1585,7 +1715,7 @@ created ──→ queued ──→ running ──→ completed
   └─→ created（用户未启动就离开，不转换）
 ```
 
-### 12.6 启动恢复完整流程
+#### 9.5.6 启动恢复完整流程
 
 服务启动时，按顺序执行：
 
@@ -1595,7 +1725,7 @@ created ──→ queued ──→ running ──→ completed
 3. startWatchdog()           ← 启动看门狗定时扫描
 ```
 
-**scheduler.recover() 细节（补充 §11.6）：**
+**scheduler.recover() 细节（补充 §9.4.6）：**
 
 ```
 1. 查询 status = 'queued' 的任务，按 createdAt 排序
@@ -1603,125 +1733,3 @@ created ──→ queued ──→ running ──→ completed
 3. 依次出队前 N 个任务启动
 4. 剩余任务保持 queued 状态等待
 ```
-
----
-
-## 13. LLM 调用层容错
-
-### 13.1 两层重试架构
-
-```
-Phase 层重试（§6，最多 3 次）
-  └── 每次 attempt 调用 callLlm()
-      └── LLM 调用层重试（§13，最多 3 次）
-           └── 单次 HTTP 请求 → LLM API
-```
-
-- **LLM 调用层**：处理 API 本身的故障（429、5xx、超时、网络错误）
-- **Phase 层**：处理业务逻辑问题（格式不对、质量不达标），用修正 prompt 重试
-
-两层各管各的，最坏情况单个阶段 3 × 3 = 9 次 API 调用（极端场景，正常 1 次即成功）。
-
-### 13.2 错误分类
-
-| 错误类型 | 例子 | 是否重试 | 处理方式 |
-|---------|------|---------|---------|
-| 速率限制 | HTTP 429 | ✅ | 读 Retry-After，否则指数退避 |
-| 服务端错误 | HTTP 500/502/503 | ✅ | 指数退避 |
-| 调用超时 | 15 分钟内无响应 | ✅ | 指数退避 |
-| 网络错误 | ECONNRESET / DNS 失败 | ✅ | 指数退避 |
-| 认证错误 | HTTP 401/403 | ❌ | 直接抛出，不浪费 attempt |
-| 请求错误 | HTTP 400 | ❌ | 直接抛出（说明 prompt 本身有问题） |
-
-### 13.3 指数退避
-
-```
-delay = base × 2^attempt + random(0, base)
-base = 2000ms
-
-attempt 0 → ~2s
-attempt 1 → ~4s
-attempt 2 → ~8s
-```
-
-429 时优先使用 `Retry-After` header 的值，没有则走指数退避。加 jitter（随机偏移）避免多个任务同时重试造成"惊群"。
-
-### 13.4 callLlm 实现
-
-```typescript
-async function callLlm(prompt: string, options: AgentOptions): Promise<string> {
-  const maxRetries = getLLMMaxRetries()    // 默认 3
-  const timeoutMs = getLLMCallTimeoutMs()  // 默认 900000 (15 分钟)
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await withTimeout(
-        llmApiCall(prompt, options),
-        timeoutMs
-      )
-    } catch (error) {
-      // 不可重试的错误直接抛出
-      if (!isRetryable(error) || attempt === maxRetries) {
-        throw error
-      }
-
-      // 429 优先读 Retry-After，否则指数退避
-      const delay = error.status === 429
-        ? getRetryAfterMs(error) ?? backoff(attempt)
-        : backoff(attempt)
-
-      await sleep(delay)
-    }
-  }
-
-  throw new Error('unreachable')
-}
-```
-
-### 13.5 与 Phase 层的配合
-
-```typescript
-// pipeline/engine.ts 中的 runPhase 伪代码
-async function runPhase(taskId, agentRole, prompt) {
-  const maxAttempts = 3
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const result = await callLlm(prompt, options)  // ← 调用层重试在这里
-      const issues = validateReviewFormat(result, agentRole)
-
-      if (issues.length === 0) return result          // 格式正确，完成
-
-      if (attempt < maxAttempts - 1) {
-        prompt = buildFormatFixPrompt(prompt, issues)  // 追加修正 prompt
-      } else {
-        return result                                   // 最后一次，兜底保留
-      }
-    } catch (error) {
-      // callLlm 所有重试耗尽后抛出 → 当前 phase attempt 失败
-      if (attempt === maxAttempts - 1) throw error
-      // 否则继续下一次 phase attempt（同样的 prompt）
-    }
-  }
-}
-```
-
-### 13.6 调用层对前端透明
-
-LLM 调用层的重试对前端完全不可见。前端只看到：
-
-- `agent_call_started { agentRole, attempt }` — phase 层的 attempt 编号
-- `agent_call_completed { agentRole, latencyMs, tokens }` — 最终成功的那次调用
-
-调用层内部的 429/5xx 重试不触发 WS 事件，不影响 PipelineMonitor 显示。
-
-### 13.7 配置
-
-| 环境变量 | 默认值 | 说明 |
-|---------|--------|------|
-| `LLM_CALL_TIMEOUT_MS` | 900000 | 单次 API 调用超时（毫秒），默认 15 分钟 |
-| `LLM_MAX_RETRIES` | 3 | 调用层最大重试次数 |
-| `LLM_RETRY_BASE_MS` | 2000 | 退避基数（毫秒） |
-
-> 单阶段最坏情况：3 phase attempt × (1 + 3 call retry) = 12 次 API 调用 × 15 分钟 = 理论最大 180 分钟。
-> 但实际不可能所有调用都超时，看门狗 120 分钟兜底会先触发。
