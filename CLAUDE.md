@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+开始前必须@contenxt.md，获取本项目的基本。。。。
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > 运用第一性原理思考，拒绝经验主义和路径盲从，不要假设我完全清楚目标，保持审慎，从原始需求和问题出发

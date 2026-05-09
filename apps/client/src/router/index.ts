@@ -9,7 +9,8 @@ const routes: RouteRecordRaw[] = [
     path: '/index',
     name: 'index',
     meta: { title: 'Taco' },
-    component: () => import('@/views/index/index.vue'),
+    // component: () => import('@/views/index/index.vue'),
+    component: () => import('@/views/complianceCheck/index.vue'),
   },
   {
     path: '/user-manage',
