@@ -78,6 +78,12 @@ function handleAddComplianceItem() {
   message.success('已添加新检查项，请编辑内容')
 }
 
+function toggleComplianceExpand(key: string) {
+  expandedComplianceKeys.value = expandedComplianceKeys.value.includes(key)
+    ? expandedComplianceKeys.value.filter((k) => k !== key)
+    : [...expandedComplianceKeys.value, key]
+}
+
 const complianceColumns = computed(() => [
   { title: '序号', key: 'index', width: 55, fixed: 'left' as const, align: 'center' as const },
   { title: '编号', dataIndex: 'key', key: 'key', width: 70 },
@@ -214,12 +220,7 @@ const complianceColumns = computed(() => [
                   transition: 'all 0.3s ease',
                   fontSize: 12,
                 }"
-                @click="
-                  record.requirement.length > 40 &&
-                  (expandedComplianceKeys = expandedComplianceKeys.includes(record.key)
-                    ? expandedComplianceKeys.filter((k) => k !== record.key)
-                    : [...expandedComplianceKeys, record.key])
-                "
+                @click="record.requirement.length > 40 && toggleComplianceExpand(record.key)"
               >
                 {{ record.requirement }}
                 <span v-if="record.requirement.length > 40 && !expandedComplianceKeys.includes(record.key)" style="color: #1890ff"> ...展开</span>

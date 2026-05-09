@@ -140,6 +140,11 @@ function toggleTaskPaused(taskId: string) {
   taskPausedMap.value = { ...taskPausedMap.value, [taskId]: !taskPausedMap.value[taskId] }
 }
 
+function startManualConfirm(taskId: string) {
+  pendingManualTaskId.value = taskId
+  manualNote.value = ''
+}
+
 function handleManualConfirm() {
   const next = new Set(manualConfirmedSet.value)
   if (pendingManualTaskId.value) next.add(pendingManualTaskId.value)
@@ -454,10 +459,8 @@ function closeDroolsModal() {
                   danger
                   style="flex: 1"
                   @click="
-                    () => {
-                      pendingManualTaskId = null
-                      manualNote = ''
-                    }
+                    pendingManualTaskId = null
+                    manualNote = ''
                   "
                 >
                   <template #icon><StopOutlined /></template>取消（保持挂起）
@@ -749,16 +752,7 @@ function closeDroolsModal() {
                         </a-button>
                       </a-tooltip>
                       <a-tooltip v-if="getEffectiveStatus(task) === 'suspended' && !manualConfirmedSet.has(task.id)" title="点击前往人工确认区处理">
-                        <a-button
-                          type="text"
-                          size="small"
-                          danger
-                          :style="{ padding: '0 3px' }"
-                          @click.stop="
-                            pendingManualTaskId = task.id
-                            manualNote = ''
-                          "
-                        >
+                        <a-button type="text" size="small" danger :style="{ padding: '0 3px' }" @click.stop="startManualConfirm(task.id)">
                           <template #icon><UserOutlined /></template>
                         </a-button>
                       </a-tooltip>
@@ -850,10 +844,7 @@ function closeDroolsModal() {
                     danger
                     size="small"
                     style="margin-top: 8px; width: 100%"
-                    @click.stop="
-                      pendingManualTaskId = task.id
-                      manualNote = ''
-                    "
+                    @click.stop="startManualConfirm(task.id)"
                   >
                     <template #icon><UserOutlined /></template>前往中间区完成人工确认
                   </a-button>
