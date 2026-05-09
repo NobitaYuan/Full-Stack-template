@@ -454,8 +454,10 @@ function closeDroolsModal() {
                   danger
                   style="flex: 1"
                   @click="
-                    pendingManualTaskId = null
-                    manualNote = ''
+                    () => {
+                      pendingManualTaskId = null
+                      manualNote = ''
+                    }
                   "
                 >
                   <template #icon><StopOutlined /></template>取消（保持挂起）
