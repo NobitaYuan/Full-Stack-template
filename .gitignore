@@ -33,7 +33,7 @@ pnpm-debug.log*
 
 # Auto-generated
 auto-imports.d.ts
-components.d.ts
+types/components.d.ts
 .eslintrc-auto-import.json
 tsconfig.tsbuildinfo
 openapi.json

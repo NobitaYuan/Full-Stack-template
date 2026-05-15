@@ -30,13 +30,12 @@
 src/
 ├── api/
 │   ├── request.ts              # openapi-fetch 客户端（含 auth 中间件）
-│   ├── api-types.d.ts          # 合并所有模块的类型（自动生成，勿手动编辑）
+│   ├── components.d.ts         # 全量 components schemas（自动生成，勿手动编辑）
+│   ├── api-types.d.ts          # 合并所有模块 paths + re-export components（自动生成）
 │   ├── auth/                   # 认证模块
-│   │   ├── index.ts            # 请求函数（register, login）
-│   │   └── auth.d.ts           # 生成的类型（自动生成，勿手动编辑）
+│   │   └── index.ts            # 请求函数（register, login）
 │   └── users/                  # 用户模块
-│       ├── index.ts            # 请求函数（getUserList, getUser, updateUser, deleteUser）
-│       └── users.d.ts          # 生成的类型（自动生成，勿手动编辑）
+│       └── index.ts            # 请求函数（getUserList, getUser, updateUser, deleteUser）
 ├── assets/
 │   ├── images/
 │   └── style/                 # main.css, tailwind.css, var.css, reset.css

@@ -130,7 +130,7 @@ requestId → security → cors(配置化) → rateLimit → requestLogger → �
 - **`z` 导入源** — 所有 schema 文件中的 `z` 必须从 `'@hono/zod-openapi'` 导入（不直接用 `'zod'`），这样可以使用 `.openapi('Name')` 注册命名 schema 到 OpenAPI `components.schemas`。只有 `core/config/index.ts`（环境变量校验）例外，直接用 `'zod'`
 - **`.openapi('Name')`** — 每个导出的 schema 都应链式调用 `.openapi('SchemaName')` 注册为命名组件，避免 OpenAPI spec 中 schema 重复内联
 - **`.describe()` 注释** — 所有 schema 和关键字段都应加 `.describe('中文描述')`，注释会传递到 OpenAPI spec 和前端类型文件。链路：`Zod .describe()` → OpenAPI `description` → 前端 `apps/client/src/api/{module}/{module}.d.ts` 的 `/** @description */` 注释
-- **前端类型** — 运行 `pnpm generate:api` 按模块生成类型到 `apps/client/src/api/{module}/{module}.d.ts`，合并导出到 `apps/client/src/api/api-types.d.ts`，前端通过 `components['schemas']` 使用
+- **前端类型** — 运行 `pnpm generate:api` 按模块生成 paths 到 `apps/client/src/api/{module}/{module}.d.ts`，components 单独生成到 `apps/client/src/api/components.d.ts`（全量共享），合并导出到 `apps/client/src/api/api-types.d.ts`，前端通过 `components['schemas']` 使用
 - **日志** — 中间件中用 `c.get('logger')` 获取带 requestId 的子 logger，service 层用 `getLogger()`，不要用 `console.log`
 - **错误响应** — 统一使用 `fail(c, message, code)` 返回错误，不要手写 `{ code, message, data: null }` JSON
 - **测试** — Vitest，每个测试文件 `afterEach` 中用 `await db.execute(sql\`DELETE FROM ...\`)` 清空数据
