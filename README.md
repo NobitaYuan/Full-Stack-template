@@ -39,6 +39,8 @@ full-stack-template/
 └── package.json         # 根 monorepo 配置
 ```
 
+Drizzle 迁移和后端运行时共用 [表结构入口](apps/server/src/core/db/schema.ts)。新增表后，从该入口导出，再按[新增模块流程](apps/server/README.md#如何添加新模块)生成迁移。
+
 **前后端类型安全协作链路：**
 
 | 步骤 | 技术 | 功能 | 效果 |
