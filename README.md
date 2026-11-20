@@ -59,6 +59,8 @@ flowchart TD
 
 # 🚀 快速开始
 
+默认用 Docker Compose 启动开发数据库。使用本机 PostgreSQL 时，按[首次启动说明](docs/quickstart.md)配置连接串。
+
 ```shell
 # 克隆仓库
 git clone https://github.com/NobitaYuan/Full-Stack-template.git
@@ -67,10 +69,11 @@ cd Full-Stack-template
 # 安装依赖
 pnpm install --frozen-lockfile
 
-# 准备 PostgreSQL，创建 server_template 数据库
-createdb server_template
+# 启动开发数据库，等待 PostgreSQL 就绪
+docker compose up -d --wait postgres
+
+# 首次启动时复制预设配置，再执行迁移
 cp apps/server/.env.example apps/server/.env
-# 将 apps/server/.env 中的 DATABASE_URL 改为本地数据库连接串
 pnpm --filter @repo/server db:migrate
 
 # 启动开发服务器（前后端同时启动）

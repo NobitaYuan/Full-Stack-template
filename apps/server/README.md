@@ -16,23 +16,22 @@
 
 ## 快速开始
 
-```bash
-# 安装依赖
-pnpm install
+默认使用仓库自带的 Docker Compose 启动 PostgreSQL。首次启动时，按[首次启动说明](../../docs/quickstart.md)复制本目录的 `.env.example` 到 `.env`，示例连接串已匹配容器的开发配置。
 
-# 复制环境变量
-cp .env.example .env
+在仓库根目录运行以下命令。
 
-# 确保 PostgreSQL 已启动，创建数据库
-createdb server_template
-# 将 .env 的 DATABASE_URL 改为该数据库的连接串
+```sh
+pnpm install --frozen-lockfile
+docker compose up -d --wait postgres
 
 # 初始化数据库表
-pnpm db:migrate
+pnpm --filter @repo/server db:migrate
 
 # 启动开发服务器
-pnpm dev
+pnpm --filter @repo/server dev
 ```
+
+也可以使用本机 PostgreSQL。启动本机数据库后，将 `.env` 的 `DATABASE_URL` 改为专用开发库的连接串，然后执行迁移和启动命令。
 
 服务器启动后访问：
 
