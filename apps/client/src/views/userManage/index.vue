@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next'
-import type { components } from '@/api/users/users'
+import type { components } from '@/api/api-types'
 import { getUserList, updateUser, deleteUser } from '@/api/users'
 import { register } from '@/api/auth'
 import dayjs from 'dayjs'
@@ -26,13 +26,15 @@ const formatTime = (iso: string) => dayjs(iso).format('YYYY-MM-DD HH:mm:ss')
 const fetchData = async () => {
   loading.value = true
   try {
-    const { data: res, error } = await getUserList({
+    const { data: res } = await getUserList({
       page: pagination.current,
       size: pagination.pageSize,
     })
-    if (error) return
-    userList.value = res!.data.items
-    pagination.total = res!.data.total
+    if (!res) return
+    userList.value = res.data.items
+    pagination.total = res.data.total
+  } catch {
+    // 请求层已提示网络错误。
   } finally {
     loading.value = false
   }
@@ -57,11 +59,13 @@ const handleAdd = () => {
 const handleAddSubmit = async () => {
   addLoading.value = true
   try {
-    const { error } = await register(addForm.value.username, addForm.value.password, addForm.value.confirmPassword)
-    if (error) return
+    const { data } = await register(addForm.value.username, addForm.value.password, addForm.value.confirmPassword)
+    if (!data) return
     MessagePlugin.success('注册成功')
     addDialogVisible.value = false
     await fetchData()
+  } catch {
+    // 请求层已提示网络错误。
   } finally {
     addLoading.value = false
   }
@@ -80,13 +84,15 @@ const handleEdit = (row: User) => {
 const handleEditSubmit = async () => {
   editLoading.value = true
   try {
-    const { error } = await updateUser(editForm.value.id, {
+    const { data } = await updateUser(editForm.value.id, {
       username: editForm.value.username,
     })
-    if (error) return
+    if (!data) return
     MessagePlugin.success('更新成功')
     editDialogVisible.value = false
     await fetchData()
+  } catch {
+    // 请求层已提示网络错误。
   } finally {
     editLoading.value = false
   }
@@ -102,12 +108,17 @@ const handleDelete = (row: User) => {
     cancelBtn: '取消',
     onConfirm: async () => {
       confirmDialog.update({ confirmLoading: true })
-      const { error } = await deleteUser(row.id)
-      confirmDialog.update({ confirmLoading: false })
-      if (error) return
-      confirmDialog.hide()
-      MessagePlugin.success('删除成功')
-      await fetchData()
+      try {
+        const { data } = await deleteUser(row.id)
+        if (!data) return
+        confirmDialog.hide()
+        MessagePlugin.success('删除成功')
+        await fetchData()
+      } catch {
+        // 请求层已提示网络错误。
+      } finally {
+        confirmDialog.update({ confirmLoading: false })
+      }
     },
   })
 }

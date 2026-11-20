@@ -1,110 +1,88 @@
-import { describe, it, expect, beforeAll, afterEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { app } from '../../src/app.js'
-import { getDb } from '../../src/core/db/index.js'
-import { sql } from 'drizzle-orm'
 
-beforeAll(async () => {
-  // PG tables should exist via migration before tests run
-})
+function createUserInput() {
+  return {
+    username: `test-${crypto.randomUUID()}`,
+    password: 'example-password',
+    confirmPassword: 'example-password',
+  }
+}
 
-afterEach(async () => {
-  const db = getDb()
-  await db.execute(sql`DELETE FROM users`)
-})
+function postAuth(path: 'register' | 'login', body: unknown) {
+  return app.request(`/api/v1/auth/${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
 
 describe('Auth', () => {
-  const testUser = {
-    username: 'testuser',
-    password: '123456',
-    confirmPassword: '123456',
-  }
-
   describe('POST /api/v1/auth/register', () => {
-    it('should register a new user', async () => {
-      const res = await app.request('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testUser),
-      })
+    it('registers an ordinary user', async () => {
+      const input = createUserInput()
+      const res = await postAuth('register', input)
 
       expect(res.status).toBe(200)
-      const json = await res.json()
-      expect(json.data.user.username).toBe(testUser.username)
-      expect(json.data.accessToken).toBeDefined()
+      expect(await res.json()).toMatchObject({
+        code: 200,
+        data: {
+          user: { username: input.username, isAdmin: false },
+          accessToken: expect.any(String),
+        },
+      })
     })
 
-    it('should reject duplicate username', async () => {
-      await app.request('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testUser),
-      })
+    it('returns HTTP 409 when a concurrent registration claims the same username', async () => {
+      const input = createUserInput()
+      const responses = await Promise.all([postAuth('register', input), postAuth('register', input)])
 
-      const res = await app.request('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testUser),
-      })
-
-      expect(res.status).toBe(200)
-      const json = await res.json()
-      expect(json.code).toBe(409)
+      expect(responses.map(({ status }) => status).sort()).toEqual([200, 409])
+      const rejected = responses.find(({ status }) => status === 409)
+      expect(await rejected?.json()).toMatchObject({ code: 409, data: null })
     })
 
-    it('should reject mismatched passwords', async () => {
+    it('returns HTTP 422 for mismatched passwords with field details', async () => {
+      const res = await postAuth('register', { ...createUserInput(), confirmPassword: 'wrong' })
+
+      expect(res.status).toBe(422)
+      expect(await res.json()).toMatchObject({
+        code: 422,
+        data: [{ path: 'confirmPassword', message: expect.any(String) }],
+      })
+    })
+
+    it('returns HTTP 400 for malformed JSON', async () => {
       const res = await app.request('/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...testUser, confirmPassword: 'wrong' }),
+        body: '{',
       })
 
-      expect(res.status).toBe(200)
-      const json = await res.json()
-      expect(json.code).toBe(422)
+      expect(res.status).toBe(400)
+      expect(await res.json()).toMatchObject({ code: 400, data: null })
     })
   })
 
   describe('POST /api/v1/auth/login', () => {
-    it('should login with valid credentials', async () => {
-      await app.request('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testUser),
-      })
+    it('logs in with valid credentials', async () => {
+      const input = createUserInput()
+      expect((await postAuth('register', input)).status).toBe(200)
 
-      const res = await app.request('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: testUser.username,
-          password: testUser.password,
-        }),
-      })
+      const res = await postAuth('login', { username: input.username, password: input.password })
 
       expect(res.status).toBe(200)
-      const json = await res.json()
-      expect(json.data.accessToken).toBeDefined()
+      expect(await res.json()).toMatchObject({ code: 200, data: { accessToken: expect.any(String) } })
     })
 
-    it('should reject wrong password', async () => {
-      await app.request('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testUser),
-      })
+    it('returns HTTP 401 for the wrong password', async () => {
+      const input = createUserInput()
+      expect((await postAuth('register', input)).status).toBe(200)
 
-      const res = await app.request('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: testUser.username,
-          password: 'wrongpassword',
-        }),
-      })
+      const res = await postAuth('login', { username: input.username, password: 'wrongpassword' })
 
-      expect(res.status).toBe(200)
-      const json = await res.json()
-      expect(json.code).toBe(401)
+      expect(res.status).toBe(401)
+      expect(await res.json()).toMatchObject({ code: 401, data: null })
     })
   })
 })

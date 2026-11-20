@@ -22,7 +22,6 @@ dist-ssr
 *.sw?
 
 # Auto-generated
-auto-imports.d.ts
 .eslintrc-auto-import.json
 tsconfig.tsbuildinfo
 stats.html

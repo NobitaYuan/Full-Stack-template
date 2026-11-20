@@ -19,7 +19,8 @@ description: Hono web framework development guide. Trigger when working with Hon
 - 工厂函数 `createRouteApp()` 自动处理 Zod 验证错误
 - `apiSchema()` 包装响应为标准 `{ code, message, data }` 格式
 - `success(c, data)` / `fail(c, message, code)` 返回统一响应
-- HTTP 状态码始终 200，业务状态码在 body.code 中
+- HTTP 状态码与响应体的 `code` 一致，使用 `errorResponses` 在 OpenAPI 路由中声明错误
+- 保护资源的路由在认证之后检查角色或所有权，参考用户模块
 
 参考已有模块实现：`apps/server/src/modules/auth/`、`apps/server/src/modules/user/`
 

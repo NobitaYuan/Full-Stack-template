@@ -48,7 +48,7 @@ tests/
 
 ## 响应规范
 
-**所有接口 HTTP 状态码始终返回 200，业务状态码在 body.code 中。**
+HTTP 状态码与响应体的 `code` 一致。成功返回 200，验证错误返回 422，权限错误返回 401 或 403。
 
 ```typescript
 // 成功
@@ -133,7 +133,7 @@ requestId → security → cors(配置化) → rateLimit → requestLogger → �
 - **前端类型** — 运行 `pnpm generate:api` 按模块生成 paths 到 `apps/client/src/api/{module}/{module}.d.ts`，components 单独生成到 `apps/client/src/api/components.d.ts`（全量共享），合并导出到 `apps/client/src/api/api-types.d.ts`，前端通过 `components['schemas']` 使用
 - **日志** — 中间件中用 `c.get('logger')` 获取带 requestId 的子 logger，service 层用 `getLogger()`，不要用 `console.log`
 - **错误响应** — 统一使用 `fail(c, message, code)` 返回错误，不要手写 `{ code, message, data: null }` JSON
-- **测试** — Vitest，每个测试文件 `afterEach` 中用 `await db.execute(sql\`DELETE FROM ...\`)` 清空数据
+- **测试** — Vitest 通过 `TEST_DATABASE_URL` 连接独立测试库，每个测试文件使用自己的临时 schema。测试用例使用独立的测试数据，避免全表清理
 
 ## 环境变量
 
@@ -142,8 +142,9 @@ requestId → security → cors(配置化) → rateLimit → requestLogger → �
 | `PORT`              | number | 3000                                        | 服务端口                            |
 | `NODE_ENV`          | enum   | development                                 | 环境（development/production/test） |
 | `DATABASE_URL`      | string | postgresql://localhost:5432/server_template | PostgreSQL 连接串                   |
-| `JWT_SECRET`        | string | dev-secret-change-in-production             | JWT 签名密钥                        |
+| `JWT_SECRET`        | string | 仅开发和测试有默认值                        | 生产环境需提供至少 32 字节的独立密钥 |
 | `JWT_EXPIRES_IN`    | string | 7d                                          | Token 过期时间                      |
+| `ADMIN_USER_IDS`    | string | 空                                          | 管理员用户 ID，逗号分隔             |
 | `LOG_LEVEL`         | enum   | info                                        | 日志级别                            |
 | `CORS_ORIGINS`      | string | http://localhost:5173                       | CORS 白名单（逗号分隔）             |
 | `RATE_LIMIT_MAX`    | number | 100                                         | 每窗口最大请求数                    |
@@ -155,8 +156,8 @@ requestId → security → cors(配置化) → rateLimit → requestLogger → �
 | ------ | ----------------------- | ---- | -------- |
 | POST   | `/api/v1/auth/register` | 否   | 注册     |
 | POST   | `/api/v1/auth/login`    | 否   | 登录     |
-| GET    | `/api/v1/users`         | 是   | 用户列表 |
-| GET    | `/api/v1/users/:id`     | 是   | 用户详情 |
-| PATCH  | `/api/v1/users/:id`     | 是   | 更新用户 |
-| DELETE | `/api/v1/users/:id`     | 是   | 删除用户 |
+| GET    | `/api/v1/users`         | 管理员 | 用户列表 |
+| GET    | `/api/v1/users/:id`     | 本人或管理员 | 用户详情 |
+| PATCH  | `/api/v1/users/:id`     | 本人或管理员 | 更新用户 |
+| DELETE | `/api/v1/users/:id`     | 本人或管理员 | 删除用户 |
 | GET    | `/health`               | 否   | 健康检查 |

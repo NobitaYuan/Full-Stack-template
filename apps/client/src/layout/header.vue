@@ -41,9 +41,9 @@ const renderContent: SwitchProps['label'] = (h, data) => {
   align-items: center;
   padding-left: 12px;
   padding-right: 24px;
-  background-color: #0052d9;
-  transition: all 0.3s;
-  color: #fff;
+  background-color: var(--topbar-bg);
+  transition: background-color 0.3s, color 0.3s;
+  color: var(--topbar-text);
   .logo {
     display: flex;
     align-items: center;

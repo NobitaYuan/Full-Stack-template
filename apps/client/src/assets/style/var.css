@@ -2,6 +2,10 @@
 :root {
   /* 顶部栏高度 */
   --topbar-h: 54px;
+  --topbar-bg: #0052d9;
+  --topbar-text: #fff;
+  --topbar-item-active-bg: #fff;
+  --topbar-item-active-text: var(--td-brand-color);
   /* 侧边宽度 */
   --sidebar-w: 300px;
   --layout-bg: #eeeeee;
@@ -10,5 +14,9 @@
 
 /* 黑夜模式 */
 :root.dark {
+  --topbar-bg: var(--td-brand-color-2);
+  --topbar-text: var(--td-text-color-primary);
+  --topbar-item-active-bg: var(--td-brand-color-5);
+  --topbar-item-active-text: var(--td-text-color-primary);
   --layout-bg: #494848;
 }

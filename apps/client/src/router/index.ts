@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/user-manage',
     name: 'userManage',
-    meta: { title: '用户管理' },
+    meta: { title: '用户管理', requiresAdmin: true },
     component: () => import('@/views/userManage/index.vue'),
   },
   {

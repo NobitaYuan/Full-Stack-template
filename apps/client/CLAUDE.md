@@ -151,11 +151,11 @@ import { getToken, setToken, clearUserToken, clearAllLocalStorage } from '@/util
 
 ### 5. API 请求与封装
 
-使用 openapi-fetch（类型安全，新模块必须用），request 自动处理 Bearer token、401 登出、业务错误 MessagePlugin 提示。
+使用 openapi-fetch（类型安全，新模块必须用）。请求层为需认证接口附加 Bearer token，当前会话接口返回 401 时清理登录状态，接口错误由 MessagePlugin 提示。
 
 **不要设 baseUrl**：OpenAPI spec 中的路径已包含 `/api/v1` 前缀。
 
-**响应结构**：`{ data, error }` — 成功时 `data` 为 `{ code, message, data }`，失败时 `error` 有值。
+**响应结构**：HTTP 成功响应通过 `data` 返回，HTTP 错误响应通过 `error` 返回，两者的响应体都采用 `{ code, message, data }`。网络错误会抛出异常，并由请求层提示。
 
 #### 参数写法速查
 
@@ -255,9 +255,11 @@ const data = ref<YourType[]>([])
 const fetchData = async () => {
   loading.value = true
   try {
-    const { data: res, error } = await getList()
-    if (error) return // client 中间件已自动弹 MessagePlugin
-    data.value = res!.data
+    const { data: res } = await getList()
+    if (!res) return
+    data.value = res.data
+  } catch {
+    // 请求层已提示网络错误
   } finally {
     loading.value = false
   }
@@ -268,10 +270,12 @@ onMounted(() => fetchData())
 const handleAction = async () => {
   loading.value = true
   try {
-    const { error } = await someApiCall(/* 数据 */)
-    if (error) return
+    const { data } = await someApiCall(/* 数据 */)
+    if (!data) return
     MessagePlugin.success('成功')
     await fetchData() // 统一刷新
+  } catch {
+    // 请求层已提示网络错误
   } finally {
     loading.value = false
   }
@@ -281,7 +285,7 @@ const handleAction = async () => {
 **核心原则：**
 
 1. `loading.value` 统一管理，try-finally 确保重置
-2. 用 `{ data, error }` 解构 — `error` 有值时 return（client 中间件已弹错误提示）
+2. 检查 `data` 存在后再读取响应或提示成功。HTTP 错误和网络错误的提示由请求层处理。
 3. 成功时手动 `MessagePlugin.success()`，修改/删除后统一 `fetchData()` 刷新，禁止手动 push/filter
 4. 使用 `ref()` 包装状态，`.value` 访问修改
 

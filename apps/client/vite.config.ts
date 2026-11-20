@@ -13,7 +13,7 @@ export default defineConfig((env: ConfigEnv) => {
   const envVar = loadEnv(mode, process.cwd())
 
   // 环境变量
-  const { VITE_APP_TITLE, VITE_APP_BASE_API_URL } = envVar
+  const { VITE_APP_TITLE, VITE_APP_BASE_API_URL = '/api/v1' } = envVar
   const IP = {
     test: 'http://localhost:3000',
   }
@@ -32,6 +32,7 @@ export default defineConfig((env: ConfigEnv) => {
       AutoImport({
         imports: ['vue', 'vue-router'],
         dts: 'src/types/auto-imports.d.ts',
+        dtsMode: 'overwrite',
       }),
       Components({
         resolvers: [
@@ -42,7 +43,7 @@ export default defineConfig((env: ConfigEnv) => {
         dts: 'src/types/components.d.ts',
       }),
       visualizer({
-        open: true, //如果存在本地服务端口，将在打包后自动展示
+        open: false,
       }),
     ],
     resolve: {

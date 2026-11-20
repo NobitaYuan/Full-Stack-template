@@ -9,6 +9,6 @@
   // 对应 prettier 的 singleQuote
   "singleQuote": true,
   // 对应 .prettierignore
-  "ignorePatterns": ["node_modules", "build", "coverage", "dist"],
+  "ignorePatterns": ["node_modules", "build", "coverage", "dist", "src/api/**/*.d.ts", "src/types/auto-imports.d.ts", "src/types/components.d.ts"],
   "endOfLine": "lf",
 }

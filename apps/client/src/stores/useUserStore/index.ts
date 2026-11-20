@@ -1,17 +1,16 @@
 import { defineStore } from 'pinia'
-import { getToken, setToken, userInfoKey, userTokenKey } from '@/utils/localStorage/token'
-import { clearLocal, getFromLocal } from '@/utils'
+import { clearUserToken, getToken, setToken, userInfoKey, userTokenKey } from '@/utils/localStorage/token'
+import { removeFromLocal } from '@/utils'
 import * as serverAuthApi from '@/api/auth'
 import * as serverUserApi from '@/api/users'
+import type { components } from '@/api/api-types'
 
-interface UserInfo {
-  id: string
-  username: string
-}
+type UserInfo = components['schemas']['AuthUser']
 
 const InitUserInfo: UserInfo = {
   id: '',
   username: '',
+  isAdmin: false,
 }
 
 // 用户信息store
@@ -19,7 +18,7 @@ export const useUserStore = defineStore('userStore', {
   state: () => ({
     hasUserInfo: false,
     token: getToken() || '',
-    info: getUserInitInfo(),
+    info: { ...InitUserInfo },
   }),
   getters: {
     userName(state) {
@@ -31,29 +30,41 @@ export const useUserStore = defineStore('userStore', {
     userInfo(state) {
       return state.info
     },
+    isAdmin(state) {
+      return state.hasUserInfo && state.info.isAdmin
+    },
   },
   actions: {
     async login(username: string, password: string) {
-      const { data, error } = await serverAuthApi.login(username, password)
-      if (error || !data) throw error
+      const { data } = await serverAuthApi.login(username, password)
+      if (!data) return false
       this.token = data.data.accessToken
       setToken(data.data.accessToken)
       this.info = data.data.user
       this.hasUserInfo = true
+      return true
     },
     async getUserInfo() {
-      const userId = this.info.id
-      if (!userId) return
-      const { data, error } = await serverUserApi.getUser(userId)
-      if (error || !data) throw error
-      this.info = data.data
+      const { id } = this.info
+      if (!id) {
+        this.logout()
+        return
+      }
+
+      const token = this.token
+      const { data } = await serverUserApi.getUser(id)
+      if (token !== this.token) return
+      if (!data) {
+        this.hasUserInfo = false
+        return
+      }
+      this.info = { id: data.data.id, username: data.data.username, isAdmin: data.data.isAdmin }
       this.hasUserInfo = true
     },
     logout(reload: boolean = false) {
-      this.token = ''
-      this.hasUserInfo = false
-      this.info = { ...InitUserInfo }
-      clearLocal()
+      this.$patch({ token: '', hasUserInfo: false, info: { ...InitUserInfo } })
+      clearUserToken()
+      removeFromLocal(userInfoKey)
       if (reload) {
         window.location.reload()
       }
@@ -66,9 +77,7 @@ export const useUserStore = defineStore('userStore', {
       pick: ['token'],
       serializer: {
         serialize: (value) => value.token,
-        deserialize: (value) => {
-          return JSON.parse(value)
-        },
+        deserialize: (value) => ({ token: value }),
       },
     },
     {
@@ -78,14 +87,8 @@ export const useUserStore = defineStore('userStore', {
         serialize: (value) => {
           return JSON.stringify(value.info)
         },
-        deserialize: (value) => {
-          return JSON.parse(value)
-        },
+        deserialize: (value) => ({ info: { ...InitUserInfo, ...JSON.parse(value) } }),
       },
     },
   ],
 })
-
-const getUserInitInfo = (): UserInfo => {
-  return getFromLocal(userInfoKey) || { ...InitUserInfo }
-}

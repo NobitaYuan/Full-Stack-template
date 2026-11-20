@@ -32,7 +32,7 @@
 full-stack-template/
 ├── apps/
 │   ├── client/          # @repo/client — Vue 3 + Vite + TDesign
-│   └── server/          # @repo/server — Hono + Drizzle ORM + SQLite
+│   └── server/          # @repo/server — Hono + Drizzle ORM + PostgreSQL
 ├── packages/            # 共享包（预留）
 ├── turbo.json           # Turborepo 任务编排
 ├── pnpm-workspace.yaml  # pnpm workspace 配置
@@ -62,12 +62,16 @@ flowchart TD
 ```shell
 # 克隆仓库
 git clone https://github.com/NobitaYuan/Full-Stack-template.git
+cd Full-Stack-template
 
 # 安装依赖
-pnpm i
+pnpm install --frozen-lockfile
 
-# 生成前端类型（首次启动前必须执行，以后后端改接口后再执行）
-pnpm generate:api
+# 准备 PostgreSQL，创建 server_template 数据库
+createdb server_template
+cp apps/server/.env.example apps/server/.env
+# 将 apps/server/.env 中的 DATABASE_URL 改为本地数据库连接串
+pnpm --filter @repo/server db:migrate
 
 # 启动开发服务器（前后端同时启动）
 pnpm dev
@@ -78,13 +82,15 @@ pnpm dev
 pnpm --filter @repo/client dev    # 仅前端
 pnpm --filter @repo/server dev    # 仅后端
 ```
-> 环境要求：Node.js >= 18、pnpm
+需要 Node.js 22.18 或更新版本，推荐 Node.js 24 LTS。pnpm 版本以根目录 `package.json` 的 `packageManager` 为准。
+
+首次注册的账号具有普通用户权限。需要使用用户管理功能时，将受信任账号的用户 ID 写入服务端 `ADMIN_USER_IDS`。配置与测试方式见[后端文档](apps/server/README.md)。
 
 
 **构建：**
 
 ```shell
-pnpm build        # 并行构建前后端
+pnpm build        # 检查前端类型并构建生产产物
 ```
 
 **其他命令：**
@@ -92,7 +98,7 @@ pnpm build        # 并行构建前后端
 ```shell
 pnpm lint         # Oxlint 代码检查
 pnpm format       # Oxfmt 格式化
-pnpm test         # 运行测试（Vitest）
+pnpm test         # 运行后端集成测试，需要先设置 TEST_DATABASE_URL
 ```
 
 **API 类型同步：**
@@ -101,12 +107,6 @@ pnpm test         # 运行测试（Vitest）
 
 ```shell
 pnpm generate:api
-```
-
-如需自定义服务端环境变量（如 JWT 密钥），复制：
-
-```shell
-cp apps/server/.env.example apps/server/.env
 ```
 
 # 🤖 AI 辅助开发

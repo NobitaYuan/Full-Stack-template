@@ -23,12 +23,19 @@ async function signToken(payload: { userId: string }, expiresIn: string): Promis
   return new jose.SignJWT(payload).setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime(expiresIn).sign(secret)
 }
 
-async function verifyToken(token: string) {
+export function isAdminUser(id: string): boolean {
+  return getConfig().ADMIN_USER_IDS.has(id)
+}
+
+async function verifyToken(token: string): Promise<{ userId: string }> {
   const config = getConfig()
   const secret = new TextEncoder().encode(config.JWT_SECRET)
   try {
-    const { payload } = await jose.jwtVerify(token, secret)
-    return payload as { userId: string }
+    const { payload } = await jose.jwtVerify(token, secret, { algorithms: ['HS256'], requiredClaims: ['exp', 'userId'] })
+    if (typeof payload.userId !== 'string' || !payload.userId) {
+      throw new UnauthorizedError('令牌缺少用户标识')
+    }
+    return { userId: payload.userId }
   } catch {
     throw new UnauthorizedError('无效或过期的令牌')
   }
@@ -38,19 +45,16 @@ export async function register(data: RegisterInput) {
   const db = getDb()
   const logger = getLogger()
 
-  const existing = await db.select().from(users).where(eq(users.username, data.username))
-  if (existing.length > 0) {
-    throw new ConflictError('用户名已被占用')
-  }
-
   const passwordHash = await hashPassword(data.password)
   const id = generateId()
 
-  await db.insert(users).values({
-    id,
-    username: data.username,
-    passwordHash,
-  })
+  const [user] = await db
+    .insert(users)
+    .values({ id, username: data.username, passwordHash })
+    .onConflictDoNothing({ target: users.username })
+    .returning({ id: users.id, username: users.username })
+
+  if (!user) throw new ConflictError('用户名已被占用')
 
   logger.info({ userId: id }, '用户注册成功')
 
@@ -58,7 +62,7 @@ export async function register(data: RegisterInput) {
   const accessToken = await signToken({ userId: id }, config.JWT_EXPIRES_IN)
 
   return {
-    user: { id, username: data.username },
+    user: { ...user, isAdmin: isAdminUser(id) },
     accessToken,
   }
 }
@@ -81,7 +85,7 @@ export async function login(data: LoginInput) {
   const accessToken = await signToken({ userId: user.id }, config.JWT_EXPIRES_IN)
 
   return {
-    user: { id: user.id, username: user.username },
+    user: { id: user.id, username: user.username, isAdmin: isAdminUser(user.id) },
     accessToken,
   }
 }

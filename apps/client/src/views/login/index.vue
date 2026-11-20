@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/useUserStore'
-import { isDev } from '@/utils/isDev'
-import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next'
+import { type FormInstanceFunctions, type FormProps, MessagePlugin } from 'tdesign-vue-next'
 
 const title = import.meta.env.VITE_APP_TITLE
 
@@ -40,27 +39,22 @@ const formRef = ref<FormInstanceFunctions | null>(null)
 
 const isLoading = ref(false)
 const loginFn = async () => {
-  isLoading.value = true
   if (!formRef.value) return
+  isLoading.value = true
   try {
     const res1 = await formRef.value.validate()
     if (res1 !== true) return
-    await userStore.login(formData.value.username, formData.value.password)
+    const loggedIn = await userStore.login(formData.value.username, formData.value.password)
+    if (!loggedIn) return
     MessagePlugin.success('登录成功')
-    const redirect = route.query.redirect as string
-    const toUrl = redirect ? decodeURIComponent(redirect) : '/'
+    const redirect = route.query.redirect
+    const toUrl = typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/'
     router.replace(toUrl)
   } catch (error) {
     void error
   } finally {
     isLoading.value = false
   }
-}
-
-// 开发环境下默认填入账号密码
-if (isDev) {
-  formData.value.username = 'admin'
-  formData.value.password = 'admin123'
 }
 </script>
 

@@ -1,7 +1,7 @@
 {
   "name": "full-stack-template",
   "private": true,
-  "packageManager": "pnpm@10.29.2",
+  "packageManager": "pnpm@10.34.9",
   "scripts": {
     "prepare": "husky",
     "dev": "turbo run dev",
@@ -10,18 +10,22 @@
     "format": "turbo run format",
     "test": "turbo run test",
     "generate:api": "turbo run generate:api",
-    "kill": "npx kill-port 3000"
+    "kill": "npx kill-port 3000",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0",
-    "turbo": "^2"
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
+    "turbo": "^2.11.13"
   },
   "lint-staged": {
-    "apps/client/**/*": "oxfmt",
+    "apps/client/**/*": "oxfmt -c apps/client/.oxfmtrc.jsonc --no-error-on-unmatched-pattern",
     "apps/client/*.{js,ts,vue,jsx,tsx}": "oxlint --fix",
-    "apps/server/**/*": "oxfmt"
+    "apps/server/**/*": "oxfmt -c apps/server/.oxfmtrc.jsonc --no-error-on-unmatched-pattern"
+  },
+  "engines": {
+    "node": ">=22.18.0"
   }
 }

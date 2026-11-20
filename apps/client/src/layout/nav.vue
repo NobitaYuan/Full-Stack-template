@@ -1,8 +1,12 @@
 <script lang="ts" setup>
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 const navList = [
   { name: '示例页面', path: '/index', icon: 'app' },
-  { name: '用户管理', path: '/user-manage', icon: 'usergroup' },
+  { name: '用户管理', path: '/user-manage', icon: 'usergroup', requiresAdmin: true },
 ]
+const visibleNavItems = computed(() => navList.filter((item) => !item.requiresAdmin || userStore.isAdmin))
 
 const route = useRoute()
 const activePath = computed(() => route.path)
@@ -14,7 +18,7 @@ const isPathActive = (path: string) => {
 
 <template>
   <div class="nav">
-    <RouterLink class="navItem" :class="{ active: isPathActive(item.path) }" v-for="item in navList" :key="item.path" :to="item.path">
+    <RouterLink class="navItem" :class="{ active: isPathActive(item.path) }" v-for="item in visibleNavItems" :key="item.path" :to="item.path">
       <t-icon v-if="item.icon" :name="item.icon" />
       <div class="text">{{ item.name }}</div>
     </RouterLink>
@@ -41,13 +45,10 @@ const isPathActive = (path: string) => {
     .text {
       white-space: nowrap;
     }
-    &.active {
-      background-color: #fff;
-      color: var(--td-brand-color);
-    }
+    &.active,
     &:hover {
-      background-color: #fff;
-      color: var(--td-brand-color);
+      background-color: var(--topbar-item-active-bg);
+      color: var(--topbar-item-active-text);
     }
   }
 }

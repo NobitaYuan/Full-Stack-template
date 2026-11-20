@@ -10,9 +10,9 @@ import { authMiddleware } from './core/middleware/auth.js'
 import { authApp } from './modules/auth/index.js'
 import { userApp } from './modules/user/index.js'
 import { getConfig } from './core/config/index.js'
+import { fail } from './lib/response.js'
 
 const API_PREFIX = '/api/v1'
-const config = getConfig()
 
 const app = new OpenAPIHono()
 
@@ -22,13 +22,14 @@ app.use('*', securityMiddleware)
 app.use(
   '*',
   cors({
-    origin: config.CORS_ORIGINS.split(',').map((s) => s.trim()),
+    origin: (origin) => (getConfig().CORS_ORIGINS.includes(origin) ? origin : null),
     credentials: true,
   }),
 )
 app.use('*', rateLimitMiddleware)
 app.use('*', requestLogger)
 app.onError(errorHandler)
+app.notFound((c) => fail(c, '资源不存在', 404))
 
 // ==================== 路由注册 ====================
 app.get('/health', (c) => c.json({ code: 200, message: '服务正常~', data: null }))
@@ -49,11 +50,11 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'BearerAuth', {
   bearerFormat: 'JWT',
 })
 
-app.doc(`${API_PREFIX}/openapi.json`, {
+export const apiDocumentConfig = {
   openapi: '3.1.0',
   info: { title: 'Server Template API', version: '1.0.0' },
-  security: [{ BearerAuth: [] }],
-})
+}
+app.doc31(`${API_PREFIX}/openapi.json`, apiDocumentConfig)
 
 app.get(
   `${API_PREFIX}/doc`,

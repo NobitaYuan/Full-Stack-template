@@ -3,6 +3,10 @@
   "tasks": {
     "build": {
       "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["@repo/server#generate:api"],
+      "cache": false
     }
   }
 }

@@ -1,7 +1,11 @@
+import type { ClientErrorStatusCode, ServerErrorStatusCode } from 'hono/utils/http-status'
+
+export type ErrorStatusCode = ClientErrorStatusCode | ServerErrorStatusCode
+
 export class AppError extends Error {
   constructor(
     message: string,
-    public statusCode: number = 500,
+    public readonly statusCode: ErrorStatusCode = 500,
   ) {
     super(message)
     this.name = 'AppError'

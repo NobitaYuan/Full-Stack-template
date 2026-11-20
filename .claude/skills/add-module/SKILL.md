@@ -41,7 +41,7 @@ export const PostResponseSchema = postSelectSchema
 关键：
 
 - `z` 从 `@hono/zod-openapi` 导入（不是 `zod`），这样 schema 支持 `.openapi()` 方法
-- **`.openapi('TypeName')`** 将 schema 注册为 OpenAPI 命名组件，前端通过 `components['schemas']['TypeName']` 使用
+- **`.openapi('TypeName')`** 将 schema 注册为 OpenAPI 命名组件，前端从 `@/api/api-types` 导入 `components` 后使用 `components['schemas']['TypeName']`
 - **所有 schema 和关键字段加 `.describe('中文描述')`**，注释会沿链路传递到前端类型
 - 用 `.omit()` 排除敏感字段，保持单一数据源
 
@@ -65,10 +65,10 @@ export * from './schema.js'
 
 关键模式：
 
-- `createRouteApp()` 工厂自动处理 Zod 验证错误（返回 code 422）
+- `createRouteApp()` 工厂自动处理 Zod 验证错误（HTTP 422），路由使用 `errorResponses` 声明可能返回的错误
 - `apiSchema()` 包装响应 schema 为标准格式
 - `success(c, data)` 返回成功响应，`fail(c, message, code)` 返回错误响应
-- 需要认证的路由通过 `c.get('userId')` 获取用户 ID
+- 需要认证的路由通过 `c.get('userId')` 获取用户 ID，并按资源所有权或角色检查操作权限
 - **列表接口**：query schema 用 `PaginationQuerySchema`（从 `lib/pagination.ts` 导入），service 用 `paginatedQuery<T>()` 查询 + `paginateResult()` 包装响应
 - **错误响应**：统一用 `fail()`，不要手写 `{ code, message, data: null }`
 
@@ -88,9 +88,9 @@ pnpm db:migrate
 
 注意：无需手动调用 `app.openAPIRegistry.register()`，响应 schema 已通过 `.openapi()` 自动注册。
 
-## 第 6 步：写测试
+## 第 6 步：同步类型并验证
 
 在 `tests/modules/` 下添加测试文件，参考现有测试模式：
 
-- `afterEach` 中用 `await db.execute(sql\`DELETE FROM <table>\`)` 清空数据
-- 不需要 `initDb()`，数据库表由迁移管理
+- 每个用例创建自己的测试数据。测试套件通过 `TEST_DATABASE_URL` 连接独立数据库，在每个文件自己的临时 schema 执行迁移和清理。
+- 从仓库根目录运行 `pnpm generate:api` 和 `pnpm typecheck`。提交迁移与生成的 API 声明，一起运行 `pnpm test`。

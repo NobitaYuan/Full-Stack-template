@@ -25,8 +25,9 @@ cp .env.example .env
 
 # 确保 PostgreSQL 已启动，创建数据库
 createdb server_template
+# 将 .env 的 DATABASE_URL 改为该数据库的连接串
 
-# 执行数据库迁移
+# 初始化数据库表
 pnpm db:migrate
 
 # 启动开发服务器
@@ -38,6 +39,8 @@ pnpm dev
 - API 文档：http://localhost:3000/api/v1/doc
 - OpenAPI Spec：http://localhost:3000/api/v1/openapi.json
 - 健康检查：http://localhost:3000/health
+
+初始迁移保存在 `drizzle/`。如果此前曾自行创建或迁移用户表，请先核对现有表结构和迁移记录，再执行当前仓库的迁移。
 
 ## 项目结构
 
@@ -79,8 +82,9 @@ src/
 | `PORT`              | 服务端口                | 3000                                        |
 | `NODE_ENV`          | 环境                    | development                                 |
 | `DATABASE_URL`      | PostgreSQL 连接串       | postgresql://localhost:5432/server_template |
-| `JWT_SECRET`        | JWT 密钥                | —                                           |
+| `JWT_SECRET`        | JWT 密钥，生产环境必须提供独立的至少 32 字节密钥 | 仅开发和测试有默认值 |
 | `JWT_EXPIRES_IN`    | Token 过期时间          | 7d                                          |
+| `ADMIN_USER_IDS`    | 管理员用户 ID，逗号分隔  | 空                                          |
 | `LOG_LEVEL`         | 日志级别                | info                                        |
 | `CORS_ORIGINS`      | CORS 白名单（逗号分隔） | http://localhost:5173                       |
 | `RATE_LIMIT_MAX`    | 每窗口最大请求数        | 100                                         |
@@ -96,6 +100,21 @@ src/
 - **输入消毒** — `sanitizeInput()` HTML 实体转义工具
 - **JWT 认证** — Bearer Token，HS256 签名
 
+### 管理员配置
+
+通过注册接口创建账号后，从注册或登录响应中取得该账号的 `data.user.id`。在服务端环境变量 `ADMIN_USER_IDS` 中配置该 ID，然后重启服务并重新登录。用户列表需要管理员权限，读取、修改和删除单个账号允许账号本人或管理员操作。
+
+### 集成测试
+
+在 PostgreSQL 创建单独的测试数据库，名称以 `_test` 结尾，测试账号需要在该库创建 schema 的权限。从工作区根目录执行：
+
+```bash
+createdb server_template_test
+TEST_DATABASE_URL=postgresql://user:password@localhost:5432/server_template_test pnpm test
+```
+
+PowerShell 可先设置 `$env:TEST_DATABASE_URL = 'postgresql://user:password@localhost:5432/server_template_test'`，再执行 `pnpm test`。测试为每个测试文件新建独立 schema，应用已提交的迁移，并在测试结束时只删除本次生成的 schema。
+
 ### 性能
 
 - **PostgreSQL + 连接池** — postgres.js 自带连接池管理
@@ -106,7 +125,7 @@ src/
 
 - **自动 API 文档** — Scalar UI，代码即文档
 - **类型安全** — Drizzle → Zod → OpenAPI → 前端类型，全链路类型推导
-- **统一响应格式** — 所有接口 `{ code, message, data }`，通过 `success()` / `fail()` 返回
+- **统一响应格式** — 所有接口 `{ code, message, data }`，HTTP 状态码与响应体 `code` 对应
 
 ## 如何添加新模块
 
@@ -138,10 +157,10 @@ src/
 
 ### 用户
 
-- `GET /api/v1/users` — 用户列表（需认证）
-- `GET /api/v1/users/:id` — 用户详情（需认证）
-- `PATCH /api/v1/users/:id` — 更新用户（需认证）
-- `DELETE /api/v1/users/:id` — 删除用户（需认证）
+- `GET /api/v1/users` — 用户列表（管理员）
+- `GET /api/v1/users/:id` — 用户详情（本人或管理员）
+- `PATCH /api/v1/users/:id` — 更新用户（本人或管理员）
+- `DELETE /api/v1/users/:id` — 删除用户（本人或管理员）
 
 ## License
 

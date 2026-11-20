@@ -3,6 +3,20 @@
   "tasks": {
     "build": {
       "outputs": ["dist/**"]
+    },
+    "dev": {
+      "passThroughEnv": [
+        "PORT",
+        "NODE_ENV",
+        "DATABASE_URL",
+        "JWT_SECRET",
+        "JWT_EXPIRES_IN",
+        "ADMIN_USER_IDS",
+        "LOG_LEVEL",
+        "CORS_ORIGINS",
+        "RATE_LIMIT_MAX",
+        "RATE_LIMIT_WINDOW"
+      ]
     }
   }
 }

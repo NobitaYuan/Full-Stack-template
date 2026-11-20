@@ -1,7 +1,10 @@
 import { request } from '../request'
+import type { components, paths } from '../api-types'
+
+type UserListQuery = paths['/api/v1/users']['get']['parameters']['query']
 
 /** 用户列表（分页） */
-export function getUserList(params?: { page?: number; size?: number }) {
+export function getUserList(params?: UserListQuery) {
   return request.GET('/api/v1/users', { params: { query: params } })
 }
 
@@ -11,7 +14,7 @@ export function getUser(id: string) {
 }
 
 /** 更新用户 */
-export function updateUser(id: string, body: { username?: string }) {
+export function updateUser(id: string, body: components['schemas']['UpdateUserInput']) {
   return request.PATCH('/api/v1/users/{id}', { params: { path: { id } }, body })
 }
 

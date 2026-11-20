@@ -45,10 +45,10 @@ const userStore = useUserStore()
   display: flex;
   gap: 8px;
   :deep(.t-button--variant-text) {
-    color: #fff;
+    color: var(--topbar-text);
     &:hover {
-      color: var(--td-brand-color);
-      background-color: var(--td-bg-color-container);
+      color: var(--topbar-item-active-text);
+      background-color: var(--topbar-item-active-bg);
     }
   }
 }

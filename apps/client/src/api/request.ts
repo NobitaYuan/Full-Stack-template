@@ -2,40 +2,43 @@ import createClient from 'openapi-fetch'
 import type { paths } from './api-types'
 import { getToken } from '@/utils/localStorage/token'
 import { MessagePlugin } from 'tdesign-vue-next'
+import router from '@/router'
 import { useUserStore } from '@/stores/useUserStore'
 
 const request = createClient<paths>()
 
 request.use({
-  async onRequest({ request }) {
+  onRequest({ request, schemaPath }) {
     const token = getToken()
-    if (token) {
+    if (token && schemaPath !== '/api/v1/auth/login' && schemaPath !== '/api/v1/auth/register') {
       request.headers.set('Authorization', `Bearer ${token}`)
     }
     return request
   },
-  async onResponse({ response }) {
-    // 只处理 JSON 响应
-    const contentType = response.headers.get('content-type')
-    if (!contentType?.includes('application/json')) return response
-
-    // 克隆响应以便读取 body（不消耗原始流）
-    const cloned = response.clone()
-    const body = await cloned.json()
-
-    // 401：身份失效，跳转登录
-    if (body.code === 401) {
+  async onResponse({ request, response }) {
+    if (response.ok) return
+    const token = getToken()
+    if (response.status === 401 && token && request.headers.get('Authorization') === `Bearer ${token}`) {
       MessagePlugin.warning({ content: '身份验证失效，请重新登录', closeBtn: true })
       useUserStore().logout()
-      return response
+      const route = router.currentRoute.value
+      if (route.meta.requiresAdmin) {
+        void router.replace({ name: 'login', query: { redirect: route.fullPath } })
+      }
+      return
     }
 
-    // 其他业务错误：弹出提示
-    if (body.code && body.code !== 200) {
-      MessagePlugin.error({ content: body.message || '请求失败', closeBtn: true })
+    let message = '请求失败'
+    if (response.headers.get('content-type')?.includes('application/json')) {
+      const body: unknown = await response
+        .clone()
+        .json()
+        .catch(() => undefined)
+      if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
+        message = body.message
+      }
     }
-
-    return response
+    MessagePlugin.error({ content: message, closeBtn: true })
   },
   async onError({ error }) {
     const message = error instanceof TypeError ? '网络连接异常，请检查网络' : '请求出错，请稍后重试'
