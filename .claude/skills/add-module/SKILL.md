@@ -11,6 +11,8 @@ description: 添加新的 API 模块（从建表到前端类型生成的完整�
 
 在 `src/core/db/<name>/` 下创建 `db.ts`，参考现有 `user/db.ts` 的写法。
 
+在 `src/core/db/schema.ts` 显式导出新增的 Drizzle 表，例如 `export { posts } from './post/db.js'`。该入口供迁移与运行时共用，Zod schema 留在各模块。
+
 关键模式：
 
 - 从 `drizzle-orm/pg-core` 导入类型（`pgTable`、`varchar`、`text`、`timestamp` 等）
@@ -74,9 +76,11 @@ export * from './schema.js'
 
 ## 第 4 步：生成并执行迁移
 
+从仓库根目录运行以下命令。先检查生成的 SQL 包含新增表，再将 `DATABASE_URL` 指向空白验证库并执行迁移。
+
 ```bash
-pnpm db:generate
-pnpm db:migrate
+pnpm --filter @repo/server db:generate
+pnpm --filter @repo/server db:migrate
 ```
 
 ## 第 5 步：在 `src/app.ts` 注册

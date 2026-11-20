@@ -51,7 +51,7 @@ src/
 │   └── user/         # 用户管理：CRUD
 ├── core/             # 核心基础设施
 │   ├── config/       # 环境变量解析与校验
-│   ├── db/           # 数据库连接 + Schema + 分页 helper
+│   ├── db/           # 数据库连接、统一表结构入口 schema.ts、领域表和分页 helper
 │   ├── errors/       # 自定义错误类
 │   └── middleware/    # 全局中间件（认证、安全、限流、请求ID、日志、错误处理）
 ├── lib/              # 通用工具（logger、分页、响应格式化、消毒、网络工具）
@@ -137,8 +137,8 @@ PowerShell 可先设置 `$env:TEST_DATABASE_URL = 'postgresql://user:password@lo
    - `post.service.ts` — 业务逻辑
    - `post.route.ts` — OpenAPI 路由
    - `index.ts` — 导出路由
-3. 在 `src/core/db/{domain}/db.ts` 中添加 Drizzle 表定义
-4. 运行 `pnpm db:generate` 生成迁移，`pnpm db:migrate` 执行
+3. 在 `src/core/db/{domain}/db.ts` 中定义 Drizzle 表，并在 [统一表结构入口](src/core/db/schema.ts)显式导出，例如 `export { posts } from './post/db.js'`。Drizzle Kit 和应用运行时共用这个入口。Zod 请求和响应 schema 留在所在模块。
+4. 在仓库根目录运行 `pnpm --filter @repo/server db:generate`，检查生成的 SQL 包含新增表，再将 `DATABASE_URL` 指向空白验证库，运行 `pnpm --filter @repo/server db:migrate` 验证从初始迁移到最新迁移。
 5. 在 `src/app.ts` 中挂载新路由：
    ```ts
    import { postApp } from './modules/post/index.js'
@@ -146,7 +146,7 @@ PowerShell 可先设置 `$env:TEST_DATABASE_URL = 'postgresql://user:password@lo
    // 如果需要认证，加一行：
    app.use('/api/v1/posts/*', authMiddleware)
    ```
-6. 在 `tests/modules/` 下添加测试
+6. 在 `tests/modules/` 下添加路由或读写测试。回到仓库根目录运行 `pnpm generate:api` 和 `pnpm typecheck`，再用独立的 `TEST_DATABASE_URL` 运行 `pnpm test`。
 
 ## API 概览
 

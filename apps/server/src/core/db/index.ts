@@ -1,12 +1,12 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import * as userSchema from './user/index.js'
+import * as schema from './schema.js'
 import { getConfig } from '../config/index.js'
 
-const schema = { ...userSchema }
+type Database = ReturnType<typeof drizzle<typeof schema>>
 
 let _sql: ReturnType<typeof postgres> | null = null
-let _db: ReturnType<typeof drizzle> | null = null
+let _db: Database | null = null
 
 function getSql() {
   if (_sql) return _sql
@@ -15,7 +15,7 @@ function getSql() {
   return _sql
 }
 
-export function getDb() {
+export function getDb(): Database {
   if (_db) return _db
   const sql = getSql()
   _db = drizzle(sql, { schema })

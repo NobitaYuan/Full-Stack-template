@@ -22,6 +22,7 @@ src/
 ├── core/                   # 核心基础设施（不依赖业务模块）
 │   ├── config/index.ts     # Zod 校验环境变量，单例
 │   ├── db/index.ts         # 数据库连接（postgres.js + Drizzle）
+│   ├── db/schema.ts        # Drizzle 迁移与运行时共用的表结构入口
 │   ├── db/helpers.ts       # 分页查询 helper（paginatedQuery）
 │   ├── db/{domain}/        # 按领域组织：db.ts（表定义）+ schema.ts（Zod 派生）+ index.ts
 │   ├── errors/index.ts     # 自定义错误类（AppError 体系）
@@ -121,6 +122,7 @@ requestId → security → cors(配置化) → rateLimit → requestLogger → �
 
 - **导入路径** — 使用 `.js` 后缀（TypeScript ESM 约定）
 - **数据库** — 使用 Drizzle ORM + postgres.js，全部异步 API（`await`），查询返回数组用 `result[0]` 取首条
+- **表结构入口** — `src/core/db/schema.ts` 为迁移与运行时显式导出各模块的 Drizzle 表。新增表时从所在模块的 `db.js` 导出，Zod 请求和响应 schema 继续留在各模块。
 - **分页** — 列表接口统一使用 `PaginationQuerySchema`（来自 `lib/pagination.ts`）作为 query schema，service 层用 `paginatedQuery<T>()` 查询 + `paginateResult()` 包装响应，不要手写 count/limit/offset
 - **ID 生成** — 使用 `generateId()`（来自 `src/lib/utils.ts`），不要在各模块重复定义
 - **密码** — 使用 bcryptjs（`hashPassword` / `verifyPassword`）
